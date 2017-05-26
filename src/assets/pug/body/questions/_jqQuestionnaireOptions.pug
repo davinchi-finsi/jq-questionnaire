@@ -1,0 +1,19 @@
+include ../../common/_globalStructure/_globalStructure
+//- @description Mixin para generar el contexto para las opciones
+//- Acepta todos los parámetros de _mod-baseContent
+//- @see common/_globalStructure/_mod-baseContent
+mixin jq-questionnaire__options(params)
+    -
+        params = params || {};
+    //Questionnaire options
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-questionnaire__options",
+            attributes: {
+                "data-jq-questionnaire-options": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End questionnaire options

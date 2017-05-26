@@ -1,0 +1,93 @@
+//-@description Genera un contenedor
+//-Se ha de utilizar en conjunto con mod-content__header, mod-content__title y mod-content__body
+//-@param params                        Parámetros que acepta
+//-@param [params.type=div]             Indica el tipo de elemento a utilizar. Puede ser "article" "section" o "div"
+//-@param [params.cssClass]             Clases css a añadir al elemento
+//-@param [params.attributes]           Atributos a añadir al HTML
+//-@example
+//- mod-section({type:"article"})
+        mod-section__header
+            mod-section__title({content:"Titulo"})
+        mod-section__body
+            p Contenido de la sección
+mixin _mod-baseContent(params)
+    -params.externalParams= params.externalParams || {};
+    -params.externalParams.tag = params.externalParams.tag || "div";
+    +_mod-baseContent__tag(params)&attributes(attributes)
+        block
+
+//-@description Genera la cabecera de un contenido
+//-@param params                        Parámetros que acepta
+//-@param [params.type=div]             Indica el tipo de elemento a utilizar. Puede ser "header" o "div"
+//-@param [params.cssClass]             Clases css a añadir al elemento
+//-@param [params.attributes]           Atributos a añadir al HTML
+mixin _mod-baseContent__header(params)
+    -params.externalParams= params.externalParams || {};
+    -params.externalParams.tag = params.externalParams.tag || "header";
+    +_mod-baseContent__tag(params)&attributes(attributes)
+        block
+//-@description Genera el título de un contenido
+//-@param params                    Parámetros que acepta
+//-@param [params.level]            Nivel de encabezado a utilizar. Si se indica del 1-6 se genera un encabezado h(x). En caso de no indicar nivel se genera un p
+//-@param [params.content]          Contenido textual. Es posible indicar el contenido mediante block
+//-@param [params.cssClass]         Clases css a añadir al elemento
+//-@param [params.attributes]       Atributos a añadir al HTML
+//-@example
+//- mod-content({type:"article"})
+        mod-content__header({type:"header"})
+            mod-content__title({level:3,content:"Titulo"})
+//-@example
+//- mod-content({type:"article"})
+        mod-content__header({type:"header"})
+            mod-content__title({level:3})
+                span Titulo
+                span Compuesto
+mixin _mod-baseContent__title(params)
+    -params.externalParams= params.externalParams || {};
+    if(params.externalParams.tag == undefined)
+        case params.externalParams.level
+            when 1
+            when 2
+            when 3
+            when 4
+            when 5
+            when 6
+                -params.externalParams.tag="h"+params.externalParams.level;
+            default
+                -params.externalParams.tag="div";
+                    block
+    +_mod-baseContent__tag(params)&attributes(attributes)
+        block
+
+//-@description Genera un boton o enlace
+//-@param params                    Parámetros que acepta
+//-@param [params.cssClass]         Clases css a añadir al elemento
+//-@param [params.attributes]       Atributos a añadir al HTML
+mixin _mod-baseContent__action(params)
+    -params = params || {};
+    -params.externalParams= params.externalParams || {};
+    -params.internalParams= params.internalParams || {};
+    case (params.externalParams.tag)
+        when "link"
+            a(id=params.externalParams.id class=params.internalParams.cssClass href=params.internalParams.href)(class=params.externalParams.cssClass)&attributes(attributes)&attributes(params.internalParams.attributes)&attributes(params.externalParams.attributes)!=params.externalParams.content
+                block
+        default
+            button(id=params.externalParams.id class=params.internalParams.cssClass)(class=params.externalParams.cssClass)&attributes(attributes)&attributes(params.internalParams.attributes)&attributes(params.externalParams.attributes)!=params.externalParams.content
+                block
+
+mixin mod-baseContent__element(params)
+    -params = params || {};
+    -params.tag = params.tag || "div";
+    +_mod-baseContent__tag({
+        externalParams:params
+    })&attributes(attributes)
+        block
+
+mixin _mod-baseContent__tag(params)
+    -params = params || {};
+    -params.externalParams= params.externalParams || {};
+    -params.internalParams= params.internalParams || {};
+    -params.internalParams.ignoreContent = params.internalParams.ignoreContent == undefined ?  true : params.internalParams.ignoreContent;
+    -params.externalParams.tag = params.externalParams.tag || "div";
+    #{params.externalParams.tag}(id=params.externalParams.id class=params.internalParams.cssClass)(class=params.externalParams.cssClass)&attributes(attributes)&attributes(params.internalParams.attributes)&attributes(params.externalParams.attributes)!= params.internalParams.ignoreContent != true ? params.externalParams.content : ""
+        block

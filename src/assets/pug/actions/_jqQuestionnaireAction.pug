@@ -1,0 +1,16 @@
+include ../common/_globalStructure/_globalStructure
+mixin jq-questionnaire__action(params)
+    -params = params ||{};
+    -params.tag = params.tag || "button";
+    -var internalAttributes = {};
+    -internalAttributes["data-jq-questionnaire-"+params.type]="";
+    //Questionnaire actions
+    +_mod-baseContent__action({
+        internalParams: {
+            cssClass: "jq-questionnaire__action",
+            attributes: internalAttributes
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End questionnaire actions

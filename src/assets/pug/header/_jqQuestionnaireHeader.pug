@@ -1,0 +1,90 @@
+include ../common/_globalStructure/_globalStructure
+include _jqQuestionnaireTitle
+include _jqQuestionnaireProperties
+include _jqQuestionnaireDescription
+include ../actions/_jqQuestionnaireActions
+//- @description Mixin para generar el contexto de la cabecera del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__header.
+//- Adicionalmente acepta:
+//- @param  {Object}        [params]              Configuración
+//- @param  {String}        [params.title]        Genera el título mediante jq-questionnaire__title
+//- @param  {String}        [params.description]  Genera la descripción mediante jq-questionnaire__description
+//- @param  {boolean}       [params.properties]   Genera las propiedades mediante jq-questionnaire__properties
+//- @param  {IActionConfig} [params.actions]      Genera las acciones mediante jq-questionnaire__action.
+//- @see common/_globalStructure/_mod-baseContent__header
+//- @example
+//- +jq-questionnaire
+//-     +jq-questionnaire__header
+//-         +jq-questionnaire__title
+//-             span Title
+//-         +jq-questionnaire__description
+//-             span Description
+//-         +jq-questionnaire__properties
+//-         +jq-questionnaire__actions
+//-             +jq-questionnaire__action({
+//-                 type:"start",
+//-                 content:"Start"
+//-             })
+//-     +jq-questionnaire__body
+//-         +jq-questionnaire__questions
+//-             +jq-questionnaire__question
+//-                 +jq-questionnaire__statement
+//-                     span Some question
+//-                 +jq-questionnaire__options
+//-                     +jq-questionnaire__option
+//-         +jq-questionnaire__feedback
+//-         +jq-questionnaire__actions
+//- @example
+//- +jq-questionnaire
+//-     +jq-questionnaire__header(
+//-         {
+//-             title:"Titulo",
+//-             description:"Descripción del cuestionario",
+//-             properties:true,
+//-             actions:[
+//-                 {
+//-                     type:"start",
+//-                     content:"Start"
+//-                 }
+//-             ]
+//-         }
+//-     )
+mixin jq-questionnaire__header(params)
+    -
+        params = params || {};
+    +_mod-baseContent__header({
+        internalParams: {
+            cssClass: "jq-questionnaire__header",
+            attributes: {
+                "data-jq-questionnaire-header": ""
+            }
+        },
+        externalParams: params
+    })
+        if(params.title != undefined)
+            -
+                var titleParams = params.title;
+                if((typeof params.title).toLowerCase() == "string"){
+                    titleParams = {
+                        content:params.title
+                    }
+                }
+
+            +jq-questionnaire__title(titleParams)
+        if(params.description != undefined)
+            -
+                var descriptionParams = params.title;
+                if((typeof params.description).toLowerCase() == "string"){
+                    descriptionParams = {
+                        content:params.title
+                    }
+                }
+
+            +jq-questionnaire__description(descriptionParams)
+        if(params.properties != undefined)
+            +jq-questionnaire__properties(params.properties)
+        if(params.actions != undefined)
+            +jq-questionnaire__actions({
+                actions:params.actions
+            })
+        block

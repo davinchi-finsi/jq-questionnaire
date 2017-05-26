@@ -1,0 +1,236 @@
+include ../src/_jqQuestionnaire
+doctype html
+html(lang='en')
+    head
+        title Simple use
+        script(src="../node_modules/jquery/dist/jquery.js")
+        script(src="../node_modules/jquery-ui-dist/jquery-ui.js")
+        script(src="../node_modules/prismjs/prism.js")
+        script(src="../node_modules/prismjs/components/prism-jade.js")
+        script(src="../node_modules/prismjs/components/prism-typescript.js")
+        script(src="../node_modules/prismjs/components/prism-json.js")
+        script(src="../src/jquery.questionnaire.js")
+        link(rel="stylesheet" href="main.css")
+        link(rel="stylesheet" href="markdown.css")
+        link(rel="stylesheet" href="prism-github.css")
+    body
+        div.markdown-wrapper
+            :markdown-it(linkify)
+                ## jqQuestionnaire
+                jqQuestionnaire is a jquery widget for create static questionnaires
+                ### Features
+                * Easy creation with PUG mixins
+                * HTML full customizable
+                * Modular
+                * Enable or disable change of an option after check one
+                * Immediate feedback
+                * Points to sum if success and points to substract if fails
+                * Cut off mark
+                * Free
+                #### Options
+                ```json
+                let options = {
+                    delayOnAutoNext: 500,//delay before auto go to next question
+                    pointsForSuccess: 1,//amount of points to increase when an answer is correct
+                    pointsForFail: 0,//ammoint of points to substract when an answer is incorrect
+                    cutOffMark: 50,//minimum % of points to success (over 100%)
+                    immediateFeedback: false,// if true, when the user selects an option, the question will be checked immediately
+                    showCorrection: true, //show corrections at the end of the questionnaire
+                    showResult: true, //show the result of the questionnaire at the end
+                    multichoice: false,//if true, multiple options could be selected
+                    dialog: {//options for the result dialog. see jquery ui dialog options
+                        draggable: false,
+                        autoOpen: true,
+                        resizable: false,
+                        modal: true
+                    }
+                }
+                ```
+                ### Simple use
+                jqQuestionnaire is modularized in parts, each part has a propose and could be place where you want inside of jqQuestionnaire container.
+                Each part has a specific mixin in pug, de esta manera es posible manipular cada elemento por separado, añadir un id, añadir clases, encapsularlo en otro elemento html, etc
+                Include the mixins from your instalation (node_modules or the folder in which jqQuestionnaire is
+                #### page.pug
+                ```jade
+                include jqQuestionnaire/_jqQuestionnaire
+                +jq-questionnaire
+                    +jq-questionnaire__header
+                        +jq-questionnaire__title({
+                            content:"My questionnaire"
+                        })
+                        +jq-questionnaire__description({
+                            content:"Description for my questionnaire"
+                        })
+                        +jq-questionnaire__actions
+                            +jq-questionnaire__action({
+                                type:"start",
+                                content:"Start questionnaire"
+                            })
+                    +jq-questionnaire__body
+                        +jq-questionnaire__questions
+                            +jq-questionnaire__question
+                                +jq-questionnaire__statement
+                                    span Some question
+                                +jq-questionnaire__options
+                                    +jq-questionnaire__option({
+                                        name:"question1",
+                                        content:"Incorrect",
+                                        isCorrect:false
+                                    })
+                                    +jq-questionnaire__option({
+                                        name:"question1",
+                                        content:"Correct",
+                                        isCorrect:true
+                                    })
+                        +jq-questionnaire__feedback({
+                            type:"success",
+                            content:"Success feedback
+                        })
+                        +jq-questionnaire__actions
+                            +jq-questionnaire__action({
+                                type:"end",
+                                content:"End questionnaire"
+                            })
+                //- The container
+
+                ```
+        +jq-questionnaire
+            +jq-questionnaire__header
+                +jq-questionnaire__title({
+                    content: "My questionnaire"
+                })
+                +jq-questionnaire__description({
+                    content: "Description for my questionnaire"
+                })
+                +jq-questionnaire__actions
+                    +jq-questionnaire__action({
+                        type: "start",
+                        content: "Start questionnaire"
+                    })
+            +jq-questionnaire__body
+                +jq-questionnaire__questions
+                    +jq-questionnaire__question
+                        +jq-questionnaire__statement
+                            span Some question
+                        +jq-questionnaire__options
+                            +jq-questionnaire__option({
+                                content: "Incorrect",
+                                isCorrect: false
+                            })
+                            +jq-questionnaire__option({
+                                content: "Correct",
+                                isCorrect: true,
+                                feedback: [
+                                    {
+                                        content: "Feedback ko",
+                                        type: "ko"
+                                    },
+                                    {
+                                        content: "Feedback ok",
+                                        type: "ok"
+                                    }
+                                ]
+                            })
+                        +jq-questionnaire__feedback({
+                            type: "success",
+                            content: "Success feedback"
+                        })
+                    +jq-questionnaire__question
+                        +jq-questionnaire__statement
+                            span Some question
+                        +jq-questionnaire__options
+                            +jq-questionnaire__option({
+                                content: "Incorrect",
+                                isCorrect: false
+                            })
+                            +jq-questionnaire__option({
+                                content: "Correct",
+                                isCorrect: true,
+                                feedback: [
+                                    {
+                                        content: "Feedback ko",
+                                        type: "ko"
+                                    },
+                                    {
+                                        content: "Feedback ok",
+                                        type: "ok"
+                                    }
+                                ]
+                            })
+                        +jq-questionnaire__feedback({
+                            type: "ok",
+                            content: "Success feedback"
+                        })
+                        +jq-questionnaire__feedback({
+                            type: "ko",
+                            content: "Fail feedback"
+                        })
+                +jq-questionnaire__actions
+                    +jq-questionnaire__action({
+                        type: "end",
+                        content: "End questionnaire"
+                    })
+            +jq-questionnaire__result
+        //-+jq-questionnaire({
+        //-    id: "simpleUse"
+        //-})
+        //-    +jq-questionnaire__header(
+        //-        {
+        //-            title:"Titulo",
+        //-            description:"Descripción del cuestionario",
+        //-            actions:[
+        //-                {
+        //-                    type:"start",
+        //-                    content:"Start"
+        //-                }
+        //-            ]
+        //-        }
+        //-    )
+        //-    +jq-questionnaire__body({
+        //-        questions: [
+        //-            {
+        //-                content: "Enunciado",
+        //-                options: [
+        //-                    {
+        //-                        name:"option",
+        //-                        content: "Option",
+        //-                        isCorrect:false
+        //-                    },
+        //-                    {
+        //-                        name:"option",
+        //-                        content: "Option2",
+        //-                        isCorrect: true
+        //-                    }
+        //-                ]
+        //-            }
+        //-        ],
+        //-        actions:[
+        //-            {
+        //-                type:"prev",
+        //-                content:"Prev"
+        //-            },
+        //-            {
+        //-                type:"next",
+        //-                content:"Next"
+        //-            },
+        //-            {
+        //-                type:"end",
+        //-                content:"End"
+        //-            }
+        //-        ]
+        //-    })
+        //-    +jq-questionnaire__result({
+        //-        items: [
+        //-            {
+        //-                type: "success?¡Perfecto!:No pasa nada, vuelve a intentarlo. Puedes revisar las opciones que has seleccionado"
+        //-            }
+        //-        ]
+        //-    })
+        script.
+            $(".jq-questionnaire")
+                .jqQuestionnaire(
+                    {
+                        immediateFeedback: true,
+                        disableOptionAfterSelect: false
+                    }
+                );

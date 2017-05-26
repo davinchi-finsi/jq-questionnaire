@@ -1,0 +1,38 @@
+mixin jq-questionnaire__result-item(params)
+    //Questionnaire body
+    - params = params || {};
+    if(params.content)
+        -params.tag = "dt";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__result-item",
+                attributes: {
+                    "data-jq-questionnaire-result-item-label": params.type
+                },
+                ignoreContent:false,
+            },
+            externalParams: params
+        })&attributes(attributes)
+        -params.tag = "dd";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__result-item",
+                attributes: {
+                    "data-jq-questionnaire-result-item":params.type
+                }
+            },
+            externalParams: params
+        })&attributes(attributes)
+            block
+    else
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__result-item",
+                attributes: {
+                    "data-jq-questionnaire-result-item": params.type
+                }
+            },
+            externalParams: params
+        })&attributes(attributes)
+            block
+    //End questionnaire body

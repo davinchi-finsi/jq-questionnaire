@@ -1,0 +1,25 @@
+include ../common/_globalStructure/_globalStructure
+include _jqQuestionnaireProperty
+//- @description Mixin para generar el contexto de los parámetros del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__body
+//- @see common/_globalStructure/_mod-baseContent__body
+mixin jq-questionnaire__properties(params)
+    -
+        params = params || {};
+    //Questionnaire properties
+    -params = params || {};
+    -params.tag = params.tag || "dl";
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-questionnaire__properties",
+            attributes: {
+                "data-jq-questionnaire-properties": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.properties)
+            each property in params.properties
+                +jq-questionnaire__property(property)
+        block
+    //End questionnaire properties

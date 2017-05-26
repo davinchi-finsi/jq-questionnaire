@@ -1,0 +1,15 @@
+include ../common/_globalStructure/_globalStructure
+mixin jq-questionnaire__feedback(params)
+    -
+        params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-questionnaire__feedback",
+            attributes: {
+                "data-jq-questionnaire-feedback": params.type || "all"
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block

@@ -1,0 +1,20 @@
+include ../common/_globalStructure/_globalStructure
+//- @description Mixin para generar la descripción del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__body
+//- @see common/_globalStructure/_mod-baseContent__body
+mixin jq-questionnaire__description(params)
+    -
+        params = params || {};
+    //Questionnaire description
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-questionnaire__description",
+            attributes: {
+                "data-jq-questionnaire-description": ""
+            },
+            ignoreContent:false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End questionnaire description

@@ -1,0 +1,20 @@
+include ../common/_globalStructure/_globalStructure
+include ./_jqQuestionnaireAction
+mixin jq-questionnaire__actions(params)
+    -
+        params = params || {};
+    //Questionnaire actions
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-questionnaire__actions",
+            attributes: {
+                "data-jq-questionnaire-actions": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.actions)
+            each action in params.actions
+                +jq-questionnaire__action(action)
+        block
+    //End questionnaire actions

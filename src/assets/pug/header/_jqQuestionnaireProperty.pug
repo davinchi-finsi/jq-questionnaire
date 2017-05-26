@@ -1,0 +1,30 @@
+mixin jq-questionnaire__property(params)
+    - params = params || {};
+    - var attrs = {};
+    - attrs["data-jq-questionnaire-property"]=params.type
+    if(params.content)
+        -params.tag = "dt";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__property",
+                ignoreContent: false
+            },
+            externalParams: params
+        })&attributes(attributes)
+        -params.tag = "dd";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__property",
+                attributes: attrs
+            },
+            externalParams: params
+        })&attributes(attributes)
+        block
+    else
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-questionnaire__property"
+            },
+            externalParams: params
+        })&attributes(attributes)
+            block
