@@ -1,0 +1,21 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+//- @description Mixin para generar el titulo de la cabecera del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__title
+//- @see common/_globalStructure/_mod-baseContent__title
+mixin jq-quiz__title(params)
+    //Quiz title
+    - params = params || {};
+    - params.level = params.level || 1;
+    +_mod-baseContent__title({
+        internalParams: {
+            cssClass: "jq-quiz__title",
+            attributes: {
+                "data-jq-quiz-title": ""
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz title

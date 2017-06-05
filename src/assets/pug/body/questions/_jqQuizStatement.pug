@@ -1,0 +1,18 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../../common/_globalStructure/_globalStructure
+mixin jq-quiz__statement(params)
+    - params = params || {};
+    - params.tag = params.tag || "legend";
+    //Quiz statement
+    +_mod-baseContent__title({
+        internalParams: {
+            cssClass: "jq-quiz__statement",
+            attributes: {
+                "data-jq-quiz-statement": ""
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz statement

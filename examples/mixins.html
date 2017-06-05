@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Simple use</title>
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/jquery-ui-dist/jquery-ui.js"></script>
+    <script src="../node_modules/prismjs/prism.js"></script>
+    <script src="../node_modules/prismjs/components/prism-jade.js"></script>
+    <script src="../node_modules/prismjs/components/prism-typescript.js"></script>
+    <script src="../node_modules/prismjs/components/prism-json.js"></script>
+    <script src="../dist/jquery.quiz.js"></script>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="markdown.css">
+    <link rel="stylesheet" href="prism-github.css">
+  </head>
+  <body>
+    <div class="markdown-wrapper"><h2>jqQuiz</h2>
+<h3>The Mixins way</h3>
+<p>Los mixins permiten un mayor control sobre el HTML del cuesitonario, se pueden añadir elementos por encima (por ejemplo un sistema de grillas) o re orgainzar la manera en la que
+aparecen las distintas partes del cuestionario dando libertad casi completa para aplicar estilos.<br>
+Todos los mixins aceptan una serie de parámetros idénticos:</p>
+<h4>Options</h4>
+<pre><code class="language-json">let options = {
+    &quot;classes&quot;: {
+        &quot;firstQuestion&quot;: &quot;jq-quiz--first-question&quot;,
+        &quot;lastQuestion&quot;: &quot;jq-quiz--last-question&quot;,
+        &quot;widget&quot;: &quot;jq-quiz&quot;,
+        &quot;questionCorrect&quot;: &quot;jq-quiz--correct&quot;,
+        &quot;questionIncorrect&quot;: &quot;jq-quiz--incorrect&quot;,
+        &quot;selected&quot;: &quot;jq-quiz--selected&quot;,
+        &quot;stateResult&quot;: &quot;jq-quiz--result&quot;,
+        &quot;stateReview&quot;: &quot;jq-quiz--review&quot;,
+        &quot;stateRunning&quot;: &quot;jq-quiz--running&quot;,
+        &quot;multichoice&quot;: &quot;jq-quiz--multi-choice&quot;,
+        &quot;wrapper&quot;: &quot;jq-quiz__form&quot;,
+        &quot;header&quot;: &quot;jq-quiz__header&quot;,
+        &quot;body&quot;: &quot;jq-quesitonnaire__body&quot;,
+        &quot;startBtn&quot;: &quot;jq-quiz__start&quot;,
+        &quot;nextBtn&quot;: &quot;jq-quiz__next&quot;,
+        &quot;prevBtn&quot;: &quot;jq-quiz__prev&quot;,
+        &quot;endBtn&quot;: &quot;jq-quiz__end&quot;,
+        &quot;result&quot;: &quot;jq-quiz__result&quot;,
+        &quot;question&quot;: &quot;jq-quiz__question&quot;,
+        &quot;option&quot;: &quot;jq-quiz__option&quot;,
+        &quot;navbar&quot;: &quot;jq-quiz__navbar&quot;,
+        &quot;button&quot;: &quot;jq-quiz__action&quot;,
+        &quot;properties&quot;: &quot;jq-quiz__properties&quot;,
+        &quot;questions&quot;: &quot;jq-quiz__questions&quot;
+    },
+    &quot;delayOnAutoNext&quot;: 500,//delay before auto go next question
+    &quot;pointsForSuccess&quot;: 1,//amount of points to increase when a question is answered correctly
+    &quot;pointsForFail&quot;: 0,//amount of points to substract when a question is answered incorrectly
+    &quot;cutOffMark&quot;: 50,//minimum % of points to pass the quiz
+    &quot;immediateFeedback&quot;: false,//show if the question has been answered correctly or incorrectly immediatly after choose an option
+    &quot;disableOptionAfterSelect&quot;: true,//Disables the options of the question answered before choose one option. Only applies if immediateFeedback == true
+    &quot;autoGoNext&quot;: true,//Go to the next question after choose an option. Only applies if immediateFeedback == false
+    &quot;showCorrection&quot;: true,//Show the question corrections at the end of the quiz
+    &quot;showResult&quot;: true,//show the result dialog
+    &quot;multichoice&quot;: false,
+    &quot;disableNextUntilSuccess&quot;: false,//disable the next action until select the correct answer. Only available when immediateFeedback is true and disableOptionAfterSelect is false
+    &quot;disableEndActionUntil&quot;:0,//disable the end action until a condition. Use DISABLE_END conditions. Only available when immediateFeedback is true and disableOptionAfterSelect is false.
+    &quot;dialog&quot;: {//dialog options. All options of jquery ui dialog could be used  https://api.jqueryui.com/dialog/
+        &quot;draggable&quot;: false,
+        &quot;autoOpen&quot;: true,
+        &quot;resizable&quot;: false,
+        &quot;modal&quot;: true
+    }
+}
+</code></pre>
+<h3>Simple use</h3>
+<p>jqQuiz trabaja con HTML en lugar de con JSON para dar libertad casi total en como pintar el cuestionario en lugar de fijar una estructura pintada dinámicamente.<br>
+jqQuiz está dividido en pequeñas piezas que pueden colocarse de la manera que mejor se adapte a tus necesidades, como si de un puzzle se tratase.<br>
+Si no se quiere una de las partes basta con eliminarla del HTML.<br>
+Cada pieza tiene un rol específico dentro del cuestionario, ese rol está especificado por un atributo del tipo <code>data-jq-quiz-**</code>, el resto del HTMl es completamente libre!
+Para facilitar la creación del markup se ofrecen mixins de pug pudiendo manipular cada elemento por separado, añadir un id, añadir clases, encapsularlo en otro elemento html, etc
+Los mixins a su vez se pueden utilizar de manera individual o mediante JSON (si se usan con JSON la estructura es fija!)
+Include the mixins from your instalation (node_modules or the folder in which jqQuiz is</p>
+<h4>JSON way</h4>
+<h4>Full mixins way</h4>
+<pre><code class="language-jade">include jqQuiz/_jqQuiz
++jq-quiz
+    +jq-quiz__header
+        +jq-quiz__title({
+            content:&quot;My quiz&quot;
+        })
+        +jq-quiz__description({
+            content:&quot;Description for my quiz&quot;
+        })
+        +jq-quiz__actions
+            +jq-quiz__action({
+                type:&quot;start&quot;,
+                content:&quot;Start quiz&quot;
+            })
+    +jq-quiz__body
+        +jq-quiz__questions
+            +jq-quiz__question
+                +jq-quiz__statement
+                    span Some question
+                +jq-quiz__options
+                    +jq-quiz__option({
+                        name:&quot;question1&quot;,
+                        content:&quot;Incorrect&quot;,
+                        isCorrect:false
+                    })
+                    +jq-quiz__option({
+                        name:&quot;question1&quot;,
+                        content:&quot;Correct&quot;,
+                        isCorrect:true
+                    })
+        +jq-quiz__feedback({
+            type:&quot;success&quot;,
+            content:&quot;Success feedback
+        })
+        +jq-quiz__actions
+            +jq-quiz__action({
+                type:&quot;end&quot;,
+                content:&quot;End quiz&quot;
+            })
+//- The container
+
+</code></pre>
+
+    </div>
+    <!--+jq-quiz
+    +jq-quiz__header
+        +jq-quiz__title({
+            content: "My quiz"
+        })
+        +jq-quiz__description({
+            content: "Description for my quiz"
+        })
+        +jq-quiz__actions
+            +jq-quiz__action({
+                type: "start",
+                content: "Start quiz"
+            })
+    +jq-quiz__body
+        +jq-quiz__questions
+            +jq-quiz__question
+                +jq-quiz__statement
+                    span Some question
+                +jq-quiz__options
+                    +jq-quiz__option({
+                        name:"q1",
+                        content: "Incorrect",
+                        isCorrect: false
+                    })
+                    +jq-quiz__option({
+                        name:"q1",
+                        content: "Correct",
+                        isCorrect: true,
+                        feedback: [
+                            {
+                                content: "Feedback ko",
+                                type: "ko"
+                            },
+                            {
+                                content: "Feedback ok",
+                                type: "ok"
+                            }
+                        ]
+                    })
+                +jq-quiz__feedback({
+                    type: "success",
+                    content: "Success feedback"
+                })
+            +jq-quiz__question
+                +jq-quiz__statement
+                    span Some question
+                +jq-quiz__options
+                    +jq-quiz__option({
+                        name:"q2",
+                        content: "Incorrect",
+                        isCorrect: false
+                    })
+                    +jq-quiz__option({
+                        name:"q2",
+                        content: "Correct",
+                        isCorrect: true,
+                        feedback: [
+                            {
+                                content: "Feedback ko",
+                                type: "ko"
+                            },
+                            {
+                                content: "Feedback ok",
+                                type: "ok"
+                            }
+                        ]
+                    })
+                +jq-quiz__feedback({
+                    type: "ok",
+                    content: "Success feedback"
+                })
+                +jq-quiz__feedback({
+                    type: "ko",
+                    content: "Fail feedback"
+                })
+        +jq-quiz__actions
+            +jq-quiz__action({
+                type: "end",
+                content: "End quiz"
+            })
+    +jq-quiz__result({
+        items:[
+            {
+                type: "success ? Perfect! : Ohhh, try again"
+            }
+        ]
+    })
+    -->
+    <!--Quiz-->
+    <section class="jq-quiz">
+      <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
+        <header class="jq-quiz__header" data-jq-quiz-header="">
+          <!--Quiz title-->
+          <h1 class="jq-quiz__title" data-jq-quiz-title="">My quiz
+          </h1>
+          <!--End quiz title-->
+          <!--Questionnaire description-->
+          <div class="jq-quiz__description" data-jq-quiz-description="">My quiz
+          </div>
+          <!--End quiz description-->
+          <!--Quiz properties-->
+          <undefined class="jq-quiz__properties" data-jq-quiz-properties="">
+          </undefined>
+          <!--End quiz properties-->
+          <!--Quiz actions-->
+          <div class="jq-quiz__actions" data-jq-quiz-actions="">
+            <!--Quiz actions-->
+            <button class="jq-quiz__action" data-jq-quiz-start="">Start
+            </button>
+            <!--End quiz actions-->
+          </div>
+          <!--End quiz actions-->
+        </header>
+        <!--Quiz body-->
+        <div class="jq-quiz__body" data-jq-quiz-body="">
+          <!--Quiz questions-->
+          <div class="jq-quiz__questions" data-jq-quiz-questions="">
+            <!--Quiz question-->
+            <fieldset class="jq-quiz__question" data-jq-quiz-question="">
+              <!--Quiz statement-->
+              <legend class="jq-quiz__statement" data-jq-quiz-statement="">Some quesiton
+              </legend>
+              <!--End quiz statement-->
+              <!--Quiz options-->
+              <div class="jq-quiz__options" data-jq-quiz-options="">
+                <!--Quiz option-->
+                <div class="jq-quiz__option" data-jq-quiz-option="">
+                  <label class="jq-quiz__option-label"><span>Incorrect</span>
+                    <input class="jq-quiz__option-field" type="radio" name="q1"/>
+                  </label>
+                </div>
+                <!--End quiz option-->
+                <!--Quiz option-->
+                <div class="jq-quiz__option" data-jq-quiz-option="" data-is-correct="true">
+                  <label class="jq-quiz__option-label"><span>Correct</span>
+                    <input class="jq-quiz__option-field" type="radio" name="q1"/>
+                  </label>
+                </div>
+                <!--End quiz option-->
+              </div>
+              <!--End quiz options-->
+            </fieldset>
+            <!--End quiz question-->
+          </div>
+          <!--End quiz questions-->
+          <!--Quiz actions-->
+          <div class="jq-quiz__actions" data-jq-quiz-actions="">
+            <!--Quiz actions-->
+            <button class="jq-quiz__action" data-jq-quiz-end="">End
+            </button>
+            <!--End quiz actions-->
+          </div>
+          <!--End quiz actions-->
+        </div>
+        <!--End quiz body-->
+        <!--Questionnaire result-->
+        <div class="jq-quiz__result" data-jq-quiz-result="">
+          <!--Questionnaire body-->
+          <div class="jq-quiz__result-item" data-jq-quiz-result-item="success ? Perfect! : Ohhh, try again">
+          </div>
+          <!--End quiz body-->
+        </div>
+        <!--End quiz result-->
+      </form>
+    </section>
+    <!--End quiz-->
+    <script>
+      $(".jq-quiz")
+          .jqQuiz(
+              {
+                  immediateFeedback: true,
+                  disableOptionAfterSelect: false
+              }
+          );
+    </script>
+  </body>
+</html>

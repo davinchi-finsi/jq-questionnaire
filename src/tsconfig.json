@@ -2,6 +2,8 @@
     "compilerOptions": {
         "target": "es5",
         "sourceMap": true,
+        "outDir": "dist",
+        "removeComments": true,
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "typeRoots": [

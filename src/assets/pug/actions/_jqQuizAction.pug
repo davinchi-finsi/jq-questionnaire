@@ -1,0 +1,17 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+mixin jq-quiz__action(params)
+    -params = params ||{};
+    -params.tag = params.tag || "button";
+    -var internalAttributes = {};
+    -internalAttributes["data-jq-quiz-"+params.type]="";
+    //Quiz actions
+    +_mod-baseContent__action({
+        internalParams: {
+            cssClass: "jq-quiz__action",
+            attributes: internalAttributes
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz actions

@@ -1,0 +1,16 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+mixin jq-quiz__feedback(params)
+    -
+        params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__feedback",
+            attributes: {
+                "data-jq-quiz-feedback": params.type || "all"
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block

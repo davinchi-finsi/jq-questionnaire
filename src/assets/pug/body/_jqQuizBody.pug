@@ -1,0 +1,64 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include ./questions/_jqQuizQuestions
+include ./questions/_jqQuizQuestion
+include ../actions/_jqQuizActions
+//- @description Mixin para generar el contexto para el cuerpo del cuestionario.
+//- Acepta todos los parámetros de _mod-baseContent__body
+//- Adicionalmente acepta:
+//- @param  {Object}            [params]              Configuración
+//- @param  {IQuestionConfig}   [params.questions]    Conjunto de preguntas a generar. Si se indica, genera automáticamente el contexto de preguntas. Acepta los parámetros de jq-quiz__question
+//- @see common/_globalStructure/_mod-baseContent__body
+//- @see questions/_jqQuizQuestion
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__body
+//-         +jq-quiz__questions
+//-             +jq-quiz__question
+//-                 +jq-quiz__statement
+//-                     span Some question
+//-                 +jq-quiz__options
+//-                     +jq-quiz__option
+//-         +jq-quiz__feedback
+//-         +jq-quiz__actions
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__body({
+//-         questions:[
+//-             {
+//-                 content:"Enunciado",
+//-                 options:[
+//-                     {
+//-                         content:"Option"
+//-                     },
+//-                     {
+//-                         content:"Option2",
+//-                         isCorrect:true
+//-                     }
+//-                 ]
+//-             }
+//-         ]
+//-     })
+mixin jq-quiz__body(params)
+    //Quiz body
+    - params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__body",
+            attributes: {
+                "data-jq-quiz-body": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.questions)
+            +jq-quiz__questions
+                each question in params.questions
+                    - question.multichoice = params.multichoice;
+                    +jq-quiz__question(question)
+        if(params.actions)
+            +jq-quiz__actions({
+                actions:params.actions
+            })
+        block
+    //End quiz body

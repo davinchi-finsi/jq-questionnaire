@@ -9,7 +9,9 @@ let config = {
     },
     production: program.production,
     bowerAssets: [],
-    copy: [],
+    copy: [
+        "**/*.pug"
+    ],
     server: {
         port: program.port || 8081,
         codeSync: !program.disableLiveReload,

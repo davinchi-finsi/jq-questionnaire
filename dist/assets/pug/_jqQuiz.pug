@@ -1,0 +1,111 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ./common/_globalStructure/_globalStructure
+//- @description Mixin para generar el contexto del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent
+//- Adicionalmente acepta:
+//- @param  {Object}        [params]              Configuración
+//- @param  {String}        [params.header]       Genera la cabecera del cuestionario mediante jq-quiz__header
+//- @param  {String}        [params.body]         Genera el cuerpo del cuestionario mediante jq-quiz__body
+//- @see common/_globalStructure/_mod-baseContent
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__header
+//-         +jq-quiz__title
+//-             span Titule
+//-         +jq-quiz__description
+//-             span Description
+//-         +jq-quiz__properties
+//-         +jq-quiz__actions
+//-             +jq-quiz__action({
+//-                 type:"start",
+//-                 content:"Start"
+//-             })
+//-     +jq-quiz__body
+//-         +jq-quiz__questions
+//-             +jq-quiz__question
+//-                 +jq-quiz__statement
+//-                     span Some question
+//-                 +jq-quiz__options
+//-                     +jq-quiz__option
+//-         +jq-quiz__feedback
+//-         +jq-quiz__actions
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__header(
+//-         {
+//-             title:"Titulo",
+//-             description:"Descripción del cuestionario",
+//-             properties:true,
+//-             actions:[
+//-                 {
+//-                     type:"start",
+//-                     content:"Start"
+//-                 }
+//-             ]
+//-         }
+//-     )
+//-     +jq-quiz__body({
+//-         questions:[
+//-             {
+//-                 content:"Enunciado",
+//-                 options:[
+//-                     {
+//-                         content:"Option"
+//-                     },
+//-                     {
+//-                         content:"Option2",
+//-                         isCorrect:true
+//-                     }
+//-                 ]
+//-             }
+//-         ]
+//-     })
+//- @example
+//- +jq-quiz({
+//-     header:{
+//-         title:"Titulo",
+//-         description:"Descripción del cuestionario",
+//-         properties:true,
+//-         actions:[
+//-             {
+//-                 type:"start",
+//-                 content:"Start"
+//-             }
+//-         ]
+//-     },
+//-     body:{
+//-         questions:[
+//-             {
+//-                 content:"Enunciado",
+//-                 options:[
+//-                     {
+//-                         content:"Option"
+//-                     },
+//-                     {
+//-                         content:"Option2",
+//-                         isCorrect:true
+//-                     }
+//-                 ]
+//-             }
+//-         ]
+//-     }
+//- })
+mixin jq-quiz(params)
+    //Quiz
+    - params = params || {};
+    - params.tag = params.tag || "section";
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz"
+        },
+        externalParams: params
+    })&attributes(attributes)
+        form.jq-quiz__form(data-jq-quiz-wrapper)
+            if(params.header)
+                +jq-quiz__header(params.header)
+            if(params.body)
+                +jq-quiz__body(params.body)
+            if(params.result)
+                +jq-quiz__result(params.result)
+            block
+    //End quiz

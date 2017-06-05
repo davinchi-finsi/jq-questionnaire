@@ -1,0 +1,21 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include ./_jqQuizAction
+mixin jq-quiz__actions(params)
+    -
+        params = params || {};
+    //Quiz actions
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__actions",
+            attributes: {
+                "data-jq-quiz-actions": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.actions)
+            each action in params.actions
+                +jq-quiz__action(action)
+        block
+    //End quiz actions

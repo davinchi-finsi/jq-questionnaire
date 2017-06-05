@@ -1,0 +1,91 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include _jqQuizTitle
+include _jqQuizProperties
+include _jqQuizDescription
+include ../actions/_jqQuizActions
+//- @description Mixin para generar el contexto de la cabecera del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__header.
+//- Adicionalmente acepta:
+//- @param  {Object}        [params]              Configuración
+//- @param  {String}        [params.title]        Genera el título mediante jq-quiz__title
+//- @param  {String}        [params.description]  Genera la descripción mediante jq-quiz__description
+//- @param  {boolean}       [params.properties]   Genera las propiedades mediante jq-quiz__properties
+//- @param  {IActionConfig} [params.actions]      Genera las acciones mediante jq-quiz__action.
+//- @see common/_globalStructure/_mod-baseContent__header
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__header
+//-         +jq-quiz__title
+//-             span Title
+//-         +jq-quiz__description
+//-             span Description
+//-         +jq-quiz__properties
+//-         +jq-quiz__actions
+//-             +jq-quiz__action({
+//-                 type:"start",
+//-                 content:"Start"
+//-             })
+//-     +jq-quiz__body
+//-         +jq-quiz__questions
+//-             +jq-quiz__question
+//-                 +jq-quiz__statement
+//-                     span Some question
+//-                 +jq-quiz__options
+//-                     +jq-quiz__option
+//-         +jq-quiz__feedback
+//-         +jq-quiz__actions
+//- @example
+//- +jq-quiz
+//-     +jq-quiz__header(
+//-         {
+//-             title:"Titulo",
+//-             description:"Descripción del cuestionario",
+//-             properties:true,
+//-             actions:[
+//-                 {
+//-                     type:"start",
+//-                     content:"Start"
+//-                 }
+//-             ]
+//-         }
+//-     )
+mixin jq-quiz__header(params)
+    -
+        params = params || {};
+    +_mod-baseContent__header({
+        internalParams: {
+            cssClass: "jq-quiz__header",
+            attributes: {
+                "data-jq-quiz-header": ""
+            }
+        },
+        externalParams: params
+    })
+        if(params.title != undefined)
+            -
+                var titleParams = params.title;
+                if((typeof params.title).toLowerCase() == "string"){
+                    titleParams = {
+                        content:params.title
+                    }
+                }
+
+            +jq-quiz__title(titleParams)
+        if(params.description != undefined)
+            -
+                var descriptionParams = params.title;
+                if((typeof params.description).toLowerCase() == "string"){
+                    descriptionParams = {
+                        content:params.description
+                    }
+                }
+
+            +jq-quiz__description(descriptionParams)
+        if(params.properties != undefined)
+            +jq-quiz__properties(params.properties)
+        if(params.actions != undefined)
+            +jq-quiz__actions({
+                actions:params.actions
+            })
+        block

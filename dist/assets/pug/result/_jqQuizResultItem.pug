@@ -1,0 +1,39 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+mixin jq-quiz__result-item(params)
+    //Questionnaire body
+    - params = params || {};
+    if(params.content)
+        -params.tag = "dt";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-quiz__result-item",
+                attributes: {
+                    "data-jq-quiz-result-item-label": params.type
+                },
+                ignoreContent:false,
+            },
+            externalParams: params
+        })&attributes(attributes)
+        -params.tag = "dd";
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-quiz__result-item",
+                attributes: {
+                    "data-jq-quiz-result-item":params.type
+                }
+            },
+            externalParams: params
+        })&attributes(attributes)
+            block
+    else
+        +_mod-baseContent({
+            internalParams: {
+                cssClass: "jq-quiz__result-item",
+                attributes: {
+                    "data-jq-quiz-result-item": params.type
+                }
+            },
+            externalParams: params
+        })&attributes(attributes)
+            block
+    //End quiz body

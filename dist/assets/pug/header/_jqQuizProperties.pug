@@ -1,0 +1,24 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include _jqQuizProperty
+//- @description Mixin para generar el contexto de los parámetros del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__body
+//- @see common/_globalStructure/_mod-baseContent__body
+mixin jq-quiz__properties(params)
+    -
+        params = params || {};
+    -params.tag = params.tag || "dl";
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__properties",
+            attributes: {
+                "data-jq-quiz-properties": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.items)
+            each property in params.items
+                +jq-quiz__property(property)
+        block
+    //End quiz properties

@@ -1,0 +1,21 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+//- @description Mixin para generar la descripción del cuestionario
+//- Acepta todos los parámetros de _mod-baseContent__body
+//- @see common/_globalStructure/_mod-baseContent__body
+mixin jq-quiz__description(params)
+    -
+        params = params || {};
+    //Questionnaire description
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__description",
+            attributes: {
+                "data-jq-quiz-description": ""
+            },
+            ignoreContent:false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz description

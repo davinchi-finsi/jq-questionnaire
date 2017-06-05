@@ -1,5 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 src/*.html
+src/*.js
+src/*.js.map
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json

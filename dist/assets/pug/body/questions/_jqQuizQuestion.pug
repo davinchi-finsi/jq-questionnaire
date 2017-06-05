@@ -1,0 +1,33 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../../common/_globalStructure/_globalStructure
+include ./_jqQuizStatement
+include _jqQuizOption
+include _jqQuizOptions
+include ../_jqQuizFeedback
+mixin jq-quiz__question(params)
+    //Quiz question
+    - params = params || {};
+    - params.tag = params.tag || "fieldset";
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__question",
+            attributes: {
+                "data-jq-quiz-question": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.content)
+            +jq-quiz__statement({
+                content: params.content
+            })
+        if(params.options)
+            +jq-quiz__options
+                each option in params.options
+                    - option.multichoice = params.multichoice;
+                    +jq-quiz__option(option)
+        if(params.feedback)
+            each feedback in params.feedback
+                +jq-quiz__feedback(feedback)
+        block
+    //End quiz question
