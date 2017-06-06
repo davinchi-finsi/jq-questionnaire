@@ -1,61 +1,62 @@
 //- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
 include ../../common/_globalStructure/_globalStructure
 include ../_jqQuizFeedback
-//- @description Mixin para generar una opción. Por defecto permite generar un label y un input de tipo radio
-//- Acepta todos los parámetros de _mod-baseContent.
-//- Si se utiliza una
-//- Adicionalmente acepta:
-//- @param  {Object}        params                      Configuración
-//- @param  {boolean}       params.isCorrect            Indica si la opción es la correcta
-//- @param  {Object}        [params.content]            Si se indica, se genera un label y un input de tipo radio. Texto del label
-//- @param  {String}        [params.name]               Si se indica params.content este parámetro es obligatorio. Valor del atributo name del input para relacionar las opciones
-//- @param  {Object}        [params.label]              Configuración del label
-//- @param  {Object}        [params.label.attributes]   Añade el atributos al label
-//- @param  {Object}        [params.field]              Configuración del input
-//- @param  {boolean}       [params.field.required]     Añade el atributo required al input
-//- @param  {String}        [params.field.value]        Añade el atributo value al input
-//- @param  {String}        [params.field.id]           Añade el atributo id al input
-//- @param  {Object}        [params.field.attributes]   Añade el atributos al input
-//- @see common/_globalStructure/_mod-baseContent
-//- @example
-//- +jq-quiz
-//-     +jq-quiz__body({
-//-         questions:[
-//-             {
-//-                 content:"Question 1",
-//-                 options:[
-//-                     {
-//-                         content:"Option1",
-//-                         name:"question1",
-//-                         isCorrect:false
-//-                     },
-//-                     {
-//-                         content: "Option2",
-//-                         name: "question1",
-//-                         isCorrect: true
-//-                     }
-//-                 ]
-//-             }
-//-         ]
-//-     })
-//- @example
-//- +jq-quiz
-//-     +jq-quiz__body
-//-         +jq-quiz__questions
-//-             +jq-quiz__question({
-//-                 content:"Question 1"
-//-             })
-//-                 +jq-quiz__options
-//-                     +jq-quiz__option({
-//-                         content:"Option1",
-//-                         isCorrect:false,
-//-                         name:"question1"
-//-                     })
-//-                     +jq-quiz__option({
-//-                         content:"Option2",
-//-                         isCorrect:true,
-//-                         name:"question1"
-//-                     })
+//- @pugdoc
+    @function jq-quiz__option
+    @description Mixin para to generate an option.
+    @param  {Object}        params                      Parameters
+    @param  {boolean}       [params.multichoice]        If multichoice is true, checkbox type inputs will be generated. If multichoice is false, radio type inputs will be generated.
+    @param  {boolean}       params.isCorrect            Indicates if the question is correct. This parameter must be indicated as true or false, otherwise, Pug will throw an error
+    @param  {Object}        [params.content]            If is provided, a label with a input (radio or checkbox) will be generated.
+    @param  {String}        params.name                 Set the name attribute for the input. All the inputs (options) in a question must have the same name. If the name is not provided, Pug will throw an error. Only available if params.content is provided.
+    @param  {String}        [params.label]              Options for the label element.
+    @param  {String}        [params.cssClass]           Css classes to add to the label
+    @param  {Object}        [params.label.attributes]   Add attributes to the label
+    @param  {Object}        [params.field]              Options for the input
+    @param  {boolean}       [params.field.required]     Set if the field is required
+    @param  {String}        [params.field.value]        Set the value for the input
+    @param  {String}        [params.field.id]           Set an id to the input. If is provided, the label will have the "for" attribute with the this value.
+    @param  {String}        [params.field.cssClass]     Css classes to add to the input
+    @param  {Object}        [params.field.attributes]   Add attributes to the input
+    @param  {Object[]}      [params.feedback]           If is provided, jq-quiz__feedback will be invoked for each element
+    @see jq-quiz__feedback
+    @example
+    +jq-quiz__option({
+        name:"question1",
+        content:"Some option",
+        label:{
+            cssClass:"some-css-class",
+            attributes:{
+                "data-some-attribute":"someValue"
+            }
+        },
+        field:{
+            cssClass:"some-css-class",
+            required:true,
+            value:"someValue",
+            attributes:{
+                "data-some-attribute":"someValue"
+            }
+        }
+    })
+    @example
+    +jq-quiz
+        +jq-quiz__body
+            +jq-quiz__questions
+                +jq-quiz__question({
+                    content:"Question 1"
+                })
+                    +jq-quiz__options
+                        +jq-quiz__option({
+                            content:"Option1",
+                            isCorrect:false,
+                            name:"question1"
+                        })
+                        +jq-quiz__option({
+                            content:"Option2",
+                            isCorrect:true,
+                            name:"question1"
+                        })
 mixin jq-quiz__option(params)
     - params = params || {};;
     - params.field = params.field || {};
@@ -79,17 +80,18 @@ mixin jq-quiz__option(params)
             //- If label is provided, the parameter name is required
             if(params.name == undefined)
                 - throw "[ERR] jq-quiz__option - The option 'name' is required"
-            label.jq-quiz__option-label(for=params.field.id)&attributes(params.label.attributes)
+            label.jq-quiz__option-label(class=params.label.cssClass||"", for=params.field.id)&attributes(params.label.attributes)
                 span!= params.content
                 input.jq-quiz__option-field(id=params.field.id,
+                class=params.field.cssClass || "",
                 type=params.multichoice ? "checkbox":"radio",
                 required=(params.field.required
                     ? "required"
                     : undefined)
                 name=params.name,
                 value=params.field.value)&attributes(params.field.attributes)
-            if(params.feedback)
-                each feedback in params.feedback
-                    +jq-quiz__feedback(feedback)
+        if(params.feedback)
+            each feedback in params.feedback
+                +jq-quiz__feedback(feedback)
         block
     //End quiz option

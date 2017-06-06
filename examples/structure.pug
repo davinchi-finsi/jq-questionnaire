@@ -5,12 +5,10 @@ html(lang='en')
         title Structure & Roles
         script(src="../node_modules/jquery/dist/jquery.js")
         script(src="../node_modules/jquery-ui-dist/jquery-ui.js")
-        script(src="../node_modules/prismjs/prism.js")
-        script(src="../node_modules/prismjs/components/prism-jade.js")
-        script(src="../node_modules/prismjs/components/prism-typescript.js")
-        script(src="../node_modules/prismjs/components/prism-json.js")
+
         script(src="../dist/jquery.quiz.js")
         link(rel="stylesheet" href="main.css")
+        link(rel="stylesheet" href="../node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css")
         link(rel="stylesheet" href="markdown.css")
         link(rel="stylesheet" href="prism-github.css")
     body
@@ -18,13 +16,11 @@ html(lang='en')
             :markdown-it(linkify)
                 ## jqQuiz
                 ### Overwiew
-                jqQuiz works reading the HTML instead of use a JSON to provide more freedom over the markup as other jquery plugins do (jquery accordion for example), you choose the way to render it!\
+                jqQuiz works reading the HTML instead of use a JSON to provide more flexibility in the construction of the markup, as many other jquery plugins do (jquery accordion for example).
 
-                jqQuiz is divided in small pieces, each piece has a specific rol inside the quiz, this rol is specified by an attribute of type `data-jq-quiz-**`, the rest of the markup is totally up to you!\
+                jqQuiz is divided in small pieces, each piece has a specific rol inside the quiz, this rol is specified by an attribute of type `data-jq-quiz-**`, the rest of the markup is totally up to you!
 
-                So, if you don't want to include a description, simply remove it! So easy.\
-
-                To simplify the creation of the markup, we provided some pug mixins, you only have to call the mixin of the element you want to place!. For more info please see [mixins](./mixins.html).\
+                So, if you don't want to include some optional element, simply remove it from the markup.\
 
                 ### Structure & Roles
                 Most of the markup is totally free but, of course, a little structure must be provided.\
@@ -55,17 +51,15 @@ html(lang='en')
                 **Please note** that the order of elements in their container is not mandatory, you could use the order you want.
                 A valid structure could be:
                 ```html
-                <section class="jq-quiz">
-                    <form class="jq-quiz__form" data-jq-quiz-wrapper>
+                <section class="jq-quiz" id="myQuiz">
+                    <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
                         <header class="jq-quiz__header" data-jq-quiz-header>
                             <!--Quiz title-->
-                            <h1 class="jq-quiz__title" data-jq-quiz-title>Quiz options example</h1>
+                            <h1 class="jq-quiz__title" data-jq-quiz-title>My quiz title</h1>
                             <!--End quiz title-->
-                            <dl class="jq-quiz__properties" data-jq-quiz-properties>
-                                <dt class="jq-quiz__property">Cut of mark</dt>
-                                <dd class="jq-quiz__property" data-jq-quiz-property></dd>
-                            </dl>
-                            <!--End quiz properties-->
+                            <!--Questionnaire description-->
+                            <p class="jq-quiz__description" data-jq-quiz-description>Description for my quiz</p>
+                            <!--End quiz description-->
                             <!--Quiz actions-->
                             <div class="jq-quiz__actions" data-jq-quiz-actions>
                                 <!--Quiz actions-->
@@ -88,7 +82,7 @@ html(lang='en')
                                         <!--Quiz option-->
                                         <div class="jq-quiz__option" data-jq-quiz-option>
                                             <label class="jq-quiz__option-label">
-                                                <span>Some option 1</span>
+                                                <span>Incorrect</span>
                                                 <input class="jq-quiz__option-field" type="radio" name="q1">
                                             </label>
                                         </div>
@@ -96,14 +90,13 @@ html(lang='en')
                                         <!--Quiz option-->
                                         <div class="jq-quiz__option" data-jq-quiz-option data-is-correct="true">
                                             <label class="jq-quiz__option-label">
-                                                <span>Some Option</span>
+                                                <span>Correct</span>
                                                 <input class="jq-quiz__option-field" type="radio" name="q1">
                                             </label>
                                         </div>
                                         <!--End quiz option-->
                                     </div>
                                     <!--End quiz options-->
-                                    <div class="jq-quiz__feedback" data-jq-quiz-feedback="success ? Success feedback : Fail feedback">Feedback</div>
                                 </fieldset>
                                 <!--End quiz question-->
                             </div>
@@ -120,15 +113,68 @@ html(lang='en')
                         <!--Questionnaire result-->
                         <div class="jq-quiz__result" data-jq-quiz-result>
                             <!--Questionnaire body-->
-                            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="score">Score</dt>
-                            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="score"></dd>
+                            <div class="jq-quiz__result-item" data-jq-quiz-result-item="success ? Perfect! : Ohhh, try again"></div>
                             <!--End quiz body-->
                         </div>
                         <!--End quiz result-->
                     </form>
                 </section>
                 ```
+                But it's a lot of code and it's a bit difficult to read, right?\
+                To make your(our) life easier, we have created some pug mixins, you only have to call the mixin of the element you want to place without add anything more.
+                The same that appears above could be specified with mixins:
+                ```jade
+                +jq-quiz({
+                    id:"myQuiz"
+                })
+                    +jq-quiz__header()
+                        +jq-quiz__title({
+                            content:"My quiz title"
+                        })
+                        +jq-quiz__description({
+                            content:"Description for my quiz"
+                        })
+                        +jq-quiz__actions()
+                            +jq-quiz__action({
+                                type:"start",
+                                 content:"Start the quiz"
+                            })
+                    +jq-quiz__body()
+                        +jq-quiz__questions()
+                            +jq-quiz__question({
+                                statement:"Some question"
+                            })
+                                +jq-quiz__options()
+                                    +jq-quiz__option({
+                                        name:"q1",
+                                        isCorrect:false,
+                                        content:"Incorrect"
+                                    })
+                                    +jq-quiz__option({
+                                        name:"q1",
+                                        isCorrect:true,
+                                        content:"Correct"
+                                    })
+                        +jq-quiz__actions()
+                            +jq-quiz__action({
+                                type:"end",
+                                content:"End the quiz"
+                            })
+                    +jq-quiz__result()
+                        +jq-quiz__result-item({
+                            type: "success ? Perfect! : Ohhh, try again"
+                        })
+                ```
+                Much better right?. The mixins provides multiple ways for render the quiz, making the code more readable.\
+                For more info please see [mixins](./mixins.html)
                 ### More things
                 * [options](./options.html)
                 * [mixins way](./mixins.html)
                 * [json way](./json.html)
+    script.
+        $("pre").addClass("line-numbers")
+    script(src="../node_modules/prismjs/prism.js")
+    script(src="../node_modules/prismjs/components/prism-jade.js")
+    script(src="../node_modules/prismjs/components/prism-typescript.js")
+    script(src="../node_modules/prismjs/components/prism-json.js")
+    script(src="../node_modules/prismjs/plugins/line-numbers/prism-line-numbers.js")

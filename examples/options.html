@@ -45,7 +45,7 @@ $(&quot;.myQuiz&quot;).option(&quot;option&quot;,&quot;immediateFeedback&quot;,t
         &quot;multichoice&quot;: &quot;jq-quiz--multi-choice&quot;,
         &quot;wrapper&quot;: &quot;jq-quiz__form&quot;,
         &quot;header&quot;: &quot;jq-quiz__header&quot;,
-        &quot;body&quot;: &quot;jq-quesitonnaire__body&quot;,
+        &quot;body&quot;: &quot;jq-questionnaire__body&quot;,
         &quot;startBtn&quot;: &quot;jq-quiz__start&quot;,
         &quot;nextBtn&quot;: &quot;jq-quiz__next&quot;,
         &quot;prevBtn&quot;: &quot;jq-quiz__prev&quot;,
@@ -79,11 +79,139 @@ $(&quot;.myQuiz&quot;).option(&quot;option&quot;,&quot;immediateFeedback&quot;,t
 }
 </code></pre>
 <h3>Example</h3>
-<pre><code>$(&quot;#quiz-1&quot;).jqQuiz()
+<pre><code class="language-jade">+jq-quiz({
+    id:&quot;myQuiz&quot;,
+    header: {
+        title: &quot;Quiz options example&quot;,
+        properties: {
+            items: [
+                {
+                    type: &quot;cutOfMark&quot;,
+                    content: &quot;Cut of mark&quot;
+                },
+                {
+                    type: &quot;immediateFeedback ? Yes : No&quot;,
+                    content: &quot;Immediate Feedback&quot;
+                },
+                {
+                    type: &quot;pointsForSuccess&quot;,
+                    content: &quot;Points to add for each correct answer&quot;
+                },
+                {
+                    type: &quot;pointsForFail&quot;,
+                    content: &quot;Points to substract for each incorrect answer&quot;
+                }
+            ]
+        },
+        actions: [
+            {
+                type: &quot;start&quot;,
+                content: &quot;Start the quiz&quot;
+            }
+        ]
+    },
+    body: {
+        questions: [
+            {
+                content: &quot;1 + 1 = &quot;,
+                options: [
+                    {
+                        name: &quot;q1&quot;,
+                        content: &quot;7&quot;,
+                        isCorrect: false
+                    },
+                    {
+                        name: &quot;q1&quot;,
+                        content: &quot;2&quot;,
+                        isCorrect: true
+                    },
+                    {
+                        name: &quot;q1&quot;,
+                        content: &quot;Mind blown&quot;,
+                        isCorrect: false
+                    }
+                ],
+                feedback:[
+                    {
+                        type:&quot;ok&quot;,
+                        content:&quot;Yeeessss, auto continue in 2 seconds.&quot;
+                    },
+                    {
+                        type:&quot;ko&quot;,
+                        content:&quot;Had a bad day? Don't worry, you will success the next question.&quot;
+                    }
+                ]
+            },
+            {
+                content: &quot;NPM or YARN?&quot;,
+                options: [
+                    {
+                        name: &quot;q2&quot;,
+                        content: &quot;NPM&quot;,
+                        isCorrect: true
+                    },
+                    {
+                        name: &quot;q2&quot;,
+                        content: &quot;YARN&quot;,
+                        isCorrect: true
+                    }
+                ],
+                feedback: [
+                    {
+                        type: &quot;ok&quot;,
+                        content: &quot;Both are correct :P Multiple correct options are allowed&quot;
+                    }
+                ]
+            },
+            {
+                content: &quot;\&quot;0\&quot; == false&quot;,
+                options: [
+                    {
+                        name: &quot;q3&quot;,
+                        content: &quot;true&quot;,
+                        isCorrect: true
+                    },
+                    {
+                        name: &quot;q3&quot;,
+                        content: &quot;false&quot;,
+                        isCorrect: false
+                    }
+                ]
+            }
+        ],
+        actions: [
+            {
+                type: &quot;end&quot;,
+                content: &quot;End the quiz&quot;
+            }
+        ]
+    },
+    result: {
+        items: [
+            {
+                type: &quot;success ? Well done! : Ohhh, try again&quot;,
+                content:&quot;Feedback&quot;
+            }
+        ]
+    }
+})
+</code></pre>
+<pre><code class="language-typescript">$(&quot;#myQuiz&quot;).jqQuiz({
+    delayOnAutoNext:2000,
+    cutOfMark:80,
+    immediateFeedback:true,
+    pointsForFail:0.2,
+    showCorrection:false,
+    disableEndActionUntil:1,
+    dialog:{
+        resizable:true,
+        modal:false
+    }
+});
 </code></pre>
 
       <!--Quiz-->
-      <section class="jq-quiz">
+      <section class="jq-quiz" id="myQuiz">
         <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
           <header class="jq-quiz__header" data-jq-quiz-header="">
             <!--Quiz title-->
@@ -233,43 +361,13 @@ $(&quot;.myQuiz&quot;).option(&quot;option&quot;,&quot;immediateFeedback&quot;,t
             <dd class="jq-quiz__result-item" data-jq-quiz-result-item="success ? Well done! : Ohhh, try again">
             </dd>
             <!--End quiz body-->
-            <!--Questionnaire body-->
-            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="maxScore">Max score
-            </dt>
-            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="maxScore">
-            </dd>
-            <!--End quiz body-->
-            <!--Questionnaire body-->
-            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="score">Score
-            </dt>
-            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="score">
-            </dd>
-            <!--End quiz body-->
-            <!--Questionnaire body-->
-            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="questionsSuccess">Num of successes
-            </dt>
-            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="questionsSuccess">
-            </dd>
-            <!--End quiz body-->
-            <!--Questionnaire body-->
-            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="questionsFail">Num of fails
-            </dt>
-            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="questionsFail">
-            </dd>
-            <!--End quiz body-->
-            <!--Questionnaire body-->
-            <dt class="jq-quiz__result-item" data-jq-quiz-result-item-label="questionsNotAttempted">Num of questions not attempted
-            </dt>
-            <dd class="jq-quiz__result-item" data-jq-quiz-result-item="questionsNotAttempted">
-            </dd>
-            <!--End quiz body-->
           </div>
           <!--End quiz result-->
         </form>
       </section>
       <!--End quiz-->
       <script>
-        $(".jq-quiz").jqQuiz({
+        $("#myQuiz").jqQuiz({
             delayOnAutoNext:2000,
             cutOfMark:80,
             immediateFeedback:true,

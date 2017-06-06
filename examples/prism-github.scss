@@ -18,7 +18,7 @@ pre[class*="language-"] {
     word-spacing: normal;
     word-break: normal;
     word-wrap: normal;
-    line-height: 1.4;
+    line-height: 16px;
 
     -moz-tab-size: 8;
     -o-tab-size: 8;
@@ -37,6 +37,10 @@ pre[class*="language-"] {
     border: 1px solid #ddd;
     border-radius: 3px;
     background: #fff;
+    &.line-numbers{
+        padding-left:2.8em;
+        line-height: 16px;
+    }
 }
 
 /* Inline code */
@@ -45,6 +49,9 @@ pre[class*="language-"] {
     border-radius: .3em;
     white-space: normal;
     background: #f5f5f5;
+    &.line-numbers{
+        padding-left:2.8em;
+    }
 }
 
 .token.comment,

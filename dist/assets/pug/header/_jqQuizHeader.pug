@@ -4,52 +4,89 @@ include _jqQuizTitle
 include _jqQuizProperties
 include _jqQuizDescription
 include ../actions/_jqQuizActions
-//- @description Mixin para generar el contexto de la cabecera del cuestionario
-//- Acepta todos los parámetros de _mod-baseContent__header.
-//- Adicionalmente acepta:
-//- @param  {Object}        [params]              Configuración
-//- @param  {String}        [params.title]        Genera el título mediante jq-quiz__title
-//- @param  {String}        [params.description]  Genera la descripción mediante jq-quiz__description
-//- @param  {boolean}       [params.properties]   Genera las propiedades mediante jq-quiz__properties
-//- @param  {IActionConfig} [params.actions]      Genera las acciones mediante jq-quiz__action.
-//- @see common/_globalStructure/_mod-baseContent__header
-//- @example
-//- +jq-quiz
-//-     +jq-quiz__header
-//-         +jq-quiz__title
-//-             span Title
-//-         +jq-quiz__description
-//-             span Description
-//-         +jq-quiz__properties
-//-         +jq-quiz__actions
-//-             +jq-quiz__action({
-//-                 type:"start",
-//-                 content:"Start"
-//-             })
-//-     +jq-quiz__body
-//-         +jq-quiz__questions
-//-             +jq-quiz__question
-//-                 +jq-quiz__statement
-//-                     span Some question
-//-                 +jq-quiz__options
-//-                     +jq-quiz__option
-//-         +jq-quiz__feedback
-//-         +jq-quiz__actions
-//- @example
-//- +jq-quiz
-//-     +jq-quiz__header(
-//-         {
-//-             title:"Titulo",
-//-             description:"Descripción del cuestionario",
-//-             properties:true,
-//-             actions:[
-//-                 {
-//-                     type:"start",
-//-                     content:"Start"
-//-                 }
-//-             ]
-//-         }
-//-     )
+//- @pugdoc
+    @function jq-quiz__header
+    @description Mixin to generate the header of the quiz
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=header]         Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {Object | String}   [params.title]              If is provided, jq-quiz__title will be invoked. Could be an object or a string
+    @param  {Object | String}   [params.description]        If is provided, jq-quiz__description will be invoked. Could be an object or a string
+    @param  {Object[] | Object} [params.properties]         If is provided, jq-quiz__properties will be invoked. Could use an array of actions or a full list of parameters from jq-quiz__properties
+    @param  {Object[] | Object} [params.actions]            If is provided, jq-quiz__actions will be invoked. Could use an array of actions or a full list of parameters from jq-quiz__actions
+    @see jq-quiz__title
+    @see jq-quiz__description
+    @see jq-quiz__properties
+    @see jq-quiz__actions
+    @example
+    +jq-quiz__header({
+        id:"someId",
+        cssClass:"someCssClass",
+        attributes:{
+            "data-some-attribute":"someValue"
+        }
+    })
+        +jq-quiz__title
+            span Title
+        +jq-quiz__description
+            span Description
+        +jq-quiz__properties
+            +jq-quiz__property({
+                type:"cutOfMark",
+                content:"Minimum score to pass"
+            })
+        +jq-quiz__actions
+            +jq-quiz__action({
+                type:"start",
+                content:"Start the quiz"
+            })
+    @example
+    +jq-quiz__header(
+        {
+            title:"Title",
+            description:"Description",
+            properties:[
+                {
+                    type:"cutOfMark",
+                    content:"Minimum score to pass"
+                }
+            ],
+            actions:[
+                {
+                    type:"start",
+                    content:"Start the quiz"
+                }
+            ]
+        }
+    )
+    @example
+    +jq-quiz__header(
+        {
+            title:"Title",
+            description:"Description",
+            properties:{
+                id:"someIdForProperties",
+                cssClass:"someCssClassForProperties",
+                properties:[
+                    {
+                        type:"cutOfMark",
+                        content:"Minimum score to pass"
+                    }
+                ]
+            },
+            actions:{
+                id:"someIdForActions",
+                cssClass:"someCssClassForActions",
+                actions:[
+                    {
+                        type:"start",
+                        content:"Start the quiz"
+                    }
+                ]
+            }
+        }
+    )
 mixin jq-quiz__header(params)
     -
         params = params || {};
@@ -83,9 +120,21 @@ mixin jq-quiz__header(params)
 
             +jq-quiz__description(descriptionParams)
         if(params.properties != undefined)
-            +jq-quiz__properties(params.properties)
+            -
+                var propertiesParams = {};
+                if(Array.isArray(params.properties)){
+                    propertiesParams.properties = params.properties;
+                }else{
+                    propertiesParams = params.properties;
+                }
+            +jq-quiz__properties(propertiesParams)
         if(params.actions != undefined)
-            +jq-quiz__actions({
-                actions:params.actions
-            })
+            -
+                var actionsParams = {};
+                if(Array.isArray(params.actions)){
+                    actionsParams.actions = params.actions;
+                }else{
+                    actionParams = params.actions;
+                }
+            +jq-quiz__actions(actionsParams)
         block

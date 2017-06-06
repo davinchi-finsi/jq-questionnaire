@@ -135,7 +135,7 @@ mixin jq-quiz__body(params)
         if(params.questions)
             -
                 var questionsParams = {};
-                if(Array.isArray(questionsParams)){
+                if(Array.isArray(params.questions)){
                     questionsParams.questions = params.questions;
                 }else{
                     questionsParams = params.questions;

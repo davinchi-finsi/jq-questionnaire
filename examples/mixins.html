@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Simple use</title>
+    <title>Mixins</title>
     <script src="../node_modules/jquery/dist/jquery.js"></script>
     <script src="../node_modules/jquery-ui-dist/jquery-ui.js"></script>
     <script src="../node_modules/prismjs/prism.js"></script>
@@ -15,11 +15,11 @@
   </head>
   <body>
     <div class="markdown-wrapper"><h2>jqQuiz</h2>
-<h3>Pug (Jade)</h3>
-<p>Pug is a template engine for Node.js and browsers that makes the markup creation easy.<br>
-For more info please go <a href="https://github.com/pugjs/pug">here</a></p>
+<h3>What is Pug (Jade)?</h3>
+<p>Pug is a template engine for Node.js and browsers that makes the markup creation more easy and allows to process the HTML. Is like SASS but for HTML.\</p>
 <h3>What is a 'mixin'?</h3>
-<p>In Pug, a mixin is like a function that could recieve params and returns a result.<br>
+<p>In Pug, a mixin is kind of a function that could recieve parameters and return a processed result.<br>
+The mixins allows to unify and process HTML that appears in a lot of places with small changes.<br>
 For example:</p>
 <pre><code class="language-jade">//- Declare the mixin
 mixin list(items)
@@ -30,6 +30,9 @@ mixin list(items)
             li!= item
 //- Invoke the mixin with parameters (note the + before the name of the mixin)
 +list([&quot;Hello&quot;, &quot;my&quot;, &quot;friend&quot;])
+// Some code ...
+//- I need a list again
++list([&quot;Other&quot;, &quot;list&quot;])
 </code></pre>
 <p>results in:</p>
 <pre><code class="language-html">&lt;ul&gt;
@@ -37,23 +40,93 @@ mixin list(items)
     &lt;li&gt;my&lt;/li&gt;
     &lt;li&gt;friend&lt;/li&gt;
 &lt;/ul&gt;
+&lt;!-- Some code ... --&gt;
+&lt;ul&gt;
+    &lt;li&gt;Other&lt;/li&gt;
+    &lt;li&gt;list&lt;/li&gt;
+&lt;/ul&gt;
 </code></pre>
-<p>Cool, right?, with mixins is possible to reuse a lot of code.<br>
+<p>Cool, right?, with mixins is possible to reduce the amount of code and increases the maintainability and the extensibility of the HTML.<br>
+The benefict over JS rendering(dynamic) is that Pug compiles(the most of the cases) out of the browser (with Node.js) <strong>without penalize the user browser performance</strong>.<br>
+For more information about Pug please go to <a href="https://github.com/pugjs/pug">the oficial page</a><br>
 For more info about the mixins please go <a href="https://codepen.io/pixelass/post/let-us-jade-4-mixins-on-steroids">here</a></p>
 <h3>The Mixins way</h3>
-<p>The mixins gives more control over the HTML than the JSON, for example is possible to add more markup to use a grid system like flexbox grid or bootstrap grid.<br>
-All the mixins has common and specific params.<br>
-The common params are:</p>
-<pre><code class="language-jade">type            : The HTML tag to render. Depending of the mixin the default type is different, for example, for the jq-quiz__header the default tag is &quot;header&quot;.
+<p>The mixins gives more control over the markup than the JSON, for example is possible to add more markup above and below to use a grid system like flexbox grid or bootstrap grid.\</p>
+<pre><code class="language-jade">+jq-quiz({
+    id:&quot;myQuiz&quot;
+})
+    div.my-awesome-div
+        +jq-quiz__header()
+            div.row
+                div.col-xs-12.col-sm-6
+                    +jq-quiz__title({
+                        content:&quot;My quiz title&quot;
+                    })
+                div.col-xs-12.col-sm-6
+                    +jq-quiz__description({
+                        content:&quot;Description for my quiz&quot;
+                    })
+            div.row
+                div.col-xs-12
+                    +jq-quiz__actions()
+                        div.col-xs-12.col-sm-6
+                            +jq-quiz__action({
+                                type:&quot;start&quot;,
+                                 content:&quot;Start the quiz&quot;
+                            })
+        +jq-quiz__body()
+            +jq-quiz__questions()
+                +jq-quiz__question({
+                    statement:&quot;Some question&quot;
+                })
+                    +jq-quiz__options()
+                        div.row
+                            div.col-xs-12.col-sm-6
+                                +jq-quiz__option({
+                                    name:&quot;q1&quot;,
+                                    isCorrect:false,
+                                    content:&quot;Incorrect&quot;
+                                })
+                            div.col-xs-12.col-sm-6
+                                +jq-quiz__option({
+                                    name:&quot;q1&quot;,
+                                    isCorrect:true,
+                                    content:&quot;Correct&quot;
+                                })
+            +jq-quiz__actions()
+                div.row
+                    div.col-xs-12.col-sm-3
+                        +jq-quiz__action({
+                            type:&quot;prev&quot;,
+                            content:&quot;Previous question&quot;
+                        })
+                    div.col-xs-12.col-sm-3
+                        +jq-quiz__action({
+                            type:&quot;next&quot;,
+                            content:&quot;Next question&quot;
+                        })
+                    div.col-xs-12.col-sm-3.col-sm-offset-3
+                        +jq-quiz__action({
+                            type:&quot;end&quot;,
+                            content:&quot;End the quiz&quot;
+                        })
+        +jq-quiz__result()
+            +jq-quiz__result-item({
+                type: &quot;success ? Perfect! : Ohhh, try again&quot;
+            })
+</code></pre>
+<p>All the mixins have common and specific parameters.<br>
+The common parameters are:</p>
+<pre><code class="language-jade">tag             : The HTML tag to render. Depending of the mixin the default type is different, for example, for the jq-quiz__header the default tag is &quot;header&quot;.
 cssClass        : Css classes to add
-attributes      : HTML attributes to add, all the attributes are allowed
-id              : An id
+attributes      : HTML attributes to add, all the attributes are allowed. Is a JSON object where the key will be the attribute and the value the attribute value
+id              : An id for the element
 </code></pre>
 <p>An example:</p>
 <pre><code class="language-jade">+jq-quiz({
     id:&quot;myQuiz&quot;,
     cssClass:&quot;my-quiz-class another-quiz-class&quot;,
-    type:&quot;section&quot;,
+    tag:&quot;div&quot;,
     attributes:{
         &quot;data-id&quot;:&quot;someId&quot;,
         &quot;data-some-attribute&quot;:&quot;someAttributeValue&quot;
@@ -61,20 +134,44 @@ id              : An id
 })
 </code></pre>
 <p>results in:</p>
-<pre><code class="language-html">&lt;section class=&quot;jq-quiz my-quiz-class another-quiz-class&quot; id=&quot;myQuiz&quot; data-id=&quot;someId&quot; data-some-attribute=&quot;someAttributeValue&quot;&gt;
-
-&lt;/section&gt;
+<pre><code class="language-html">&lt;div class=&quot;jq-quiz my-quiz-class another-quiz-class&quot;
+     id=&quot;myQuiz&quot;
+     data-id=&quot;someId&quot;
+     data-some-attribute=&quot;someAttributeValue&quot;&gt;
+    &lt;form class=&quot;jq-quiz__form&quot;
+          data-jq-quiz-wrapper&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
 </code></pre>
 <h3>Available mixins</h3>
-<p>Each section in the structure of jqQuiz has a mixin, please see <a href="./structure.html">structure &amp; roles</a><br>
-The available mixins are:
-jq-quiz             : The scope mixin. Creates the structure for the quiz
-jq-quiz__header     : The header of the quiz. Visible when the quiz is not runing
-jq-quiz__title      : The title for the quiz</p>
-<pre><code></code></pre>
-<h4>Full mixins way</h4>
-<pre><code class="language-jade">include jqQuiz/_jqQuiz
-+jq-quiz
+<p>We use pug-jsdoc package to create the doc for the mixins, the documentation has the mixins, a description, the parameters and related mixins and examples of use.<br>
+You could see all the docs <a href="../docs/pug">here</a><br>
+The available mixins are:</p>
+<ul>
+<li>jq-quiz</li>
+<li>jq-quiz__header</li>
+<li>jq-quiz__title</li>
+<li>jq-quiz__description</li>
+<li>jq-quiz__properties</li>
+<li>jq-quiz__property</li>
+<li>jq-quiz__actions</li>
+<li>jq-quiz__action</li>
+<li>jq-quiz__body</li>
+<li>jq-quiz__feedback</li>
+<li>jq-quiz__questions</li>
+<li>jq-quiz__question</li>
+<li>jq-quiz__statement</li>
+<li>jq-quiz__options</li>
+<li>jq-quiz__option</li>
+<li>jq-quiz__result</li>
+<li>jq-quiz__result-item</li>
+</ul>
+<h4>Example</h4>
+<pre><code class="language-jade">//- NPM
+include node_modules/jqQuiz/_jqQuiz
++jq-quiz({
+    id:&quot;myQuiz&quot;
+})
     +jq-quiz__header
         +jq-quiz__title({
             content:&quot;My quiz&quot;
@@ -82,55 +179,99 @@ jq-quiz__title      : The title for the quiz</p>
         +jq-quiz__description({
             content:&quot;Description for my quiz&quot;
         })
+        +jq-quiz__properties
+            +jq-quiz__property({
+                type:&quot;cutOfMark&quot;,
+                content:&quot;Minimum score to pass&quot;
+            })
         +jq-quiz__actions
             +jq-quiz__action({
                 type:&quot;start&quot;,
-                content:&quot;Start quiz&quot;
+                content:&quot;Start the quiz&quot;
             })
     +jq-quiz__body
         +jq-quiz__questions
+            //- Question
             +jq-quiz__question
                 +jq-quiz__statement
                     span Some question
                 +jq-quiz__options
                     +jq-quiz__option({
-                        name:&quot;question1&quot;,
+                        name:&quot;q1&quot;,
                         content:&quot;Incorrect&quot;,
                         isCorrect:false
                     })
                     +jq-quiz__option({
-                        name:&quot;question1&quot;,
+                        name:&quot;q1&quot;,
                         content:&quot;Correct&quot;,
                         isCorrect:true
                     })
-        +jq-quiz__feedback({
-            type:&quot;success&quot;,
-            content:&quot;Success feedback
-        })
+                +jq-quiz__feedback({
+                    type:&quot;ok&quot;,
+                    content:&quot;Success feedback&quot;
+                })
+            //- End question
+            //- Question
+            +jq-quiz__question
+                +jq-quiz__statement
+                    span Some question
+                +jq-quiz__options
+                    +jq-quiz__option({
+                        name:&quot;q2&quot;,
+                        content:&quot;Incorrect&quot;,
+                        isCorrect:false
+                    })
+                    +jq-quiz__option({
+                        name:&quot;q2&quot;,
+                        content:&quot;Correct&quot;,
+                        isCorrect:true
+                    })
+                +jq-quiz__feedback({
+                    type:&quot;ok&quot;,
+                    content:&quot;Success feedback&quot;
+                })
+            //- End question
         +jq-quiz__actions
+            +jq-quiz__action({
+                type:&quot;prev&quot;,
+                content:&quot;Previous question&quot;
+            })
+            +jq-quiz__action({
+                type:&quot;next&quot;,
+                content:&quot;Next question&quot;
+            })
             +jq-quiz__action({
                 type:&quot;end&quot;,
                 content:&quot;End quiz&quot;
             })
-//- The container
-
+    +jq-quiz__result
+        +jq-quiz__result-item({
+            type: &quot;success ? Well done! : Ohhh, try again&quot;,
+            content:&quot;Feedback&quot;
+        })
+        +jq-quiz__result-item({
+            type:&quot;maxScore&quot;,
+            content:&quot;Max score&quot;
+        })
+        +jq-quiz__result-item({
+            type:&quot;score&quot;,
+            content:&quot;Score&quot;
+        })
+        +jq-quiz__result-item({
+            type: &quot;questionsSuccess&quot;,
+            content: &quot;Num of successes&quot;
+        })
+        +jq-quiz__result-item({
+            type:&quot;questionsFail&quot;,
+            content:&quot;Num of fails&quot;
+        })
+        +jq-quiz__result-item({
+            type:&quot;questionsNotAttempted&quot;,
+            content:&quot;Num of questions not attempted&quot;
+        })
 </code></pre>
 
     </div>
-    <!--Quiz-->
-    <section class="jq-quiz my-quiz-class" id="myQuiz" data-id="someId" data-some-attribute="someAttributeValue">
-      <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
-      </form>
-    </section>
-    <!--End quiz-->
-    <script>
-      $(".jq-quiz")
-          .jqQuiz(
-              {
-                  immediateFeedback: true,
-                  disableOptionAfterSelect: false
-              }
-          );
-    </script>
+    <script>$("#myQuiz").jqQuiz()</script>
   </body>
 </html>

@@ -34,13 +34,19 @@
 <li>It's free! Beautiful word, right?.</li>
 <li>Created with jquery ui widget factory. For more info see <a href="https://api.jqueryui.com/jquery.widget/">widget factory</a></li>
 </ul>
+<h3>Installation</h3>
+<p>For not you could install the package from NPM by<br>
+<code>npm i -s jq-quiz</code><br>
+We have plans to support bower soon.<br>
+You also could download the las trelease from <a href="https://github.com/davinchi-finsi/jq-quiz/releases">github</a></p>
 <h3>Simple usage</h3>
-<p>Include the jqQuiz mixin and call it with some questions. Voila!<br>
-The JSON way uses the mixins under the hood, every parameter match with a mixin, for example, the header uses the mixin jq-quiz__header, so, accepts the same parameters as the mixin.<br>
-If you don't want to use Pug you could use HTML like always. Please go <a href="./onlyHtml.html">here</a></p>
+<p>Include the jqQuiz mixin and call it with some questions and init the plugin in the same way that any other jquery plugin. Voila!<br>
+If you don't want to use Pug you could use HTML like always. Please go to <a href="./onlyHtml.html">here</a></p>
+<h4>Pug</h4>
 <pre><code class="language-jade">//-Include the jqQuiz mixin from node_modules/jqQuiz/dist
 include node_modules/jqQuiz/dist/_jqQuiz
 +jq-quiz({
+    id:&quot;myQuiz&quot;,
     header:{
         title:&quot;My quiz&quot;, //title for the quiz
         description:&quot;Description for my quiz&quot;, //a description for the student
@@ -52,9 +58,10 @@ include node_modules/jqQuiz/dist/_jqQuiz
         ]
     },
     body:{
+        //the questions
         questions:[
             {
-                content:&quot;Some quesiton&quot;,
+                content:&quot;Some question&quot;,
                 options:[
                     {
                         name:&quot;q1&quot;,//all the options of the same question must has the same name
@@ -69,14 +76,16 @@ include node_modules/jqQuiz/dist/_jqQuiz
                 ]
             }
         ],
-        actions:[//available options during the quiz.
+        //available actions during the quiz.
+        actions:[
             {
                 type:&quot;end&quot;, //the type of the action, for more info please go to the actions section
                 content:&quot;End the quiz&quot; // The content for the button
             }
         ]
     },
-    result:{//jquery ui dialog result
+    //jquery ui dialog result
+    result:{
         items: [
             {
                 type: &quot;success ? Perfect! : Ohhh, try again&quot;
@@ -86,102 +95,159 @@ include node_modules/jqQuiz/dist/_jqQuiz
 })
 
 </code></pre>
+<h4>HTML</h4>
+<p>If you use HTML you must provide the <code>data-jq-quiz-*</code> attributes.</p>
+<pre><code class="language-html">&lt;section class=&quot;jq-quiz&quot; id=&quot;myQuiz&quot;&gt;
+    &lt;form class=&quot;jq-quiz__form&quot; data-jq-quiz-wrapper=&quot;data-jq-quiz-wrapper&quot;&gt;
+        &lt;header class=&quot;jq-quiz__header&quot; data-jq-quiz-header&gt;
+            &lt;!--Quiz title--&gt;
+            &lt;h1 class=&quot;jq-quiz__title&quot; data-jq-quiz-title&gt;My quiz title&lt;/h1&gt;
+            &lt;!--End quiz title--&gt;
+            &lt;!--Questionnaire description--&gt;
+            &lt;p class=&quot;jq-quiz__description&quot; data-jq-quiz-description&gt;Description for my quiz&lt;/p&gt;
+            &lt;!--End quiz description--&gt;
+            &lt;!--Quiz actions--&gt;
+            &lt;div class=&quot;jq-quiz__actions&quot; data-jq-quiz-actions&gt;
+                &lt;!--Quiz actions--&gt;
+                &lt;button class=&quot;jq-quiz__action&quot; data-jq-quiz-start&gt;Start the quiz&lt;/button&gt;
+                &lt;!--End quiz actions--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz actions--&gt;
+        &lt;/header&gt;
+        &lt;!--Quiz body--&gt;
+        &lt;div class=&quot;jq-quiz__body&quot; data-jq-quiz-body&gt;
+            &lt;!--Quiz questions--&gt;
+            &lt;div class=&quot;jq-quiz__questions&quot; data-jq-quiz-questions&gt;
+                &lt;!--Quiz question--&gt;
+                &lt;fieldset class=&quot;jq-quiz__question&quot; data-jq-quiz-question&gt;
+                    &lt;!--Quiz statement--&gt;
+                    &lt;legend class=&quot;jq-quiz__statement&quot; data-jq-quiz-statement&gt;Some question&lt;/legend&gt;
+                    &lt;!--End quiz statement--&gt;
+                    &lt;!--Quiz options--&gt;
+                    &lt;div class=&quot;jq-quiz__options&quot; data-jq-quiz-options&gt;
+                        &lt;!--Quiz option--&gt;
+                        &lt;div class=&quot;jq-quiz__option&quot; data-jq-quiz-option&gt;
+                            &lt;label class=&quot;jq-quiz__option-label&quot;&gt;
+                                &lt;span&gt;Incorrect&lt;/span&gt;
+                                &lt;input class=&quot;jq-quiz__option-field&quot; type=&quot;radio&quot; name=&quot;q1&quot;&gt;
+                            &lt;/label&gt;
+                        &lt;/div&gt;
+                        &lt;!--End quiz option--&gt;
+                        &lt;!--Quiz option--&gt;
+                        &lt;div class=&quot;jq-quiz__option&quot; data-jq-quiz-option data-is-correct=&quot;true&quot;&gt;
+                            &lt;label class=&quot;jq-quiz__option-label&quot;&gt;
+                                &lt;span&gt;Correct&lt;/span&gt;
+                                &lt;input class=&quot;jq-quiz__option-field&quot; type=&quot;radio&quot; name=&quot;q1&quot;&gt;
+                            &lt;/label&gt;
+                        &lt;/div&gt;
+                        &lt;!--End quiz option--&gt;
+                    &lt;/div&gt;
+                    &lt;!--End quiz options--&gt;
+                &lt;/fieldset&gt;
+                &lt;!--End quiz question--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz questions--&gt;
+            &lt;!--Quiz actions--&gt;
+            &lt;div class=&quot;jq-quiz__actions&quot; data-jq-quiz-actions&gt;
+                &lt;!--Quiz actions--&gt;
+                &lt;button class=&quot;jq-quiz__action&quot; data-jq-quiz-end&gt;End the quiz&lt;/button&gt;
+                &lt;!--End quiz actions--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz actions--&gt;
+        &lt;/div&gt;
+        &lt;!--End quiz body--&gt;
+        &lt;!--Questionnaire result--&gt;
+        &lt;div class=&quot;jq-quiz__result&quot; data-jq-quiz-result&gt;
+            &lt;!--Questionnaire body--&gt;
+            &lt;div class=&quot;jq-quiz__result-item&quot; data-jq-quiz-result-item=&quot;success ? Perfect! : Ohhh, try again&quot;&gt;&lt;/div&gt;
+            &lt;!--End quiz body--&gt;
+        &lt;/div&gt;
+        &lt;!--End quiz result--&gt;
+    &lt;/form&gt;
+&lt;/section&gt;
+</code></pre>
+<p>Then call the plugin like any other jquery plugin</p>
+<pre><code class="language-typescript">$(&quot;#myQuiz&quot;).jqQuiz();
+</code></pre>
+<p>The result is:</p>
 
-    </div>
-    <!--Quiz-->
-    <section class="jq-quiz">
-      <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
-        <header class="jq-quiz__header" data-jq-quiz-header="">
-          <!--Quiz title-->
-          <h1 class="jq-quiz__title" data-jq-quiz-title="">My quiz title
-          </h1>
-          <!--End quiz title-->
-          <!--Questionnaire description-->
-          <div class="jq-quiz__description" data-jq-quiz-description="">Description for my quiz
-          </div>
-          <!--End quiz description-->
-          <undefined class="jq-quiz__properties" data-jq-quiz-properties="">
-          </undefined>
-          <!--End quiz properties-->
-          <!--Quiz actions-->
-          <div class="jq-quiz__actions" data-jq-quiz-actions="">
+      <!--Quiz-->
+      <section class="jq-quiz" id="myQuiz">
+        <form class="jq-quiz__form" data-jq-quiz-wrapper="data-jq-quiz-wrapper">
+          <header class="jq-quiz__header" data-jq-quiz-header="">
+            <!--Quiz title-->
+            <h1 class="jq-quiz__title" data-jq-quiz-title="">My quiz title
+            </h1>
+            <!--End quiz title-->
+            <!--Questionnaire description-->
+            <p class="jq-quiz__description" data-jq-quiz-description="">Description for my quiz
+            </p>
+            <!--End quiz description-->
             <!--Quiz actions-->
-            <button class="jq-quiz__action" data-jq-quiz-start="">Start the quiz
-            </button>
+            <div class="jq-quiz__actions" data-jq-quiz-actions="">
+              <!--Quiz actions-->
+              <button class="jq-quiz__action" data-jq-quiz-start="">Start the quiz
+              </button>
+              <!--End quiz actions-->
+            </div>
             <!--End quiz actions-->
-          </div>
-          <!--End quiz actions-->
-        </header>
-        <!--Quiz body-->
-        <div class="jq-quiz__body" data-jq-quiz-body="">
-          <!--Quiz questions-->
-          <div class="jq-quiz__questions" data-jq-quiz-questions="">
-            <!--Quiz question-->
-            <fieldset class="jq-quiz__question" data-jq-quiz-question="">
-              <!--Quiz statement-->
-              <legend class="jq-quiz__statement" data-jq-quiz-statement="">Some quesiton
-              </legend>
-              <!--End quiz statement-->
-              <!--Quiz options-->
-              <div class="jq-quiz__options" data-jq-quiz-options="">
-                <!--Quiz option-->
-                <div class="jq-quiz__option" data-jq-quiz-option="">
-                  <label class="jq-quiz__option-label"><span>Incorrect</span>
-                    <input class="jq-quiz__option-field" type="radio" name="q1"/>
-                  </label>
+          </header>
+          <!--Quiz body-->
+          <div class="jq-quiz__body" data-jq-quiz-body="">
+            <!--Quiz questions-->
+            <div class="jq-quiz__questions" data-jq-quiz-questions="">
+              <!--Quiz question-->
+              <fieldset class="jq-quiz__question" data-jq-quiz-question="">
+                <!--Quiz statement-->
+                <legend class="jq-quiz__statement" data-jq-quiz-statement="">Some question
+                </legend>
+                <!--End quiz statement-->
+                <!--Quiz options-->
+                <div class="jq-quiz__options" data-jq-quiz-options="">
+                  <!--Quiz option-->
+                  <div class="jq-quiz__option" data-jq-quiz-option="">
+                    <label class="jq-quiz__option-label"><span>Incorrect</span>
+                      <input class="jq-quiz__option-field" type="radio" name="q1"/>
+                    </label>
+                  </div>
+                  <!--End quiz option-->
+                  <!--Quiz option-->
+                  <div class="jq-quiz__option" data-jq-quiz-option="" data-is-correct="true">
+                    <label class="jq-quiz__option-label"><span>Correct</span>
+                      <input class="jq-quiz__option-field" type="radio" name="q1"/>
+                    </label>
+                  </div>
+                  <!--End quiz option-->
                 </div>
-                <!--End quiz option-->
-                <!--Quiz option-->
-                <div class="jq-quiz__option" data-jq-quiz-option="" data-is-correct="true">
-                  <label class="jq-quiz__option-label"><span>Correct</span>
-                    <input class="jq-quiz__option-field" type="radio" name="q1"/>
-                  </label>
-                </div>
-                <!--End quiz option-->
-              </div>
-              <!--End quiz options-->
-            </fieldset>
-            <!--End quiz question-->
-          </div>
-          <!--End quiz questions-->
-          <!--Quiz actions-->
-          <div class="jq-quiz__actions" data-jq-quiz-actions="">
+                <!--End quiz options-->
+              </fieldset>
+              <!--End quiz question-->
+            </div>
+            <!--End quiz questions-->
             <!--Quiz actions-->
-            <button class="jq-quiz__action" data-jq-quiz-end="">End the quiz
-            </button>
+            <div class="jq-quiz__actions" data-jq-quiz-actions="">
+              <!--Quiz actions-->
+              <button class="jq-quiz__action" data-jq-quiz-end="">End the quiz
+              </button>
+              <!--End quiz actions-->
+            </div>
             <!--End quiz actions-->
-          </div>
-          <!--End quiz actions-->
-        </div>
-        <!--End quiz body-->
-        <!--Questionnaire result-->
-        <div class="jq-quiz__result" data-jq-quiz-result="">
-          <!--Questionnaire body-->
-          <div class="jq-quiz__result-item" data-jq-quiz-result-item="ok ? Perfect! : Ohhh, try again">
           </div>
           <!--End quiz body-->
-        </div>
-        <!--End quiz result-->
-      </form>
-    </section>
-    <!--End quiz-->
-    <div class="markdown-wrapper"><h3>More things</h3>
-<ul>
-<li><a href="./structure.html">structure</a></li>
-<li><a href="./options.html">options</a></li>
-<li><a href="./mixins.html">mixins way</a></li>
-<li><a href="./json.html">json way</a></li>
-</ul>
+          <!--Questionnaire result-->
+          <div class="jq-quiz__result" data-jq-quiz-result="">
+            <!--Questionnaire body-->
+            <div class="jq-quiz__result-item" data-jq-quiz-result-item="success ? Perfect! : Ohhh, try again">
+            </div>
+            <!--End quiz body-->
+          </div>
+          <!--End quiz result-->
+        </form>
+      </section>
+      <!--End quiz--><h3>Next:</h3>
+<p><a href="./structure.html">structure &amp; roles</a></p>
 
+      <script>$("#myQuiz").jqQuiz();</script>
     </div>
-    <script>
-      $(".jq-quiz")
-          .jqQuiz(
-              {
-                  immediateFeedback: true,
-                  disableOptionAfterSelect: false
-              }
-          );
-    </script>
   </body>
 </html>

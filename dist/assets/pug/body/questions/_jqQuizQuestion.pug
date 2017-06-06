@@ -4,6 +4,43 @@ include ./_jqQuizStatement
 include _jqQuizOption
 include _jqQuizOptions
 include ../_jqQuizFeedback
+//- @pugdoc
+    @function jq-quiz__question
+    @description Mixin to generate a question
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=fieldset]       Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {String}            [params.content]            DEPRECATED, use params.statement instead. If is provided, invokes jq-quiz__statement.
+    @param  {String | Object}   [params.statement]          If is provided, jq-quiz__statement will be invoked. Could be a string or an object.
+    @param  {Object | Object[]} [params.options]            If is provided, jq-quiz__options will be invoked. Cold be an object or an array of objects.
+    @param  {Object[]}          [params.feedback]           If is provided, jq-quiz__feedback will be invoked for each item.
+    @see jq-quiz__question
+    @see jq-quiz__statement
+    @see jq-quiz__options
+    @see jq-quiz__option
+    @see jq-quiz__feedback
+    @example
+    +jq-quiz__question({
+        id: "someId",
+        cssClass: "someCssClass",
+        attributes: {
+            "data-some-attribute": "someValue"
+        }
+    })
+        +jq-quiz__statement
+            span Some question
+        +jq-quiz__options
+            +jq-quiz__option({
+                name:"q1",
+                content:"Some option 1",
+                isCorrect:false
+            })
+            +jq-quiz__option({
+                name:"q1",
+                content:"Some option 2",
+                isCorrect:true
+            })
 mixin jq-quiz__question(params)
     //Quiz question
     - params = params || {};
@@ -17,15 +54,26 @@ mixin jq-quiz__question(params)
         },
         externalParams: params
     })&attributes(attributes)
-        if(params.content)
-            +jq-quiz__statement({
-                content: params.content
-            })
+        if(params.content || params.statement)
+            -
+                var statementParams = {};
+                if((typeof params.statement).toLowerCase() == "string"){
+                    statementParams.content = params.statement;
+                }else if(params.content){
+                    statementParams.content = params.content;
+                }else if(params.statement){
+                    statementParams = params.statement;
+                }
+            +jq-quiz__statement(statementParams)
         if(params.options)
-            +jq-quiz__options
-                each option in params.options
-                    - option.multichoice = params.multichoice;
-                    +jq-quiz__option(option)
+            -
+                var optionsParams = {};
+                if(Array.isArray(params.options)){
+                    optionsParams.options = params.options;
+                }else{
+                    optionsParams = params.options;
+                }
+            +jq-quiz__options(optionsParams)
         if(params.feedback)
             each feedback in params.feedback
                 +jq-quiz__feedback(feedback)

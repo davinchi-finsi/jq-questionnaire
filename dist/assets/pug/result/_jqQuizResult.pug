@@ -1,4 +1,14 @@
 //- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+//- @pugdoc
+    @function jq-quiz__result
+    @description Mixin to create the result dialog
+    @param  {Object}        [params]                    Parameters
+    @param  {String}        [params.tag=div]            Tag to render
+    @param  {String}        [params.cssClass]           Css classes to add to the element.
+    @param  {Object}        [params.attributes]         Key-value attributes to add to the element
+    @param  {Object}        [params.items]              If is provided, invokes jq-quiz__result-item for each item
+    @see jq-quiz__result-item
 mixin jq-quiz__result(params)
     //Questionnaire result
     - params = params || {};
