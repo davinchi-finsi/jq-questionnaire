@@ -1,4 +1,20 @@
 //- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include _jqQuizProperty
+//- @pugdoc
+    @function jq-quiz__property
+    @description Mixin to generate a property of the quiz
+    @description Mixin to create the result dialog
+    @param  {Object}        [params]                    Parameters
+    @param  {String}        [params.tag=dt]             Tag to render
+    @param  {String}        [params.cssClass]           Css classes to add to the element.
+    @param  {Object}        [params.attributes]         Key-value attributes to add to the element
+    @param  {String}        [params.content]            If is provided, a dt element with the content and dd with the type will be generated. Otherwise, a div element will be generated
+    @param  {String}        [params.type]               The data to render. Only available if params.content is provided.
+    @example
+    +jq-quiz__property({
+        type:"cutOfMark",
+        content:"Minimum score to pass"
+    })
 mixin jq-quiz__property(params)
     - params = params || {};
     - var attrs = {};

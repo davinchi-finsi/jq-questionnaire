@@ -1,4 +1,18 @@
 //- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+//- @pugdoc
+    @function jq-quiz__result-item
+    @description Mixin to create the result dialog
+    @param  {Object}        [params]                    Parameters
+    @param  {String}        [params.tag=dt]             Tag to render
+    @param  {String}        [params.cssClass]           Css classes to add to the element.
+    @param  {Object}        [params.attributes]         Key-value attributes to add to the element
+    @param  {String}        [params.content]            If is provided, a dt element with the content and dd with the type will be generated. Otherwise, a div element will be generated
+    @param  {String}        [params.type]               The data to render. Only available if params.content is provided.
+    @example
+    +jq-quiz__result-item({
+        type:"score",
+        content:"Score"
+    })
 mixin jq-quiz__result-item(params)
     //Questionnaire body
     - params = params || {};
@@ -10,7 +24,7 @@ mixin jq-quiz__result-item(params)
                 attributes: {
                     "data-jq-quiz-result-item-label": params.type
                 },
-                ignoreContent:false,
+                ignoreContent:false
             },
             externalParams: params
         })&attributes(attributes)
