@@ -22,7 +22,7 @@
 <p>To simplify the creation of the markup, we provided some pug mixins, you only have to call the mixin of the element you want to place!. For more info please see <a href="./mixins.html">mixins</a>.\</p>
 <h3>Structure &amp; Roles</h3>
 <p>Most of the markup is totally free but, of course, a little structure must be provided.<br>
-The available roles for jqQuiz are:</p>
+The available roles (attributes to add to the HTML) for jqQuiz are:</p>
 <pre><code>data-jq-quiz-wrapper                        : Wrapper for the quiz. Is the main container for all the quiz markup
    |- data-jq-quiz-header                   : Header for the quiz. Visible when the quiz IS NOT running. Contains the info about the questionnaire
    |    |- data-jq-quiz-title               : OPTIONAL. A title for the quiz. Only one is allowed
@@ -36,7 +36,7 @@ The available roles for jqQuiz are:</p>
    |    |   |- data-jq-quiz-question        : Some question of the quiz. Multiple items are allowed
    |    |       |- data-jq-quiz-statement   : The text for the question. Only one is allowed
    |    |       |- data-jq-quiz-options     : The container for the options of a question. Only one is allowed
-   |    |       |   |- data-jq-quiz-option  : Some option for a question. Multiple items are allowed
+   |    |       |   |- data-jq-quiz-option  : Some option for a question. Multiple items are allowed. Each question must have the attribute data-is-correct with true or false
    |    |       |- data-jq-quiz-feedback    : OPTIONAL. Some feedback for the. Multiple items are allowed.
    |    |- data-jq-quiz-actions             : OPTIONAL. Available actions when the quiz is running. Multiple items are allowed.
    |        |- data-jq-quiz-prev            : OPTIONAL. Go to the prev question. Only one is allowed (per actions group)
@@ -45,7 +45,81 @@ The available roles for jqQuiz are:</p>
    |- data-jq-quiz-result                   : OPTIONAL. A result to show when the quiz is finished. You could see the full list of available items [here](). Only one is allowed
         |- data-jq-quiz-result-item         : Some item of the result. Multiple items are allowed
 </code></pre>
-<p><strong>Please note</strong> that the order of elements in their container is not mandatory, you could use the order you want.</p>
+<p><strong>Please note</strong> that the order of elements in their container is not mandatory, you could use the order you want.
+A valid structure could be:</p>
+<pre><code class="language-html">&lt;section class=&quot;jq-quiz&quot;&gt;
+    &lt;form class=&quot;jq-quiz__form&quot; data-jq-quiz-wrapper&gt;
+        &lt;header class=&quot;jq-quiz__header&quot; data-jq-quiz-header&gt;
+            &lt;!--Quiz title--&gt;
+            &lt;h1 class=&quot;jq-quiz__title&quot; data-jq-quiz-title&gt;Quiz options example&lt;/h1&gt;
+            &lt;!--End quiz title--&gt;
+            &lt;dl class=&quot;jq-quiz__properties&quot; data-jq-quiz-properties&gt;
+                &lt;dt class=&quot;jq-quiz__property&quot;&gt;Cut of mark&lt;/dt&gt;
+                &lt;dd class=&quot;jq-quiz__property&quot; data-jq-quiz-property&gt;&lt;/dd&gt;
+            &lt;/dl&gt;
+            &lt;!--End quiz properties--&gt;
+            &lt;!--Quiz actions--&gt;
+            &lt;div class=&quot;jq-quiz__actions&quot; data-jq-quiz-actions&gt;
+                &lt;!--Quiz actions--&gt;
+                &lt;button class=&quot;jq-quiz__action&quot; data-jq-quiz-start&gt;Start the quiz&lt;/button&gt;
+                &lt;!--End quiz actions--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz actions--&gt;
+        &lt;/header&gt;
+        &lt;!--Quiz body--&gt;
+        &lt;div class=&quot;jq-quiz__body&quot; data-jq-quiz-body&gt;
+            &lt;!--Quiz questions--&gt;
+            &lt;div class=&quot;jq-quiz__questions&quot; data-jq-quiz-questions&gt;
+                &lt;!--Quiz question--&gt;
+                &lt;fieldset class=&quot;jq-quiz__question&quot; data-jq-quiz-question&gt;
+                    &lt;!--Quiz statement--&gt;
+                    &lt;legend class=&quot;jq-quiz__statement&quot; data-jq-quiz-statement&gt;Some question&lt;/legend&gt;
+                    &lt;!--End quiz statement--&gt;
+                    &lt;!--Quiz options--&gt;
+                    &lt;div class=&quot;jq-quiz__options&quot; data-jq-quiz-options&gt;
+                        &lt;!--Quiz option--&gt;
+                        &lt;div class=&quot;jq-quiz__option&quot; data-jq-quiz-option&gt;
+                            &lt;label class=&quot;jq-quiz__option-label&quot;&gt;
+                                &lt;span&gt;Some option 1&lt;/span&gt;
+                                &lt;input class=&quot;jq-quiz__option-field&quot; type=&quot;radio&quot; name=&quot;q1&quot;&gt;
+                            &lt;/label&gt;
+                        &lt;/div&gt;
+                        &lt;!--End quiz option--&gt;
+                        &lt;!--Quiz option--&gt;
+                        &lt;div class=&quot;jq-quiz__option&quot; data-jq-quiz-option data-is-correct=&quot;true&quot;&gt;
+                            &lt;label class=&quot;jq-quiz__option-label&quot;&gt;
+                                &lt;span&gt;Some Option&lt;/span&gt;
+                                &lt;input class=&quot;jq-quiz__option-field&quot; type=&quot;radio&quot; name=&quot;q1&quot;&gt;
+                            &lt;/label&gt;
+                        &lt;/div&gt;
+                        &lt;!--End quiz option--&gt;
+                    &lt;/div&gt;
+                    &lt;!--End quiz options--&gt;
+                    &lt;div class=&quot;jq-quiz__feedback&quot; data-jq-quiz-feedback=&quot;success ? Success feedback : Fail feedback&quot;&gt;Feedback&lt;/div&gt;
+                &lt;/fieldset&gt;
+                &lt;!--End quiz question--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz questions--&gt;
+            &lt;!--Quiz actions--&gt;
+            &lt;div class=&quot;jq-quiz__actions&quot; data-jq-quiz-actions&gt;
+                &lt;!--Quiz actions--&gt;
+                &lt;button class=&quot;jq-quiz__action&quot; data-jq-quiz-end&gt;End the quiz&lt;/button&gt;
+                &lt;!--End quiz actions--&gt;
+            &lt;/div&gt;
+            &lt;!--End quiz actions--&gt;
+        &lt;/div&gt;
+        &lt;!--End quiz body--&gt;
+        &lt;!--Questionnaire result--&gt;
+        &lt;div class=&quot;jq-quiz__result&quot; data-jq-quiz-result&gt;
+            &lt;!--Questionnaire body--&gt;
+            &lt;dt class=&quot;jq-quiz__result-item&quot; data-jq-quiz-result-item-label=&quot;score&quot;&gt;Score&lt;/dt&gt;
+            &lt;dd class=&quot;jq-quiz__result-item&quot; data-jq-quiz-result-item=&quot;score&quot;&gt;&lt;/dd&gt;
+            &lt;!--End quiz body--&gt;
+        &lt;/div&gt;
+        &lt;!--End quiz result--&gt;
+    &lt;/form&gt;
+&lt;/section&gt;
+</code></pre>
 <h3>More things</h3>
 <ul>
 <li><a href="./options.html">options</a></li>

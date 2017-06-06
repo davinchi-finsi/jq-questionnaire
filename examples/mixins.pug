@@ -17,70 +17,69 @@ html(lang='en')
         div.markdown-wrapper
             :markdown-it(linkify)
                 ## jqQuiz
-                ### The Mixins way
-                Los mixins permiten un mayor control sobre el HTML del cuesitonario, se pueden añadir elementos por encima (por ejemplo un sistema de grillas) o re orgainzar la manera en la que
-                aparecen las distintas partes del cuestionario dando libertad casi completa para aplicar estilos.\
-                Todos los mixins aceptan una serie de parámetros idénticos:
-
-                #### Options
-                ```json
-                let options = {
-                    "classes": {
-                        "firstQuestion": "jq-quiz--first-question",
-                        "lastQuestion": "jq-quiz--last-question",
-                        "widget": "jq-quiz",
-                        "questionCorrect": "jq-quiz--correct",
-                        "questionIncorrect": "jq-quiz--incorrect",
-                        "selected": "jq-quiz--selected",
-                        "stateResult": "jq-quiz--result",
-                        "stateReview": "jq-quiz--review",
-                        "stateRunning": "jq-quiz--running",
-                        "multichoice": "jq-quiz--multi-choice",
-                        "wrapper": "jq-quiz__form",
-                        "header": "jq-quiz__header",
-                        "body": "jq-quesitonnaire__body",
-                        "startBtn": "jq-quiz__start",
-                        "nextBtn": "jq-quiz__next",
-                        "prevBtn": "jq-quiz__prev",
-                        "endBtn": "jq-quiz__end",
-                        "result": "jq-quiz__result",
-                        "question": "jq-quiz__question",
-                        "option": "jq-quiz__option",
-                        "navbar": "jq-quiz__navbar",
-                        "button": "jq-quiz__action",
-                        "properties": "jq-quiz__properties",
-                        "questions": "jq-quiz__questions"
-                    },
-                    "delayOnAutoNext": 500,//delay before auto go next question
-                    "pointsForSuccess": 1,//amount of points to increase when a question is answered correctly
-                    "pointsForFail": 0,//amount of points to substract when a question is answered incorrectly
-                    "cutOffMark": 50,//minimum % of points to pass the quiz
-                    "immediateFeedback": false,//show if the question has been answered correctly or incorrectly immediatly after choose an option
-                    "disableOptionAfterSelect": true,//Disables the options of the question answered before choose one option. Only applies if immediateFeedback == true
-                    "autoGoNext": true,//Go to the next question after choose an option. Only applies if immediateFeedback == false
-                    "showCorrection": true,//Show the question corrections at the end of the quiz
-                    "showResult": true,//show the result dialog
-                    "multichoice": false,
-                    "disableNextUntilSuccess": false,//disable the next action until select the correct answer. Only available when immediateFeedback is true and disableOptionAfterSelect is false
-                    "disableEndActionUntil":0,//disable the end action until a condition. Use DISABLE_END conditions. Only available when immediateFeedback is true and disableOptionAfterSelect is false.
-                    "dialog": {//dialog options. All options of jquery ui dialog could be used  https://api.jqueryui.com/dialog/
-                        "draggable": false,
-                        "autoOpen": true,
-                        "resizable": false,
-                        "modal": true
-                    }
-                }
+                ### Pug (Jade)
+                Pug is a template engine for Node.js and browsers that makes the markup creation easy.\
+                For more info please go [here](https://github.com/pugjs/pug)
+                ### What is a 'mixin'?
+                In Pug, a mixin is like a function that could recieve params and returns a result.\
+                For example:
+                ```jade
+                //- Declare the mixin
+                mixin list(items)
+                    ul
+                        //- For each item
+                        each item in items
+                            //- Create a li and asigns the content
+                            li!= item
+                //- Invoke the mixin with parameters (note the + before the name of the mixin)
+                +list(["Hello", "my", "friend"])
                 ```
-                ### Simple use
-                jqQuiz trabaja con HTML en lugar de con JSON para dar libertad casi total en como pintar el cuestionario en lugar de fijar una estructura pintada dinámicamente.\
-                jqQuiz está dividido en pequeñas piezas que pueden colocarse de la manera que mejor se adapte a tus necesidades, como si de un puzzle se tratase.\
-                Si no se quiere una de las partes basta con eliminarla del HTML.\
-                Cada pieza tiene un rol específico dentro del cuestionario, ese rol está especificado por un atributo del tipo `data-jq-quiz-**`, el resto del HTMl es completamente libre!
-                Para facilitar la creación del markup se ofrecen mixins de pug pudiendo manipular cada elemento por separado, añadir un id, añadir clases, encapsularlo en otro elemento html, etc
-                Los mixins a su vez se pueden utilizar de manera individual o mediante JSON (si se usan con JSON la estructura es fija!)
-                Include the mixins from your instalation (node_modules or the folder in which jqQuiz is
+                results in:
+                ```html
+                <ul>
+                    <li>Hello</li>
+                    <li>my</li>
+                    <li>friend</li>
+                </ul>
+                ```
+                Cool, right?, with mixins is possible to reuse a lot of code.\
+                For more info about the mixins please go [here](https://codepen.io/pixelass/post/let-us-jade-4-mixins-on-steroids)
+                ### The Mixins way
+                The mixins gives more control over the HTML than the JSON, for example is possible to add more markup to use a grid system like flexbox grid or bootstrap grid.\
+                All the mixins has common and specific params.\
+                The common params are:
+                ```jade
+                type            : The HTML tag to render. Depending of the mixin the default type is different, for example, for the jq-quiz__header the default tag is "header".
+                cssClass        : Css classes to add
+                attributes      : HTML attributes to add, all the attributes are allowed
+                id              : An id
+                ```
+                An example:
+                ```jade
+                +jq-quiz({
+                    id:"myQuiz",
+                    cssClass:"my-quiz-class another-quiz-class",
+                    type:"section",
+                    attributes:{
+                        "data-id":"someId",
+                        "data-some-attribute":"someAttributeValue"
+                    }
+                })
+                ```
+                results in:
+                ```html
+                <section class="jq-quiz my-quiz-class another-quiz-class" id="myQuiz" data-id="someId" data-some-attribute="someAttributeValue">
 
-                #### JSON way
+                </section>
+                ```
+                ### Available mixins
+                Each section in the structure of jqQuiz has a mixin, please see [structure & roles](./structure.html)\
+                The available mixins are:
+                jq-quiz             : The scope mixin. Creates the structure for the quiz
+                jq-quiz__header     : The header of the quiz. Visible when the quiz is not runing
+                jq-quiz__title      : The title for the quiz
+                ```
+                ```
 
                 #### Full mixins way
                 ```jade
@@ -126,193 +125,17 @@ html(lang='en')
                 //- The container
 
                 ```
-        //+jq-quiz
-            +jq-quiz__header
-                +jq-quiz__title({
-                    content: "My quiz"
-                })
-                +jq-quiz__description({
-                    content: "Description for my quiz"
-                })
-                +jq-quiz__actions
-                    +jq-quiz__action({
-                        type: "start",
-                        content: "Start quiz"
-                    })
-            +jq-quiz__body
-                +jq-quiz__questions
-                    +jq-quiz__question
-                        +jq-quiz__statement
-                            span Some question
-                        +jq-quiz__options
-                            +jq-quiz__option({
-                                name:"q1",
-                                content: "Incorrect",
-                                isCorrect: false
-                            })
-                            +jq-quiz__option({
-                                name:"q1",
-                                content: "Correct",
-                                isCorrect: true,
-                                feedback: [
-                                    {
-                                        content: "Feedback ko",
-                                        type: "ko"
-                                    },
-                                    {
-                                        content: "Feedback ok",
-                                        type: "ok"
-                                    }
-                                ]
-                            })
-                        +jq-quiz__feedback({
-                            type: "success",
-                            content: "Success feedback"
-                        })
-                    +jq-quiz__question
-                        +jq-quiz__statement
-                            span Some question
-                        +jq-quiz__options
-                            +jq-quiz__option({
-                                name:"q2",
-                                content: "Incorrect",
-                                isCorrect: false
-                            })
-                            +jq-quiz__option({
-                                name:"q2",
-                                content: "Correct",
-                                isCorrect: true,
-                                feedback: [
-                                    {
-                                        content: "Feedback ko",
-                                        type: "ko"
-                                    },
-                                    {
-                                        content: "Feedback ok",
-                                        type: "ok"
-                                    }
-                                ]
-                            })
-                        +jq-quiz__feedback({
-                            type: "ok",
-                            content: "Success feedback"
-                        })
-                        +jq-quiz__feedback({
-                            type: "ko",
-                            content: "Fail feedback"
-                        })
-                +jq-quiz__actions
-                    +jq-quiz__action({
-                        type: "end",
-                        content: "End quiz"
-                    })
-            +jq-quiz__result({
-                items:[
-                    {
-                        type: "success ? Perfect! : Ohhh, try again"
-                    }
-                ]
-            })
         +jq-quiz({
-            header:{
-                title:"My quiz",
-                description:"Description for my quiz",
-                properties:true,
-                actions:[
-                    {
-                        type:"start",
-                        content:"Start"
-                    }
-                ]
-            },
-            body:{
-                questions:[
-                    {
-                        content:"Some quesiton",
-                        options:[
-                            {
-                                name:"q1",
-                                content:"Incorrect",
-                                isCorrect:false
-                            },
-                            {
-                                name:"q1",
-                                content:"Correct",
-                                isCorrect:true
-                            }
-                        ]
-                    }
-                ],
-                actions:[
-                    {
-                        type:"end",
-                        content:"End"
-                    }
-                ]
-            },
-            result:{
-                items: [
-                    {
-                        type: "success ? Perfect! : Ohhh, try again"
-                    }
-                ]
+            id: "myQuiz",
+            cssClass: "my-quiz-class",
+            type: "section",
+            attributes: {
+                "data-id": "someId",
+                "data-some-attribute": "someAttributeValue"
             }
         })
-        //-+jq-quiz({
-        //-    id: "simpleUse"
-        //-})
-        //-    +jq-quiz__header(
-        //-        {
-        //-            title:"Titulo",
-        //-            description:"Descripción del cuestionario",
-        //-            actions:[
-        //-                {
-        //-                    type:"start",
-        //-                    content:"Start"
-        //-                }
-        //-            ]
-        //-        }
-        //-    )
-        //-    +jq-quiz__body({
-        //-        questions: [
-        //-            {
-        //-                content: "Enunciado",
-        //-                options: [
-        //-                    {
-        //-                        name:"option",
-        //-                        content: "Option",
-        //-                        isCorrect:false
-        //-                    },
-        //-                    {
-        //-                        name:"option",
-        //-                        content: "Option2",
-        //-                        isCorrect: true
-        //-                    }
-        //-                ]
-        //-            }
-        //-        ],
-        //-        actions:[
-        //-            {
-        //-                type:"prev",
-        //-                content:"Prev"
-        //-            },
-        //-            {
-        //-                type:"next",
-        //-                content:"Next"
-        //-            },
-        //-            {
-        //-                type:"end",
-        //-                content:"End"
-        //-            }
-        //-        ]
-        //-    })
-        //-    +jq-quiz__result({
-        //-        items: [
-        //-            {
-        //-                type: "success?¡Perfecto!:No pasa nada, vuelve a intentarlo. Puedes revisar las opciones que has seleccionado"
-        //-            }
-        //-        ]
-        //-    })
+
+
         script.
             $(".jq-quiz")
                 .jqQuiz(
