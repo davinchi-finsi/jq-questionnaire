@@ -2,8 +2,8 @@
 const gutil = require("gulp-util");
 const program = require('commander');
 let config = {
-    src: process.cwd() + "/src",
-    dist: process.cwd() + "/dist",
+    src: process.cwd() + "/examples",
+    dist: process.cwd() + "/examples",
     sass: {
         exclude: ["bower_components/**/*.scss"]
     },

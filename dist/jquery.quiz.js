@@ -6,7 +6,7 @@
  * Released under the MIT license
  * https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
  * 
- * Build: 06/06/2017 19:15
+ * Build: 07/07/2017 11:26
  */
 
 (function (factory) {

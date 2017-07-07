@@ -5,6 +5,7 @@ node_modules
 .haztivycli.config.ts
 .haztivycli.config.js
 .idea
+dist
 *.log
 ### VisualStudioCode template
 .vscode/*

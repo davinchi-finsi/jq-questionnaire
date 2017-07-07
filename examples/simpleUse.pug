@@ -1,4 +1,4 @@
-include ../dist/_jqQuiz
+include ../dist/jq-quiz
 doctype html
 html(lang='en')
     head
@@ -21,28 +21,31 @@ html(lang='en')
                 ### Features
                 * Easy creation with PUG mixins
                 * Super HTML customization
-                * A lot of options to customize the behavior like
-                    * Immediate feedback
-                    * Show wrong/correct options
-                    * Show a result dialog at the end with info like the score, feedback, number of success, fails, without answer
-                    * Points to sum if success
-                    * Points to substract if success
-                    * Disable navigation until answer correctly (for pedagogical pruposes)
-                    * And more, more, moooooore. See [the options](./options.html)
+                * A lot of options to customize the behavior:
+                    * Immediate feedback, show to the user if the answer is correct or incorrect immediately
+                    * After end the quiz, show the correction of each question
+                    * Customizable feedback messages for questions and options
+                    * Show a result dialog at the end with info like the score, feedback, number of success, fails, questions without answer
+                    * Points to sum if the answer is correct
+                    * Points to substract if the answer is incorrect
+                    * Posibility of disable navigation until answer correctly (for pedagogical pruposes)
+                See [the options](./options.html)
                 * It's free! Beautiful word, right?.
                 * Created with jquery ui widget factory. For more info see [widget factory](https://api.jqueryui.com/jquery.widget/)
                 ### Installation
-                For not you could install the package from NPM by\
+                #### NPM
                 `npm i -s jq-quiz`\
                 We have plans to support bower soon.\
-                You also could download the las trelease from [github](https://github.com/davinchi-finsi/jq-quiz/releases)
+                You also could download the last release from [github](https://github.com/davinchi-finsi/jq-quiz/releases)
                 ### Simple usage
                 Include the jqQuiz mixin and call it with some questions and init the plugin in the same way that any other jquery plugin. Voila!\
-                If you don't want to use Pug you could use HTML like always. Please go to [here](./onlyHtml.html)
+                If you don't want to use Pug you could use HTML like always. Please go [here](./onlyHtml.html)
                 #### Pug
+                There are several ways to use the pug mixins, the simplest is call the main mixin `jq-quiz` with a JSON of config, but also is possible use the sub mixins
+                and have more control over the elements. Please go [here](./mixins.html)
                 ```jade
                 //-Include the jqQuiz mixin from node_modules/jqQuiz/dist
-                include node_modules/jqQuiz/dist/_jqQuiz
+                include node_modules/jqQuiz/dist/jq-qui
                 +jq-quiz({
                     id:"myQuiz",
                     header:{
