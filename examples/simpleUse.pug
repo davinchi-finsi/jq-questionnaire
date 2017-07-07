@@ -45,7 +45,7 @@ html(lang='en')
                 and have more control over the elements. Please go [here](./mixins.html)
                 ```jade
                 //-Include the jqQuiz mixin from node_modules/jqQuiz/dist
-                include node_modules/jqQuiz/dist/jq-qui
+                include node_modules/jqQuiz/dist/jq-quiz
                 +jq-quiz({
                     id:"myQuiz",
                     header:{
@@ -178,6 +178,16 @@ html(lang='en')
                 header:{
                     title:"My quiz title",
                     description:"Description for my quiz",
+                    properties:[
+                        {
+                            content:"Nota corte",
+                            type:"cutOffMark"
+                        },
+                        {
+                            content:"custom",
+                            type:"someCustom"
+                        }
+                    ],
                     actions:[
                         {
                             type:"start",

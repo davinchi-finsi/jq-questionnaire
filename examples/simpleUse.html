@@ -47,7 +47,7 @@ If you don't want to use Pug you could use HTML like always. Please go <a href="
 <p>There are several ways to use the pug mixins, the simplest is call the main mixin <code>jq-quiz</code> with a JSON of config, but also is possible use the sub mixins
 and have more control over the elements. Please go <a href="./mixins.html">here</a></p>
 <pre><code class="language-jade">//-Include the jqQuiz mixin from node_modules/jqQuiz/dist
-include node_modules/jqQuiz/dist/jq-qui
+include node_modules/jqQuiz/dist/jq-quiz
 +jq-quiz({
     id:&quot;myQuiz&quot;,
     header:{
@@ -186,6 +186,17 @@ include node_modules/jqQuiz/dist/jq-qui
             <p class="jq-quiz__description" data-jq-quiz-description="">Description for my quiz
             </p>
             <!--End quiz description-->
+            <dl class="jq-quiz__properties" data-jq-quiz-properties="">
+              <dt class="jq-quiz__property">Nota corte
+              </dt>
+              <dd class="jq-quiz__property" data-jq-quiz-property="cutOffMark">
+              </dd>
+              <dt class="jq-quiz__property">custom
+              </dt>
+              <dd class="jq-quiz__property" data-jq-quiz-property="someCustom">
+              </dd>
+            </dl>
+            <!--End quiz properties-->
             <!--Quiz actions-->
             <div class="jq-quiz__actions" data-jq-quiz-actions="">
               <!--Quiz actions-->

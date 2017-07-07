@@ -764,6 +764,13 @@
             },
             _setOption: function (key, value) {
                 this._super(key, value);
+                if(key === "disabled"){
+                    if(value){
+                        this._disable();
+                    }else{
+                        this._enable();
+                    }
+                }
             },
             /**
              * Ejecuta la animación para ocultar una pregunta.
@@ -1006,6 +1013,22 @@
             _enableNext: function () {
                 this._$nextBtn.prop("disabled", false);
                 this._$nextBtn.removeClass(this.options.classes.disabled);
+            },
+            /**
+             * Deshabilita el botón siguiente
+             * @private
+             */
+            _disableStart: function () {
+                this._$startBtn.prop("disabled", true);
+                this._$startBtn.addClass(this.options.classes.disabled);
+            },
+            /**
+             * Habilita el botón siguiente
+             * @private
+             */
+            _enableStart: function () {
+                this._$startBtn.prop("disabled", false);
+                this._$startBtn.removeClass(this.options.classes.disabled);
             },
             /**
              * Invocado al finalizar la animación  de comienzo. Avanza a la primera página y lanza el evento ON_START
@@ -1251,6 +1274,12 @@
 
             },
             /**
+             * Redraw the properties
+             */
+            redrawProperties:function(){
+                this._renderOptions();
+            },
+            /**
              * Resetea el formulario
              */
             reset: function () {
@@ -1391,6 +1420,28 @@
                         this._state = state;
                         break;
                 }
+            },
+            _disable:function(){
+                this._disableStart();
+            },
+            _enable:function(){
+                this._enableStart();
+            },
+            /**
+             * Disable the quiz.
+             * Disable only affects to start button, if the quiz has been started, the current attempt still being enabled
+             */
+            disable:function(){
+                this._super();
+                this._disable();
+            },
+            /**
+             * Enable the quiz.
+             * Enable only affects to start button.
+             */
+            enable:function(){
+                this._super();
+                this._enable();
             },
             destroy: function () {
                 this._$wrapper.removeClass(this.options.classes.wrapper);

@@ -37,8 +37,8 @@ mixin jq-quiz__properties(params)
         },
         externalParams: params
     })&attributes(attributes)
-        if(params.items)
-            each property in params.items
+        if(params.properties)
+            each property in params.properties
                 +jq-quiz__property(property)
         block
     //End quiz properties
