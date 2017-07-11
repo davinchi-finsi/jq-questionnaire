@@ -2,7 +2,6 @@
 src/*.html
 src/*.js
 src/*.js.map
-dist
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json
