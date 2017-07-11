@@ -1,0 +1,9 @@
+include ./_head
+mixin main(params)
+    doctype html
+    html(lang='en')
+        head
+            title!= params.title
+            +head
+        body
+            block
