@@ -9,7 +9,8 @@ let config = require("./../config");
 const rename = require("gulp-rename");
 gulp.task('uglify', function () {
     gulp.src(path.join(config.dist,"**.js"))
-        .pipe(uglify({preserveComments:true}))
+        .pipe(uglify())
+        .on('error', function (err) { gutil.log(gutil.colors.red('[Error]'), err.toString()); })
         .pipe(rename({suffix:".min"}))
         .pipe(headerComment(`        
             jqQuiz plugin v<%= pkg.version %> | <%= pkg.author %> | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE

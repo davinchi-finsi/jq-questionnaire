@@ -1,6 +1,6 @@
 {
   "name": "jq-quiz",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Jquery plugin to create quizzes",
   "main": "dist/jquery.quiz.js",
   "module": "dist/jquery.quiz.js",
@@ -16,6 +16,7 @@
   "homepage": "",
   "dependencies": {
     "jquery": "^3.x",
+    "jquery-ui": "^1.12.1",
     "jquery-ui-dist": "^1.12.1"
   },
   "types": "src/jquery.quiz.ts",

@@ -4,12 +4,12 @@
 
         // AMD. Register as an anonymous module.
         define([
-                   "jquery",
-                   "./controlgroup",
-                   "./checkboxradio",
-                   "../keycode",
-                   "../widget"
-               ], factory);
+            "jquery",
+            "./controlgroup",
+            "./checkboxradio",
+            "../keycode",
+            "../widget"
+        ], factory);
     } else {
 
         // Browser globals
@@ -99,7 +99,8 @@
                 pointsForFail: 0,//amount of points to substract when a question is answered incorrectly
                 cutOffMark: 50,//minimum % of points to pass the quiz
                 immediateFeedback: false,//show if the question has been answered correctly or incorrectly immediatly after choose an option
-                disableOptionAfterSelect: true,//Disables the options of the question answered before choose one option. Only applies if immediateFeedback == true
+                disableOptionAfterSelect: true,//DEPRECATED. use allowChangeOption. Disables the options of the question answered before choose one option. Only applies if immediateFeedback == true
+                allowChangeOption:false,//Disables the options of the question answered before choose one option.
                 autoGoNext: true,//Go to the next question after choose an option. Only applies if multichoice == false
                 showCorrection: true,//Show the question corrections at the end of the quiz
                 showResult: true,//show the result dialog
@@ -188,29 +189,29 @@
              */
             _getElements: function () {
                 this._$wrapper = this.element.find(this.QUERY_WRAPPER)
-                                     .addClass(this.options.classes.wrapper);
+                    .addClass(this.options.classes.wrapper);
                 this._$header = this.element.find(this.QUERY_HEADER)
-                                    .addClass(this.options.classes.header);
+                    .addClass(this.options.classes.header);
                 this._$body = this.element.find(this.QUERY_BODY)
-                                  .addClass(this.options.classes.body);
+                    .addClass(this.options.classes.body);
                 this._$body.hide();
                 this._$properties = this.element.find(this.QUERY_PROPERTIES)
-                                        .addClass(this.options.classes.properties);
+                    .addClass(this.options.classes.properties);
                 this._$questionsWrapper = this.element.find(this.QUERY_QUESTIONS)
-                                              .addClass(this.options.classes.questions);
+                    .addClass(this.options.classes.questions);
                 this._$questions = this._$questionsWrapper.find(this.QUERY_QUESTION)
-                                       .addClass(this.options.classes.question);
+                    .addClass(this.options.classes.question);
                 this._$questions.hide();
                 this._$startBtn = this._$wrapper.find(this.QUERY_ACTION_START)
-                                      .addClass(`${this.options.classes.button} ${this.options.classes.startBtn}`);
+                    .addClass(`${this.options.classes.button} ${this.options.classes.startBtn}`);
                 this._$nextBtn = this._$wrapper.find(this.QUERY_ACTION_NEXT)
-                                     .addClass(`${this.options.classes.button} ${this.options.classes.nextBtn}`);
+                    .addClass(`${this.options.classes.button} ${this.options.classes.nextBtn}`);
                 this._$prevBtn = this._$wrapper.find(this.QUERY_ACTION_PREV)
-                                     .addClass(`${this.options.classes.button} ${this.options.classes.prevBtn}`);
+                    .addClass(`${this.options.classes.button} ${this.options.classes.prevBtn}`);
                 this._$endBtn = this._$wrapper.find(this.QUERY_ACTION_END)
-                                    .addClass(`${this.options.classes.button} ${this.options.classes.endBtn}`);
+                    .addClass(`${this.options.classes.button} ${this.options.classes.endBtn}`);
                 this._$result = this._$wrapper.find(this.QUERY_RESULT)
-                                    .addClass(this.options.classes.result);
+                    .addClass(this.options.classes.result);
                 this._$result.hide();
                 //this._$body.hide().detach();
             },
@@ -223,7 +224,7 @@
             _mapQuestions: function () {
                 //if the options has checkbox, the quiz is multichoice
                 let $options = this._$questions.find(this.QUERY_OPTION)
-                                   .find(":checkbox");
+                    .find(":checkbox");
                 //ensure the type of the inputs
                 if ($options.length > 0) {
                     $options.attr("type", "checkbox");
@@ -259,13 +260,13 @@
                 let $optionsWrapper = $question.find(this.QUERY_OPTIONS),
                     $options = $optionsWrapper.find(this.QUERY_OPTION),
                     name = $options.first()
-                                   .find("input")
-                                   .attr("name"),
+                        .find("input")
+                        .attr("name"),
                     pointsForSuccess = $question.data(this.ATTR_POINTS_FOR_SUCCESS),
                     pointsForFail = $question.data(this.ATTR_POINTS_FOR_FAIL),
                     {arr, map} = this._mapOptions($options),
                     $feedback = $question.find(this.QUERY_FEEDBACK)
-                                         .not(this.QUERY_OPTION + " " + this.QUERY_FEEDBACK),//feedback of question that are not inside of an option
+                        .not(this.QUERY_OPTION + " " + this.QUERY_FEEDBACK),//feedback of question that are not inside of an option
                     id;
                 $feedback.hide();
                 $question.removeAttr(this.ATTR_POINTS_FOR_FAIL);
@@ -275,7 +276,7 @@
                 //ensure the same name for the fields
                 name = name != undefined ? name : id;
                 $options.find("input")
-                        .attr("name", name);
+                    .attr("name", name);
                 let question: any = {
                     id: id,
                     $element: $question,
@@ -582,8 +583,8 @@
                         //if the option is selected
                         if (selected) {//if is correct add the class, if incorrect the incorrect class
                             option.$element.addClass(option.isCorrect
-                                                         ? this.options.classes.questionCorrect
-                                                         : this.options.classes.questionIncorrect);
+                                ? this.options.classes.questionCorrect
+                                : this.options.classes.questionIncorrect);
                         } else {//if is not selected but is correct, add the incorrect class
                             option.$element.addClass(option.isCorrect ? this.options.classes.questionIncorrect : "");
                         }
@@ -594,8 +595,6 @@
             },
             /**
              * Aplica la clase correspondiente al estado de la pregunta.
-             * Si la respuesta indicada es correcta añade la clase CLASS_QUESTION_CORRECT
-             * Si la respuesta indicada es incorrecta añade la clase CLASS_QUESTION_INCORRECT
              * @param {String}      questionId      Id de la pregunta a actualizar
              * @private
              */
@@ -671,10 +670,10 @@
                 if (question) {
                     if (this.options.multichoice && this._state == this.STATES.running) {//if multichoice, disable only the selected fields
                         question.$element.find(":checked")
-                                .attr("disabled", "disabled");
+                            .attr("disabled", "disabled");
                     } else {
                         question.$element.find("input")
-                                .attr("disabled", "disabled");
+                            .attr("disabled", "disabled");
                     }
                 }
             },
@@ -707,28 +706,38 @@
                         optionId = $option.attr("id");
                     questionRuntime.options = options;
                     instance._runtime[questionId] = questionRuntime;
+                    //if multichoice
                     if (instance.options.multichoice) {
                         //if item is selected
                         if (e.target.checked) {
-                            //add
+                            //store the option in the runtime
                             options.push(optionId);
-                            $option.addClass(instance.CLASS_SELECTED);
+                            $option.addClass(instance.options.classes.selected);
                         } else {
-                            //remove
+                            //remove the option and reset the dom
                             instance._resetOption(questionId, optionId);
                             options.splice(options.indexOf(optionId), 1);
                         }
                         instance._calificateMultiChoiceQuestion(questionId);
                     } else {
+                        //if single choice
+                        //check if exists an option in the runtime
                         if (questionRuntime.options.length > 0) {
+                            //reset the option
                             instance._resetOption(questionId, questionRuntime.options[0]);
                         }
+                        //store the option in the runtime
                         options[0] = optionId;
-                        $option.addClass(instance.CLASS_SELECTED);
+                        $option.addClass(instance.options.classes.selected);
                         instance._calificateSingleChoiceQuestion(questionId);
+                    }
+                    if(instance.options.allowChangeOption != true){
+                        instance._disableQuestionOptionsField(questionId);
                     }
                     //go next if isn't immediateFeedback and isnt multichoice
                     if (instance.options.immediateFeedback == true) {
+                        //if disableOptionAfterSelect, the options will be disabled
+                        //@deprecated
                         if (instance.options.disableOptionAfterSelect == true) {
                             instance._disableQuestionOptionsField(questionId);
                         } else if (instance.options.disableNextUntilSuccess == true) {
