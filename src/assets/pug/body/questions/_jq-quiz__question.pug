@@ -73,6 +73,7 @@ mixin jq-quiz__question(params)
                 }else{
                     optionsParams = params.options;
                 }
+                optionsParams.multichoice = params.multichoice || false;
             +jq-quiz__options(optionsParams)
         if(params.feedback)
             each feedback in params.feedback
