@@ -738,7 +738,7 @@
                     if (instance.options.immediateFeedback == true) {
                         //if disableOptionAfterSelect, the options will be disabled
                         //@deprecated
-                        if (instance.options.disableOptionAfterSelect == true) {
+                        if ((instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true ) || instance.options.disableOptionAfterSelect == true) {
                             instance._disableQuestionOptionsField(questionId);
                         } else if (instance.options.disableNextUntilSuccess == true) {
                             instance._updateNavigationActionsStates();
@@ -1296,6 +1296,7 @@
                 this.element.removeAttr(this.ATTR_CURRENT_QUESTION);
                 this.element.removeClass(this.options.classes.firstQuestion);
                 this.element.removeClass(this.options.classes.lastQuestion);
+                this._currentQuestionIndex = null;
                 this._$questions.hide();
                 this._$questions.first()
                     .show();
