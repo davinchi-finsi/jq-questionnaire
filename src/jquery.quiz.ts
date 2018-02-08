@@ -5,10 +5,10 @@
         // AMD. Register as an anonymous module.
         define([
             "jquery",
-            "./controlgroup",
-            "./checkboxradio",
-            "../keycode",
-            "../widget"
+            "jquery-ui/ui/widget",
+            "jquery-ui/ui/unique-id",
+            "jquery-ui/ui/widgets/controlgroup",
+            "jquery-ui/ui/widgets/checkboxradio"
         ], factory);
     } else {
 
@@ -81,7 +81,7 @@
                     multichoice: "jq-quiz--multi-choice",
                     wrapper: "jq-quiz__form",
                     header: "jq-quiz__header",
-                    body: "jq-quesitonnaire__body",
+                    body: "jq-quiz__body",
                     startBtn: "jq-quiz__start",
                     nextBtn: "jq-quiz__next",
                     prevBtn: "jq-quiz__prev",
@@ -92,7 +92,8 @@
                     navbar: "jq-quiz__navbar",
                     button: "jq-quiz__action",
                     properties: "jq-quiz__properties",
-                    questions: "jq-quiz__questions"
+                    questions: "jq-quiz__questions",
+                    disabled:"jq-quiz--disabled"
                 },
                 delayOnAutoNext: 500,//delay before auto go next question. Only applies if autoGoNext == true
                 pointsForSuccess: 1,//amount of points to increase when a question is answered correctly
@@ -112,7 +113,9 @@
                     autoOpen: true,
                     resizable: false,
                     modal: true
-                }
+                },
+                initialQuestion:0,//initial question to show. Null to use goTo manually
+                autoStart:false//auto start the quiz
             },
             /**
              * @constructor
@@ -125,6 +128,9 @@
                 this._changeState(this.STATES.off);
                 this._assignEvents();
                 this._renderOptions();
+                if(this.options.autoStart){
+                    this.start();
+                }
             },
             /**
              * Renderiza una opción escaneando los elementos que coincidan con QUERY_RENDER_OPTION
@@ -671,7 +677,14 @@
                     if (this.options.multichoice && this._state == this.STATES.running) {//if multichoice, disable only the selected fields
                         question.$element.find(":checked")
                             .attr("disabled", "disabled");
+                        for(let option of question.options){
+                            if(option.$element.find(":checked").length > 0){
+                                option.$element.addClass(this.options.classes.disabled);
+                            }
+                        }
                     } else {
+                        question.$element.addClass(this.options.classes.disabled);
+                        question.$options.addClass(this.options.classes.disabled);
                         question.$element.find("input")
                             .attr("disabled", "disabled");
                     }
@@ -703,8 +716,11 @@
                         questionId = $question.attr("id"),
                         questionRuntime = instance._runtime[questionId] || {},
                         options = questionRuntime.options || [],
-                        optionId = $option.attr("id");
+                        optionsValues = questionRuntime.optionsValues || [],
+                        optionId = $option.attr("id"),
+                        optionValue = $option.find("input").attr("value");
                     questionRuntime.options = options;
+                    questionRuntime.optionsValues = optionsValues;
                     instance._runtime[questionId] = questionRuntime;
                     //if multichoice
                     if (instance.options.multichoice) {
@@ -712,11 +728,17 @@
                         if (e.target.checked) {
                             //store the option in the runtime
                             options.push(optionId);
+                            if(optionValue) {
+                                optionsValues.push(optionValue);
+                            }
                             $option.addClass(instance.options.classes.selected);
                         } else {
                             //remove the option and reset the dom
                             instance._resetOption(questionId, optionId);
                             options.splice(options.indexOf(optionId), 1);
+                            if(optionValue) {
+                                optionsValues.splice(optionsValues.indexOf(optionValue), 1);
+                            }
                         }
                         instance._calificateMultiChoiceQuestion(questionId);
                     } else {
@@ -728,6 +750,9 @@
                         }
                         //store the option in the runtime
                         options[0] = optionId;
+                        if(optionValue) {
+                            optionsValues[0] = optionValue;
+                        }
                         $option.addClass(instance.options.classes.selected);
                         instance._calificateSingleChoiceQuestion(questionId);
                     }
@@ -757,7 +782,7 @@
                             );
                         }
                     }
-                    instance.element.triggerHandler(instance.ON_OPTION_CHANGE, [this, questionId, optionId]);
+                    instance.element.triggerHandler(instance.ON_OPTION_CHANGE, [instance, questionId, optionId,optionValue,questionRuntime]);
                 }
             },
             _resetOption: function (questionId, optionId) {
@@ -850,11 +875,15 @@
              */
             _hideHeader: function () {
                 let defer = $.Deferred();
-                let result = this.element.triggerHandler(this.ON_HEADER_HIDE, [this, this._$header]);
-                if (result != undefined && result.hasOwnProperty("then")) {
-                    result.then(this._onHeaderHidden.bind(this, defer));
-                } else {
-                    this._$header.fadeOut(400, this._onHeaderHidden.bind(this, defer));
+                if(this._$header.length > 0) {
+                    let result = this.element.triggerHandler(this.ON_HEADER_HIDE, [this, this._$header]);
+                    if (result != undefined && result.hasOwnProperty("then")) {
+                        result.then(this._onHeaderHidden.bind(this, defer));
+                    } else {
+                        this._$header.fadeOut(400, this._onHeaderHidden.bind(this, defer));
+                    }
+                }else{
+                    this._onHeaderHidden(defer);
                 }
                 return defer.promise();
             },
@@ -866,20 +895,24 @@
              */
             _showHeader: function () {
                 let defer = $.Deferred();
-                //this._$wrapper.prepend(this._$header);
-                let result = this.element.triggerHandler(this.ON_HEADER_SHOW, [this, this._$header]);
-                if (result != undefined && result.hasOwnProperty("then")) {
-                    result.then(
-                        () => {
-                            defer.resolveWith(this);
-                        }
-                    )
-                } else {
-                    this._$header.fadeIn(
-                        400, () => {
-                            defer.resolveWith(this);
-                        }
-                    );
+                if(this._$header.length > 0) {
+                    //this._$wrapper.prepend(this._$header);
+                    let result = this.element.triggerHandler(this.ON_HEADER_SHOW, [this, this._$header]);
+                    if (result != undefined && result.hasOwnProperty("then")) {
+                        result.then(
+                            () => {
+                                defer.resolveWith(this);
+                            }
+                        )
+                    } else {
+                        this._$header.fadeIn(
+                            400, () => {
+                                defer.resolveWith(this);
+                            }
+                        );
+                    }
+                }else{
+                    defer.resolveWith(this);
                 }
                 return defer.promise();
             },
@@ -1045,7 +1078,9 @@
              * @private
              */
             _onAnimationStartEnd: function () {
-                this.goTo(0);
+                if(this.options.initialQuestion != undefined) {
+                    this.goTo(this.options.initialQuestion);
+                }
                 this.element.trigger(this.ON_STARTED, [this]);
             },
             /**
@@ -1168,53 +1203,67 @@
                         currentQuestionIndex = this._currentQuestionIndex,
                         currentQuestion = this._questions[currentQuestionIndex];
                     //ensure that next question exists and it's different of the current question
-                    if (nextQuestion != undefined && (currentQuestion == undefined || currentQuestion != nextQuestion)) {
-                        let defer = $.Deferred();
-                        promise = defer.promise();
-                        //prevent navigation during transition
-                        this._disableNext();
-                        this._disablePrev();
-                        //store question index
-                        this._currentQuestionIndex = questionIndex;
-                        if (questionIndex == this._questions.length - 1) {
-                            this.element.removeClass(this.options.classes.firstQuestion);
-                            this.element.addClass(this.options.classes.lastQuestion);
-                        } else if (questionIndex == 0) {
-                            this.element.removeClass(this.options.classes.lastQuestion);
-                            this.element.addClass(this.options.classes.firstQuestion);
-                        } else {
-                            this.element.removeClass(this.options.classes.firstQuestion);
-                            this.element.removeClass(this.options.classes.lastQuestion);
+                    if (nextQuestion != undefined) {
+                        if(currentQuestion == undefined || currentQuestion != nextQuestion) {
+                            let defer = $.Deferred();
+                            promise = defer.promise();
+                            //prevent navigation during transition
+                            this._disableNext();
+                            this._disablePrev();
+                            //store question index
+                            this._currentQuestionIndex = questionIndex;
+                            if (questionIndex == this._questions.length - 1) {
+                                this.element.removeClass(this.options.classes.firstQuestion);
+                                this.element.addClass(this.options.classes.lastQuestion);
+                            } else if (questionIndex == 0) {
+                                this.element.removeClass(this.options.classes.lastQuestion);
+                                this.element.addClass(this.options.classes.firstQuestion);
+                            } else {
+                                this.element.removeClass(this.options.classes.firstQuestion);
+                                this.element.removeClass(this.options.classes.lastQuestion);
+                            }
+                            this.element.attr(this.ATTR_CURRENT_QUESTION, questionIndex);
+                            //if current question exists
+                            if (currentQuestion) {
+                                //hide the current question and then show the next
+                                this._hide(currentQuestion.$element)
+                                    .then(
+                                        () => {
+                                            this._show(nextQuestion.$element)
+                                                .then(
+                                                    this._onQuestionTransitionEnd.bind(
+                                                        this,
+                                                        currentQuestion,
+                                                        nextQuestion,
+                                                        defer
+                                                    )
+                                                );
+                                        }
+                                    );
+                            } else {
+                                //if current quesiton doesn't exists
+                                this._show(nextQuestion.$element)
+                                    .then(
+                                        this._onQuestionTransitionEnd.bind(
+                                            this,
+                                            currentQuestion,
+                                            nextQuestion,
+                                            defer
+                                        )
+                                    );
+                            }
                         }
-                        this.element.attr(this.ATTR_CURRENT_QUESTION, questionIndex);
-                        //if current question exists
-                        if (currentQuestion) {
-                            //hide the current question and then show the next
-                            this._hide(currentQuestion.$element)
-                                .then(
-                                    () => {
-                                        this._show(nextQuestion.$element)
-                                            .then(
-                                                this._onQuestionTransitionEnd.bind(
-                                                    this,
-                                                    currentQuestion,
-                                                    nextQuestion,
-                                                    defer
-                                                )
-                                            );
-                                    }
-                                );
-                        } else {
-                            //if current quesiton doesn't exists
-                            this._show(nextQuestion.$element)
-                                .then(
-                                    this._onQuestionTransitionEnd.bind(
-                                        this,
-                                        currentQuestion,
-                                        nextQuestion,
-                                        defer
-                                    )
-                                );
+                    }else{
+                        //hide current question
+                        if(currentQuestion) {
+                            let defer = $.Deferred();
+                            promise = defer.promise();
+                            this._hide(currentQuestion.$element).then(this._onQuestionTransitionEnd.bind(
+                                this,
+                                currentQuestion,
+                                null,
+                                defer
+                            ));
                         }
                     }
                 }
@@ -1303,6 +1352,7 @@
                 this._$questions.find("input")
                     .prop("checked", false)
                     .removeAttr("disabled");
+                this._$questions.find("."+this.options.classes.disabled).removeClass(this.options.classes.disabled);
                 this.element.find(this.QUERY_FEEDBACK)
                     .hide();
                 this.element.find("." + this.options.classes.questionCorrect)
@@ -1329,7 +1379,7 @@
              * @param calification
              */
             showResult: function (calification) {
-                if (calification && this.options.showResult && this._$result) {
+                if (calification && this.options.showResult && this._$result.length > 0) {
                     this._changeState(this.STATES.result);
                     this._renderVar(this.QUERY_RENDER_RESULT, "jqQuizResultItem", calification, this._$result);
                     this._$result.dialog(this.options.dialog)
@@ -1378,6 +1428,7 @@
                     let calification = this._calificate();
                     this.lastCalification = calification;
                     this._disableAllQuestions();
+                    this.element.trigger(this.ON_END, [this, calification]);
                     //if show result is disabled
                     if (!this.showResult(calification)) {
                         //if show correction
@@ -1385,7 +1436,6 @@
                             this._changeState(this.STATES.off);
                             this._animationStop()
                                 .then(this._onAnimationEndEnd);
-                            this.element.trigger(this.ON_END, [this, calification]);
                         }
                     }
                     return calification;
@@ -1396,13 +1446,11 @@
                         this._changeState(this.STATES.off);
                         this._animationStop()
                             .then(this._onAnimationEndEnd);
-                        this.element.trigger(this.ON_END, [this, this.lastCalification]);
                     }
                     return this.lastCalification;
                     //if its reviewing
                 } else if (this._state == this.STATES.review) {
                     this._changeState(this.STATES.off);
-                    this.element.trigger(this.ON_END, [this, this.lastCalification]);
                     this._animationStop()
                         .then(this._onAnimationEndEnd);
                     return this.lastCalification;
