@@ -1,0 +1,34 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+//- @pugdoc
+    @function jq-quiz__feedback
+    @description Mixin to create feedback
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=div]            Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {String}            params.type                 Type of feedback to render.
+    @example
+    +jq-quiz__feedback({
+        type:"ok",
+        content:"Success feedback
+    })
+    @example
+    +jq-quiz__feedback({
+        type:"ko"
+    })
+        span Fail feedback
+mixin jq-quiz__feedback(params)
+    -
+        params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__feedback",
+            attributes: {
+                "data-jq-quiz-feedback": params.type
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block

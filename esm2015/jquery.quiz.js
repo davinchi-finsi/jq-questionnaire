@@ -3,12 +3,6 @@
  * (c) 2018 Finsi, Inc.
  */
 
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(factory());
-}(this, (function () { 'use strict';
-
 $.widget("ui.jqQuiz", {
     NAMESPACE: "jqQuiz",
     QUERY_HEADER: "[data-jq-quiz-header]",
@@ -159,21 +153,20 @@ $.widget("ui.jqQuiz", {
     _renderVar: function (query, data, store, context) {
         context = context || this.element;
         store = store || this.options;
-        var $toRender = context.find(query);
+        let $toRender = context.find(query);
         //each element to render
-        for (var _i = 0, $toRender_1 = $toRender; _i < $toRender_1.length; _i++) {
-            var element = $toRender_1[_i];
-            var $element = $(element), optionName = ($element.data(data) || ""), //get the data name
-            optionAsTrue = void 0, optionAsFalse = void 0;
+        for (let element of $toRender) {
+            let $element = $(element), optionName = ($element.data(data) || ""), //get the data name
+            optionAsTrue, optionAsFalse;
             if (optionName != undefined) {
-                _a = optionName.split("?"), optionName = _a[0], optionAsTrue = _a[1]; //split to get the parts
+                [optionName, optionAsTrue] = optionName.split("?"); //split to get the parts
                 optionName = optionName.trim();
                 if (optionAsTrue != undefined) {
-                    _b = optionAsTrue.split(":"), optionAsTrue = _b[0], optionAsFalse = _b[1]; //destructure
+                    [optionAsTrue, optionAsFalse] = optionAsTrue.split(":"); //destructure
                     optionAsTrue.trim();
                     optionAsFalse.trim();
                 }
-                var optionValue = store[optionName]; //get the value of data
+                let optionValue = store[optionName]; //get the value of data
                 optionValue = optionValue != undefined ? optionValue : ""; //if undefined, assign empty string
                 if (optionAsTrue != undefined && !!optionValue) {
                     optionValue = optionAsTrue;
@@ -184,7 +177,6 @@ $.widget("ui.jqQuiz", {
                 $element.html(optionValue);
             }
         }
-        var _a, _b;
     },
     /**
      * Obtiene todos los elementos internos
@@ -206,13 +198,13 @@ $.widget("ui.jqQuiz", {
             .addClass(this.options.classes.question);
         this._$questions.hide();
         this._$startBtn = this._$wrapper.find(this.QUERY_ACTION_START)
-            .addClass(this.options.classes.button + " " + this.options.classes.startBtn);
+            .addClass(`${this.options.classes.button} ${this.options.classes.startBtn}`);
         this._$nextBtn = this._$wrapper.find(this.QUERY_ACTION_NEXT)
-            .addClass(this.options.classes.button + " " + this.options.classes.nextBtn);
+            .addClass(`${this.options.classes.button} ${this.options.classes.nextBtn}`);
         this._$prevBtn = this._$wrapper.find(this.QUERY_ACTION_PREV)
-            .addClass(this.options.classes.button + " " + this.options.classes.prevBtn);
+            .addClass(`${this.options.classes.button} ${this.options.classes.prevBtn}`);
         this._$endBtn = this._$wrapper.find(this.QUERY_ACTION_END)
-            .addClass(this.options.classes.button + " " + this.options.classes.endBtn);
+            .addClass(`${this.options.classes.button} ${this.options.classes.endBtn}`);
         this._$result = this._$wrapper.find(this.QUERY_RESULT)
             .addClass(this.options.classes.result);
         this._$result.hide();
@@ -226,7 +218,7 @@ $.widget("ui.jqQuiz", {
      */
     _mapQuestions: function () {
         //if the options has checkbox, the quiz is multichoice
-        var $options = this._$questions.find(this.QUERY_OPTION)
+        let $options = this._$questions.find(this.QUERY_OPTION)
             .find(":checkbox");
         //ensure the type of the inputs
         if ($options.length > 0) {
@@ -237,10 +229,10 @@ $.widget("ui.jqQuiz", {
         else {
             $options.attr("type", "radio");
         }
-        var $questions = this._$questions, questions = [], questionsMap = {}, maxScore = 0;
+        let $questions = this._$questions, questions = [], questionsMap = {}, maxScore = 0;
         //map each question
-        for (var questionIndex = 0, $questionsLength = $questions.length; questionIndex < $questionsLength; questionIndex++) {
-            var $current = $($questions[questionIndex]), parsedQuestion = this._mapQuestion($current);
+        for (let questionIndex = 0, $questionsLength = $questions.length; questionIndex < $questionsLength; questionIndex++) {
+            let $current = $($questions[questionIndex]), parsedQuestion = this._mapQuestion($current);
             questions.push(parsedQuestion);
             questionsMap[parsedQuestion.id] = questionIndex;
             maxScore += parsedQuestion.pointsForSuccess; //increment the max score
@@ -257,9 +249,9 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _mapQuestion: function ($question) {
-        var $optionsWrapper = $question.find(this.QUERY_OPTIONS), $options = $optionsWrapper.find(this.QUERY_OPTION), name = $options.first()
+        let $optionsWrapper = $question.find(this.QUERY_OPTIONS), $options = $optionsWrapper.find(this.QUERY_OPTION), name = $options.first()
             .find("input")
-            .attr("name"), pointsForSuccess = $question.data(this.ATTR_POINTS_FOR_SUCCESS), pointsForFail = $question.data(this.ATTR_POINTS_FOR_FAIL), _a = this._mapOptions($options), arr = _a.arr, map = _a.map, $feedback = $question.find(this.QUERY_FEEDBACK)
+            .attr("name"), pointsForSuccess = $question.data(this.ATTR_POINTS_FOR_SUCCESS), pointsForFail = $question.data(this.ATTR_POINTS_FOR_FAIL), { arr, map } = this._mapOptions($options), $feedback = $question.find(this.QUERY_FEEDBACK)
             .not(this.QUERY_OPTION + " " + this.QUERY_FEEDBACK), //feedback of question that are not inside of an option
         id;
         $feedback.hide();
@@ -271,7 +263,7 @@ $.widget("ui.jqQuiz", {
         name = name != undefined ? name : id;
         $options.find("input")
             .attr("name", name);
-        var question = {
+        let question = {
             id: id,
             $element: $question,
             $optionsWrapper: $optionsWrapper,
@@ -282,18 +274,17 @@ $.widget("ui.jqQuiz", {
             pointsForFail: pointsForFail != undefined ? pointsForFail : this.options.pointsForFail
         };
         //store the feedback founded by type
-        for (var _i = 0, $feedback_1 = $feedback; _i < $feedback_1.length; _i++) {
-            var feedback = $feedback_1[_i];
-            var $feedback_2 = $(feedback), type = $feedback_2.attr(this.ATTR_FEEDBACK);
+        for (let feedback of $feedback) {
+            let $feedback = $(feedback), type = $feedback.attr(this.ATTR_FEEDBACK);
             switch (type) {
                 case this.FEEDBACK_TYPES.ok:
-                    question.$feedbackOk = $feedback_2;
+                    question.$feedbackOk = $feedback;
                     break;
                 case this.FEEDBACK_TYPES.ko:
-                    question.$feedbackKo = $feedback_2;
+                    question.$feedbackKo = $feedback;
                     break;
                 default:
-                    question.$feedback = $feedback_2;
+                    question.$feedback = $feedback;
                     break;
             }
         }
@@ -308,9 +299,9 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _mapOptions: function ($options) {
-        var parsedOptions = [], parsedOptionsMap = {};
-        for (var optionIndex = 0, $optionsLength = $options.length; optionIndex < $optionsLength; optionIndex++) {
-            var $current = $($options[optionIndex]), parsedOption = this._mapOption($current);
+        let parsedOptions = [], parsedOptionsMap = {};
+        for (let optionIndex = 0, $optionsLength = $options.length; optionIndex < $optionsLength; optionIndex++) {
+            let $current = $($options[optionIndex]), parsedOption = this._mapOption($current);
             parsedOptions.push(parsedOption);
             parsedOptionsMap[parsedOption.id] = optionIndex;
         }
@@ -323,29 +314,28 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _mapOption: function ($option) {
-        var isCorrect = !!$option.data(this.IS_CORRECT), //get if is the correct option
+        let isCorrect = !!$option.data(this.IS_CORRECT), //get if is the correct option
         id, $feedback = $option.find(this.QUERY_FEEDBACK);
         //store the feedback founded by type
         $option.removeAttr(this.ATTR_IS_CORRECT);
         $option.uniqueId();
         id = $option.attr("id");
-        var option = {
+        let option = {
             id: id,
             $element: $option,
             isCorrect: isCorrect
         };
-        for (var _i = 0, $feedback_3 = $feedback; _i < $feedback_3.length; _i++) {
-            var feedback = $feedback_3[_i];
-            var $feedback_4 = $(feedback), type = $feedback_4.attr(this.ATTR_FEEDBACK);
+        for (let feedback of $feedback) {
+            let $feedback = $(feedback), type = $feedback.attr(this.ATTR_FEEDBACK);
             switch (type) {
                 case this.FEEDBACK_TYPES.ok:
-                    option.$feedbackOk = $feedback_4;
+                    option.$feedbackOk = $feedback;
                     break;
                 case this.FEEDBACK_TYPES.ko:
-                    option.$feedbackKo = $feedback_4;
+                    option.$feedbackKo = $feedback;
                     break;
                 default:
-                    option.$feedback = $feedback_4;
+                    option.$feedback = $feedback;
                     break;
             }
         }
@@ -356,16 +346,16 @@ $.widget("ui.jqQuiz", {
     },
     _assignEvents: function () {
         this._$startBtn.off(this.NAMESPACE)
-            .on("click." + this.NAMESPACE, { instance: this }, this._onStartButtonClick);
+            .on(`click.${this.NAMESPACE}`, { instance: this }, this._onStartButtonClick);
         this._$endBtn.off(this.NAMESPACE)
-            .on("click." + this.NAMESPACE, { instance: this }, this._onEndButtonClick);
+            .on(`click.${this.NAMESPACE}`, { instance: this }, this._onEndButtonClick);
         this._$nextBtn.off(this.NAMESPACE)
-            .on("click." + this.NAMESPACE, { instance: this }, this._onNextButtonClick);
+            .on(`click.${this.NAMESPACE}`, { instance: this }, this._onNextButtonClick);
         this._$prevBtn.off(this.NAMESPACE)
-            .on("click." + this.NAMESPACE, { instance: this }, this._onPrevButtonClick);
+            .on(`click.${this.NAMESPACE}`, { instance: this }, this._onPrevButtonClick);
         //this._$questions.off(this.NAMESPACE).on(`click.${this.NAMESPACE}`, {instance: this}, this._onOptionClick);
         this._$questions.off(this.NAMESPACE)
-            .on("change." + this.NAMESPACE, { instance: this }, this._onOptionChange);
+            .on(`change.${this.NAMESPACE}`, { instance: this }, this._onOptionChange);
     },
     /**
      * Invocado al pulsarse el botón start. Comienza el cuestionario
@@ -418,15 +408,15 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _calificate: function () {
-        var currentScore = 0, maxScore = this._maxScore, runtime = this._runtime, questions = this._questions, calification, nSuccess = 0, nFails = 0;
+        let currentScore = 0, maxScore = this._maxScore, runtime = this._runtime, questions = this._questions, calification, nSuccess = 0, nFails = 0;
         if (this.options.multichoice != true) {
-            var result = this._calificateSingleChoice();
+            let result = this._calificateSingleChoice();
             nSuccess = result.nSuccess;
             nFails = result.nFails;
             currentScore = result.score;
         }
         else {
-            var result = this._calificateMultiChoice();
+            let result = this._calificateMultiChoice();
             nSuccess = result.nSuccess;
             nFails = result.nFails;
             currentScore = result.score;
@@ -443,10 +433,10 @@ $.widget("ui.jqQuiz", {
         return calification;
     },
     _calificateSingleChoice: function () {
-        var currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
+        let currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
         //for each question
-        for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-            var currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
+        for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
+            let currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
             result = this._calificateSingleChoiceQuestion(currentQuestion.id);
             //if runtime exists, the question has been answered
             if (result != undefined) {
@@ -471,12 +461,12 @@ $.widget("ui.jqQuiz", {
         };
     },
     _calificateSingleChoiceQuestion: function (questionId) {
-        var question = this.getQuestionById(questionId), result;
+        let question = this.getQuestionById(questionId), result;
         if (question) {
-            var questionRuntime = this._runtime[question.id]; //get runtime for question
+            let questionRuntime = this._runtime[question.id]; //get runtime for question
             //if runtime exists, the question has been answered
             if (questionRuntime && questionRuntime.options.length > 0) {
-                var questionOptions = question.options, //get the options of the question
+                let questionOptions = question.options, //get the options of the question
                 questionOptionsMap = question.optionsMap, //get the options map of the question
                 selectedOptionId = questionRuntime.options[0], //get the id of the selected question
                 selectedOption = questionOptions[questionOptionsMap[selectedOptionId]];
@@ -488,17 +478,17 @@ $.widget("ui.jqQuiz", {
         return result;
     },
     _calificateMultiChoiceQuestion: function (questionId) {
-        var question = this.getQuestionById(questionId), result;
+        let question = this.getQuestionById(questionId), result;
         if (question) {
-            var questionRuntime = this._runtime[question.id]; //get runtime for question
+            let questionRuntime = this._runtime[question.id]; //get runtime for question
             if (questionRuntime) {
-                var questionOptions = question.options, //get the options of the question
+                let questionOptions = question.options, //get the options of the question
                 selectedOptions = questionRuntime.options, //get selected options
                 nCorrectOptionsSelected = 0, //count the success options of the question
                 nCorrectOptions = 0, nIncorrectOptionsSelected = 0;
                 //check if the correct options are all checked
-                for (var questionOptionIndex = 0, questionOptionsLength = questionOptions.length; questionOptionIndex < questionOptionsLength; questionOptionIndex++) {
-                    var currentQuestionOption = questionOptions[questionOptionIndex], checked = selectedOptions.indexOf(currentQuestionOption.id) != -1; //is checked
+                for (let questionOptionIndex = 0, questionOptionsLength = questionOptions.length; questionOptionIndex < questionOptionsLength; questionOptionIndex++) {
+                    let currentQuestionOption = questionOptions[questionOptionIndex], checked = selectedOptions.indexOf(currentQuestionOption.id) != -1; //is checked
                     if (currentQuestionOption.isCorrect) {
                         nCorrectOptions++; //increase total
                         nCorrectOptionsSelected += checked ? 1 : 0; //increase selected
@@ -518,10 +508,10 @@ $.widget("ui.jqQuiz", {
         return result;
     },
     _calificateMultiChoice: function () {
-        var currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
+        let currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
         //for each question
-        for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-            var currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
+        for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
+            let currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
             result = this._calificateMultiChoiceQuestion(currentQuestion.id);
             //if runtime exists, the question has been answered
             if (result != undefined) {
@@ -545,11 +535,11 @@ $.widget("ui.jqQuiz", {
         };
     },
     _showOptionStatus: function (questionId, optionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
-            var runtime = this._runtime[question.id], option = question.options[question.optionsMap[optionId]];
+            let runtime = this._runtime[question.id], option = question.options[question.optionsMap[optionId]];
             if (runtime && option) {
-                var selected = runtime.options.indexOf(optionId) != -1;
+                let selected = runtime.options.indexOf(optionId) != -1;
                 //if the option is selected
                 if (selected) {
                     option.$element.addClass(option.isCorrect
@@ -571,19 +561,18 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _showQuestionStatus: function (questionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
-            var runtime = this._runtime[question.id];
+            let runtime = this._runtime[question.id];
             if (runtime && runtime.option != undefined) {
-                var options = question.options;
+                let options = question.options;
                 if (runtime.isCorrect) {
                     question.$element.addClass(this.options.classes.questionCorrect);
                 }
                 else {
                     question.$element.addClass(this.options.classes.questionIncorrect);
                 }
-                for (var _i = 0, options_1 = options; _i < options_1.length; _i++) {
-                    var currentOption = options_1[_i];
+                for (let currentOption of options) {
                     if (currentOption.isCorrect) {
                         currentOption.$element.addClass(this.options.classes.questionCorrect);
                     }
@@ -595,11 +584,11 @@ $.widget("ui.jqQuiz", {
         }
     },
     _showOptionFeedback: function (questionId, optionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
-            var runtime = this._runtime[question.id], option = question.options[question.optionsMap[optionId]];
+            let runtime = this._runtime[question.id], option = question.options[question.optionsMap[optionId]];
             if (runtime && option) {
-                var selected = runtime.options.indexOf(optionId) != -1;
+                let selected = runtime.options.indexOf(optionId) != -1;
                 if (selected) {
                     if (option.isCorrect) {
                         option.$feedbackKo.hide();
@@ -619,12 +608,12 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _showQuestionFeedback: function (questionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
-            var runtime = this._runtime[question.id];
+            let runtime = this._runtime[question.id];
             if (runtime && runtime != undefined) {
                 //todo add control of multi choice
-                var option = this.getOptionById(questionId, runtime.options[0]);
+                let option = this.getOptionById(questionId, runtime.options[0]);
                 if (option.isCorrect) {
                     question.$feedbackKo.hide();
                     question.$feedbackOk.show();
@@ -642,13 +631,12 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _disableQuestionOptionsField: function (questionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
             if (this.options.multichoice && this._state == this.STATES.running) {
                 question.$element.find(":checked")
                     .attr("disabled", "disabled");
-                for (var _i = 0, _a = question.options; _i < _a.length; _i++) {
-                    var option = _a[_i];
+                for (let option of question.options) {
                     if (option.$element.find(":checked").length > 0) {
                         option.$element.addClass(this.options.classes.disabled);
                     }
@@ -663,7 +651,7 @@ $.widget("ui.jqQuiz", {
         }
     },
     _onOptionClick: function (e) {
-        var instance = e.data.instance, $question = $(this), //the event handler it's attached to the question
+        let instance = e.data.instance, $question = $(this), //the event handler it's attached to the question
         questionId = $question.attr("id"), questionRuntime = instance._runtime[questionId] || {};
         if (instance.options.immediateFeedback === true && questionRuntime.option != undefined) {
             e.preventDefault();
@@ -678,9 +666,9 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _onOptionChange: function (e) {
-        var instance = e.data.instance;
+        let instance = e.data.instance;
         if (instance.options.disabled != true && instance._state == instance.STATES.running) {
-            var $option = $(e.target)
+            let $option = $(e.target)
                 .parents(instance.QUERY_OPTION), $question = $(this), //the event handler it's attached to the question
             questionId = $question.attr("id"), questionRuntime = instance._runtime[questionId] || {}, options = questionRuntime.options || [], optionsValues = questionRuntime.optionsValues || [], optionId = $option.attr("id"), optionValue = $option.find("input").attr("value");
             questionRuntime.options = options;
@@ -742,7 +730,7 @@ $.widget("ui.jqQuiz", {
             }
             if (instance.options.autoGoNext != false) {
                 if (instance.options.multichoice != true) {
-                    setTimeout(function () {
+                    setTimeout(() => {
                         instance.next();
                     }, instance.options.delayOnAutoNext);
                 }
@@ -751,9 +739,9 @@ $.widget("ui.jqQuiz", {
         }
     },
     _resetOption: function (questionId, optionId) {
-        var question = this.getQuestionById(questionId);
+        let question = this.getQuestionById(questionId);
         if (question) {
-            var option = question.options[question.optionsMap[optionId]];
+            let option = question.options[question.optionsMap[optionId]];
             if (option) {
                 option.$feedbackKo.hide();
                 option.$feedbackOk.hide();
@@ -780,21 +768,20 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _hide: function (questionToHide) {
-        var _this = this;
-        var hideDefer = $.Deferred();
-        var result = this.element.triggerHandler(this.ON_QUESTION_HIDE, [this, questionToHide]);
+        let hideDefer = $.Deferred();
+        let result = this.element.triggerHandler(this.ON_QUESTION_HIDE, [this, questionToHide]);
         //if the event returns a promise
         if (result != undefined && result.hasOwnProperty("then")) {
             //waits for the promise to continue
-            result.then(function () {
-                _this.element.triggerHandler(_this.ON_QUESTION_HIDDEN, [_this, questionToHide]);
-                hideDefer.resolveWith(_this);
+            result.then(() => {
+                this.element.triggerHandler(this.ON_QUESTION_HIDDEN, [this, questionToHide]);
+                hideDefer.resolveWith(this);
             });
         }
         else {
-            questionToHide.fadeOut(400, function () {
-                _this.element.triggerHandler(_this.ON_QUESTION_HIDDEN, [_this, questionToHide]);
-                hideDefer.resolveWith(_this);
+            questionToHide.fadeOut(400, () => {
+                this.element.triggerHandler(this.ON_QUESTION_HIDDEN, [this, questionToHide]);
+                hideDefer.resolveWith(this);
             });
         }
         return hideDefer.promise();
@@ -807,19 +794,18 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _show: function (nextQuestion) {
-        var _this = this;
-        var showDefer = $.Deferred();
-        var result = this.element.triggerHandler(this.ON_QUESTION_SHOW, [this, nextQuestion]);
+        let showDefer = $.Deferred();
+        let result = this.element.triggerHandler(this.ON_QUESTION_SHOW, [this, nextQuestion]);
         if (result != undefined && result.hasOwnProperty("then")) {
-            result.then(function () {
-                _this.element.triggerHandler(_this.ON_QUESTION_SHOWN, [_this, nextQuestion]);
-                showDefer.resolveWith(_this);
+            result.then(() => {
+                this.element.triggerHandler(this.ON_QUESTION_SHOWN, [this, nextQuestion]);
+                showDefer.resolveWith(this);
             });
         }
         else {
-            nextQuestion.fadeIn(400, function () {
-                _this.element.triggerHandler(_this.ON_QUESTION_SHOWN, [_this, nextQuestion]);
-                showDefer.resolveWith(_this);
+            nextQuestion.fadeIn(400, () => {
+                this.element.triggerHandler(this.ON_QUESTION_SHOWN, [this, nextQuestion]);
+                showDefer.resolveWith(this);
             });
         }
         return showDefer.promise();
@@ -840,9 +826,9 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _hideHeader: function () {
-        var defer = $.Deferred();
+        let defer = $.Deferred();
         if (this._$header.length > 0) {
-            var result = this.element.triggerHandler(this.ON_HEADER_HIDE, [this, this._$header]);
+            let result = this.element.triggerHandler(this.ON_HEADER_HIDE, [this, this._$header]);
             if (result != undefined && result.hasOwnProperty("then")) {
                 result.then(this._onHeaderHidden.bind(this, defer));
             }
@@ -862,19 +848,18 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _showHeader: function () {
-        var _this = this;
-        var defer = $.Deferred();
+        let defer = $.Deferred();
         if (this._$header.length > 0) {
             //this._$wrapper.prepend(this._$header);
-            var result = this.element.triggerHandler(this.ON_HEADER_SHOW, [this, this._$header]);
+            let result = this.element.triggerHandler(this.ON_HEADER_SHOW, [this, this._$header]);
             if (result != undefined && result.hasOwnProperty("then")) {
-                result.then(function () {
-                    defer.resolveWith(_this);
+                result.then(() => {
+                    defer.resolveWith(this);
                 });
             }
             else {
-                this._$header.fadeIn(400, function () {
-                    defer.resolveWith(_this);
+                this._$header.fadeIn(400, () => {
+                    defer.resolveWith(this);
                 });
             }
         }
@@ -899,8 +884,8 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _hideBody: function () {
-        var defer = $.Deferred();
-        var result = this.element.triggerHandler(this.ON_BODY_HIDE, [this, this._$body]);
+        let defer = $.Deferred();
+        let result = this.element.triggerHandler(this.ON_BODY_HIDE, [this, this._$body]);
         if (result != undefined && result.hasOwnProperty("then")) {
             result.then(this._onBodyHidden.bind(this, defer));
         }
@@ -916,18 +901,17 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _showBody: function () {
-        var _this = this;
-        var defer = $.Deferred();
+        let defer = $.Deferred();
         //this._$wrapper.prepend(this._$body);
-        var result = this.element.triggerHandler(this.ON_BODY_SHOW, [this, this._$body]);
+        let result = this.element.triggerHandler(this.ON_BODY_SHOW, [this, this._$body]);
         if (result != undefined && result.hasOwnProperty("then")) {
-            result.then(function () {
-                defer.resolveWith(_this);
+            result.then(() => {
+                defer.resolveWith(this);
             });
         }
         else {
-            this._$body.fadeIn(400, function () {
-                defer.resolveWith(_this);
+            this._$body.fadeIn(400, () => {
+                defer.resolveWith(this);
             });
         }
         return defer.promise();
@@ -938,12 +922,11 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _animationStart: function () {
-        var _this = this;
-        var defer = $.Deferred(), that = this;
+        let defer = $.Deferred(), that = this;
         this._hideHeader()
-            .then(function () {
-            _this._showBody()
-                .then(function () {
+            .then(() => {
+            this._showBody()
+                .then(() => {
                 defer.resolveWith(that);
             });
         });
@@ -955,12 +938,11 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _animationStop: function () {
-        var _this = this;
-        var defer = $.Deferred(), that = this;
+        let defer = $.Deferred(), that = this;
         this._hideBody()
-            .then(function () {
-            _this._showHeader()
-                .then(function () {
+            .then(() => {
+            this._showHeader()
+                .then(() => {
                 defer.resolveWith(that);
             });
         });
@@ -1055,7 +1037,7 @@ $.widget("ui.jqQuiz", {
      * @param defer
      * @private
      */
-    _onQuestionTransitionEnd: function (oldPage, newPage, defer) {
+    _onQuestionTransitionEnd(oldPage, newPage, defer) {
         this._updateNavigationActionsStates();
         defer.resolveWith(this);
         this.element.triggerHandler(this.ON_TRANSITION_END, [this, oldPage, newPage]);
@@ -1065,7 +1047,7 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _updateNavigationActionsStates: function () {
-        var question = this.getQuestionByIndex(this._currentQuestionIndex), questionRuntime = this._runtime[question.id];
+        let question = this.getQuestionByIndex(this._currentQuestionIndex), questionRuntime = this._runtime[question.id];
         if (this._currentQuestionIndex === 0) {
             this._disablePrev();
             this._enableNext();
@@ -1087,10 +1069,10 @@ $.widget("ui.jqQuiz", {
                     Object.keys(this._runtime) == this._questions.length;
                     break;
                 case this.DISABLE_END.beforeAnswerAllCorrect:
-                    var correct = 0, runtime = this._runtime;
-                    for (var questionId in runtime) {
-                        var questionRuntime_1 = runtime[questionId];
-                        if (questionRuntime_1.isCorrect) {
+                    let correct = 0, runtime = this._runtime;
+                    for (let questionId in runtime) {
+                        let questionRuntime = runtime[questionId];
+                        if (questionRuntime.isCorrect) {
                             correct++;
                         }
                     }
@@ -1110,7 +1092,7 @@ $.widget("ui.jqQuiz", {
      * @private
      */
     _onEndShowResult: function (e) {
-        var instance = e.data.instance;
+        let instance = e.data.instance;
         instance.end();
     },
     /**
@@ -1156,15 +1138,14 @@ $.widget("ui.jqQuiz", {
      * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
      */
     goTo: function (questionIndex) {
-        var _this = this;
-        var promise;
+        let promise;
         if (this._state === this.STATES.running || this._state == this.STATES.review) {
-            var nextQuestion_1 = this._questions[questionIndex], currentQuestionIndex = this._currentQuestionIndex, currentQuestion_1 = this._questions[currentQuestionIndex];
+            let nextQuestion = this._questions[questionIndex], currentQuestionIndex = this._currentQuestionIndex, currentQuestion = this._questions[currentQuestionIndex];
             //ensure that next question exists and it's different of the current question
-            if (nextQuestion_1 != undefined) {
-                if (currentQuestion_1 == undefined || currentQuestion_1 != nextQuestion_1) {
-                    var defer_1 = $.Deferred();
-                    promise = defer_1.promise();
+            if (nextQuestion != undefined) {
+                if (currentQuestion == undefined || currentQuestion != nextQuestion) {
+                    let defer = $.Deferred();
+                    promise = defer.promise();
                     //prevent navigation during transition
                     this._disableNext();
                     this._disablePrev();
@@ -1184,27 +1165,27 @@ $.widget("ui.jqQuiz", {
                     }
                     this.element.attr(this.ATTR_CURRENT_QUESTION, questionIndex);
                     //if current question exists
-                    if (currentQuestion_1) {
+                    if (currentQuestion) {
                         //hide the current question and then show the next
-                        this._hide(currentQuestion_1.$element)
-                            .then(function () {
-                            _this._show(nextQuestion_1.$element)
-                                .then(_this._onQuestionTransitionEnd.bind(_this, currentQuestion_1, nextQuestion_1, defer_1));
+                        this._hide(currentQuestion.$element)
+                            .then(() => {
+                            this._show(nextQuestion.$element)
+                                .then(this._onQuestionTransitionEnd.bind(this, currentQuestion, nextQuestion, defer));
                         });
                     }
                     else {
                         //if current quesiton doesn't exists
-                        this._show(nextQuestion_1.$element)
-                            .then(this._onQuestionTransitionEnd.bind(this, currentQuestion_1, nextQuestion_1, defer_1));
+                        this._show(nextQuestion.$element)
+                            .then(this._onQuestionTransitionEnd.bind(this, currentQuestion, nextQuestion, defer));
                     }
                 }
             }
             else {
                 //hide current question
-                if (currentQuestion_1) {
-                    var defer = $.Deferred();
+                if (currentQuestion) {
+                    let defer = $.Deferred();
                     promise = defer.promise();
-                    this._hide(currentQuestion_1.$element).then(this._onQuestionTransitionEnd.bind(this, currentQuestion_1, null, defer));
+                    this._hide(currentQuestion.$element).then(this._onQuestionTransitionEnd.bind(this, currentQuestion, null, defer));
                 }
             }
         }
@@ -1248,7 +1229,7 @@ $.widget("ui.jqQuiz", {
      * @returns {any}
      */
     getOptionByIndex: function (questionId, optionIndex) {
-        var options = this.getOptions(questionId), option;
+        let options = this.getOptions(questionId), option;
         if (options) {
             option = options[optionIndex];
         }
@@ -1261,7 +1242,7 @@ $.widget("ui.jqQuiz", {
      * @returns {any}
      */
     getOptionById: function (questionId, optionId) {
-        var question = this.getQuestionById(questionId), option;
+        let question = this.getQuestionById(questionId), option;
         if (question) {
             option = question.options[question.optionsMap[optionId]];
         }
@@ -1332,11 +1313,11 @@ $.widget("ui.jqQuiz", {
      */
     showCorrection: function () {
         if (this.options.showCorrection) {
-            var questions = this._questions;
-            for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-                var currentQuestion = questions[questionIndex], options = currentQuestion.options;
-                for (var optionIndex = 0, optionsLength = options.length; optionIndex < optionsLength; optionIndex++) {
-                    var currentOption = options[optionIndex];
+            let questions = this._questions;
+            for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
+                let currentQuestion = questions[questionIndex], options = currentQuestion.options;
+                for (let optionIndex = 0, optionsLength = options.length; optionIndex < optionsLength; optionIndex++) {
+                    let currentOption = options[optionIndex];
                     this._showOptionStatus(currentQuestion.id, currentOption.id);
                 }
                 this._disableQuestionOptionsField(currentQuestion.id);
@@ -1350,9 +1331,9 @@ $.widget("ui.jqQuiz", {
         }
     },
     _disableAllQuestions: function () {
-        var questions = this._questions;
-        for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-            var currentQuestion = questions[questionIndex];
+        let questions = this._questions;
+        for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
+            let currentQuestion = questions[questionIndex];
             this._disableQuestionOptionsField(currentQuestion.id);
         }
     },
@@ -1363,7 +1344,7 @@ $.widget("ui.jqQuiz", {
         //if its running
         if (this._state === this.STATES.running) {
             //calificate
-            var calification = this._calificate();
+            let calification = this._calificate();
             this.lastCalification = calification;
             this._disableAllQuestions();
             this.element.trigger(this.ON_END, [this, calification]);
@@ -1400,21 +1381,21 @@ $.widget("ui.jqQuiz", {
         switch (state) {
             case this.STATES.review:
                 this._state = state;
-                this.element.removeClass(this.options.classes.stateRunning + " " + this.options.classes.stateResult);
+                this.element.removeClass(`${this.options.classes.stateRunning} ${this.options.classes.stateResult}`);
                 this.element.addClass(this.options.classes.stateReview);
                 break;
             case this.STATES.running:
                 this._state = state;
-                this.element.removeClass(this.options.classes.stateReview + " " + this.options.classes.stateResult);
+                this.element.removeClass(`${this.options.classes.stateReview} ${this.options.classes.stateResult}`);
                 this.element.addClass(this.options.classes.stateRunning);
                 break;
             case this.STATES.result:
                 this._state = state;
-                this.element.removeClass(this.options.classes.stateReview + " " + this.options.classes.stateRunning);
+                this.element.removeClass(`${this.options.classes.stateReview} ${this.options.classes.stateRunning}`);
                 this.element.addClass(this.options.classes.stateResult);
                 break;
             case this.STATES.off:
-                this.element.removeClass(this.options.classes.stateResult + " " + this.options.classes.stateReview + " " + this.options.classes.stateRunning);
+                this.element.removeClass(`${this.options.classes.stateResult} ${this.options.classes.stateReview} ${this.options.classes.stateRunning}`);
                 this._state = state;
                 break;
         }
@@ -1450,15 +1431,13 @@ $.widget("ui.jqQuiz", {
         this._$questionsWrapper.removeClass(this.options.classes.questions);
         this._$questions.removeClass(this.options.classes.question);
         this._$questions.show();
-        this._$startBtn.removeClass(this.options.classes.button + " " + this.options.classes.startBtn);
-        this._$nextBtn.removeClass(this.options.classes.button + " " + this.options.classes.nextBtn);
-        this._$prevBtn.removeClass(this.options.classes.button + " " + this.options.classes.prevBtn);
-        this._$endBtn.removeClass(this.options.classes.button + " " + this.options.classes.endBtn);
+        this._$startBtn.removeClass(`${this.options.classes.button} ${this.options.classes.startBtn}`);
+        this._$nextBtn.removeClass(`${this.options.classes.button} ${this.options.classes.nextBtn}`);
+        this._$prevBtn.removeClass(`${this.options.classes.button} ${this.options.classes.prevBtn}`);
+        this._$endBtn.removeClass(`${this.options.classes.button} ${this.options.classes.endBtn}`);
         this._$result.removeClass(this.options.classes.result);
         if (this._$result.data("uiDialog")) {
             this._$result.dialog("destroy");
         }
     }
 });
-
-})));

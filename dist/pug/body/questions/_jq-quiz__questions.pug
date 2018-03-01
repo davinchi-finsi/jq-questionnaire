@@ -1,0 +1,71 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../../common/_globalStructure/_globalStructure
+include _jq-quiz__question
+//- @pugdoc
+    @function jq-quiz__questions
+    @description Mixin to generate the container of questions
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=div]            Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {Object[]}          [params.questions]          If is provided, jq-quiz__question will be invoked for each item.
+    @see jq-quiz__question
+    @example
+    +jq-quiz__questions
+        +jq-quiz__question
+            +jq-quiz__statement
+                span Some question
+            +jq-quiz__options
+                +jq-quiz__option({
+                    name:"q1",
+                    content:"Some option 1",
+                    isCorrect:false
+                })
+                +jq-quiz__option({
+                    name:"q1",
+                    content:"Some option 2",
+                    isCorrect:true
+                })
+    @example
+    +jq-quiz__questions({
+        id: "someId",
+        cssClass: "someCssClass",
+        attributes: {
+            "data-some-attribute": "someValue"
+        },
+        questions: [
+            {
+                statement: "Some question",
+                options: [
+                    {
+                        name: "q1",
+                        content: "Some option 1",
+                        isCorrect: false
+                    },
+                    {
+                        name: "q1",
+                        content: "Some option 2",
+                        isCorrect: true
+                    }
+                ]
+            }
+        ]
+    })
+mixin jq-quiz__questions(params)
+    //Quiz questions
+    - params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__questions",
+            attributes: {
+                "data-jq-quiz-questions": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.questions)
+            each question in params.questions
+                - question.multichoice = params.multichoice;
+                +jq-quiz__question(question)
+        block
+    //End quiz questions

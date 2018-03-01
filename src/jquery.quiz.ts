@@ -1,4 +1,3 @@
-/*! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE */
 $.widget(
     "ui.jqQuiz", {
         NAMESPACE: "jqQuiz",
@@ -25,7 +24,9 @@ $.widget(
         ATTR_FEEDBACK: "data-jq-quiz-feedback",
         ATTR_POINTS_FOR_FAIL: "data-points-for-fail",
         ON_QUESTION_HIDE: "jqQuiz:questionHide",
+        ON_QUESTION_HIDDEN: "jqQuiz:questionHidden",
         ON_QUESTION_SHOW: "jqQuiz:questionShow",
+        ON_QUESTION_SHOWN: "jqQuiz:questionShow",
         ON_HEADER_HIDE: "jqQuiz:headerHide",
         ON_HEADER_SHOW: "jqQuiz:headerShow",
         ON_BODY_HIDE: "jqQuiz:bodyHide",

@@ -1,0 +1,44 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include _jq-quiz__property
+//- @pugdoc
+    @function jq-quiz__properties
+    @description Mixin to generate the properties container of the quiz
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=dl]             Tag to render.
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {String}            [params.properties]         If is provided,jq-quiz__property will be invoked for each item
+    @example
+    +jq-quiz__properties
+        +jq-quiz__property({
+            type:"cutOfMark",
+            content:"Minimum score to pass"
+        })
+    @example
+    +jq-quiz__properties({
+        properties:[
+            {
+                type:"cutOfMark",
+                content:"Minimum score to pass"
+            }
+        ]
+    })
+mixin jq-quiz__properties(params)
+    -
+        params = params || {};
+    -params.tag = params.tag || "dl";
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__properties",
+            attributes: {
+                "data-jq-quiz-properties": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.properties)
+            each property in params.properties
+                +jq-quiz__property(property)
+        block
+    //End quiz properties
