@@ -3,7 +3,10 @@
   "version": "0.6.3",
   "description": "Jquery plugin to create quizzes",
   "main": "dist/jquery.quiz.js",
-  "module": "dist/jquery.quiz.js",
+  "jsnext:main": "esm2015/jquery.quiz.js",
+  "ts:main": "src/jquery.quiz.ts",
+  "types": "src/jquery.quiz.ts",
+  "typings": "src/jquery.quiz.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "gulp build"
@@ -20,8 +23,6 @@
     "jquery-ui": "^1.12.1",
     "jquery-ui-dist": "^1.12.1"
   },
-  "types": "src/jquery.quiz.ts",
-  "typings": "src/jquery.quiz.ts",
   "directories": {
     "typings": "src"
   },
