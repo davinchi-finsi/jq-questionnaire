@@ -46,7 +46,9 @@
             ON_HEADER_HIDE: "jqQuiz:headerHide",
             ON_HEADER_SHOW: "jqQuiz:headerShow",
             ON_BODY_HIDE: "jqQuiz:bodyHide",
+            ON_BODY_HIDDEN: "jqQuiz:bodyHidden",
             ON_BODY_SHOW: "jqQuiz:bodyShow",
+            ON_BODY_SHOWN: "jqQuiz:bodyShown",
             ON_TRANSITION_END: "jqQuiz:transitionEnd",
             ON_OPTION_CHANGE: "jqQuiz:questionChange",
             ON_START: "jqQuiz:start",
@@ -821,12 +823,14 @@
                     //waits for the promise to continue
                     result.then(
                         () => {
+                            this.element.triggerHandler(this.ON_QUESTION_HIDDEN, [this, questionToHide]);
                             hideDefer.resolveWith(this);
                         }
                     );
                 } else {
                     questionToHide.fadeOut(
                         400, () => {
+                            this.element.triggerHandler(this.ON_QUESTION_HIDDEN, [this, questionToHide]);
                             hideDefer.resolveWith(this);
                         }
                     );
@@ -846,12 +850,14 @@
                 if (result != undefined && result.hasOwnProperty("then")) {
                     result.then(
                         () => {
+                            this.element.triggerHandler(this.ON_QUESTION_SHOWN, [this, nextQuestion]);
                             showDefer.resolveWith(this);
                         }
                     );
                 } else {
                     nextQuestion.fadeIn(
                         400, () => {
+                            this.element.triggerHandler(this.ON_QUESTION_SHOWN, [this, nextQuestion]);
                             showDefer.resolveWith(this);
                         }
                     );
