@@ -1186,11 +1186,16 @@ $.widget(
          * Navega a una pregunta en concreto
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
-        goTo: function (questionIndex) {
+        goTo: function (questionIdOrIndex) {
             let promise;
             if (this._state === this.STATES.running || this._state == this.STATES.review) {
-                let nextQuestion = this._questions[questionIndex],
-                    currentQuestionIndex = this._currentQuestionIndex,
+                let nextQuestion,
+                    questionIndex = questionIdOrIndex;
+                if((typeof questionIndex).toLowerCase() == "string"){
+                    questionIndex = this._questions.findIndex((q)=>q.id == questionIdOrIndex);
+                }
+                nextQuestion = this._questions[questionIndex];
+                let currentQuestionIndex = this._currentQuestionIndex,
                     currentQuestion = this._questions[currentQuestionIndex];
                 //ensure that next question exists and it's different of the current question
                 if (nextQuestion != undefined) {
