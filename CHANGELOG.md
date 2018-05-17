@@ -1,4 +1,8 @@
 # Change Log
+<a name="1.1.0"></a>
+## [1.0.0](https://github.com/davinchi-finsi/jq-quiz/compare/v1.0.0...v1.1.0) (2018-05-17)
+### Features
+* Now goTo accepts the id of the question or the index
 
 <a name="1.0.0"></a>
 ## [1.0.0](https://github.com/davinchi-finsi/jq-quiz/compare/v0.6.3...v1.0.0) (2018-03-01)
