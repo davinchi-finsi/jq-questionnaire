@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v1.0.0
+ * @license jq-quiz v1.1.0
  * (c) 2018 Finsi, Inc.
  */
 
@@ -158,20 +158,20 @@ $.widget("ui.jqQuiz", {
         for (let element of $toRender) {
             let $element = $(element), optionName = ($element.data(data) || ""), //get the data name
             optionAsTrue, optionAsFalse;
-            if (optionName != undefined) {
+            if (optionName != undefined) { //if exists
                 [optionName, optionAsTrue] = optionName.split("?"); //split to get the parts
                 optionName = optionName.trim();
-                if (optionAsTrue != undefined) {
+                if (optionAsTrue != undefined) { //if optionAsTrue exists
                     [optionAsTrue, optionAsFalse] = optionAsTrue.split(":"); //destructure
                     optionAsTrue.trim();
                     optionAsFalse.trim();
                 }
                 let optionValue = store[optionName]; //get the value of data
                 optionValue = optionValue != undefined ? optionValue : ""; //if undefined, assign empty string
-                if (optionAsTrue != undefined && !!optionValue) {
+                if (optionAsTrue != undefined && !!optionValue) { //if the value is true and optionAsTrue is provided, the value to display is optionAsTrue
                     optionValue = optionAsTrue;
                 }
-                else if (optionAsFalse != undefined && !optionValue) {
+                else if (optionAsFalse != undefined && !optionValue) { //if the value is false and optionAsFalse is provided, the value to display is optionAsFalse
                     optionValue = optionAsFalse;
                 }
                 $element.html(optionValue);
@@ -489,12 +489,12 @@ $.widget("ui.jqQuiz", {
                 //check if the correct options are all checked
                 for (let questionOptionIndex = 0, questionOptionsLength = questionOptions.length; questionOptionIndex < questionOptionsLength; questionOptionIndex++) {
                     let currentQuestionOption = questionOptions[questionOptionIndex], checked = selectedOptions.indexOf(currentQuestionOption.id) != -1; //is checked
-                    if (currentQuestionOption.isCorrect) {
+                    if (currentQuestionOption.isCorrect) { //option is correct
                         nCorrectOptions++; //increase total
                         nCorrectOptionsSelected += checked ? 1 : 0; //increase selected
                     }
                     else {
-                        if (checked) {
+                        if (checked) { //if a incorrect option is checked, stop checking
                             nIncorrectOptionsSelected++;
                             questionOptionIndex = questionOptionsLength;
                         }
@@ -541,12 +541,12 @@ $.widget("ui.jqQuiz", {
             if (runtime && option) {
                 let selected = runtime.options.indexOf(optionId) != -1;
                 //if the option is selected
-                if (selected) {
+                if (selected) { //if is correct add the class, if incorrect the incorrect class
                     option.$element.addClass(option.isCorrect
                         ? this.options.classes.questionCorrect
                         : this.options.classes.questionIncorrect);
                 }
-                else {
+                else { //if is not selected but is correct, add the incorrect class
                     option.$element.addClass(option.isCorrect ? this.options.classes.questionIncorrect : "");
                 }
             }
@@ -633,7 +633,7 @@ $.widget("ui.jqQuiz", {
     _disableQuestionOptionsField: function (questionId) {
         let question = this.getQuestionById(questionId);
         if (question) {
-            if (this.options.multichoice && this._state == this.STATES.running) {
+            if (this.options.multichoice && this._state == this.STATES.running) { //if multichoice, disable only the selected fields
                 question.$element.find(":checked")
                     .attr("disabled", "disabled");
                 for (let option of question.options) {
@@ -1137,10 +1137,15 @@ $.widget("ui.jqQuiz", {
      * Navega a una pregunta en concreto
      * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
      */
-    goTo: function (questionIndex) {
+    goTo: function (questionIdOrIndex) {
         let promise;
         if (this._state === this.STATES.running || this._state == this.STATES.review) {
-            let nextQuestion = this._questions[questionIndex], currentQuestionIndex = this._currentQuestionIndex, currentQuestion = this._questions[currentQuestionIndex];
+            let nextQuestion, questionIndex = questionIdOrIndex;
+            if ((typeof questionIndex).toLowerCase() == "string") {
+                questionIndex = this._questions.findIndex((q) => q.id == questionIdOrIndex);
+            }
+            nextQuestion = this._questions[questionIndex];
+            let currentQuestionIndex = this._currentQuestionIndex, currentQuestion = this._questions[currentQuestionIndex];
             //ensure that next question exists and it's different of the current question
             if (nextQuestion != undefined) {
                 if (currentQuestion == undefined || currentQuestion != nextQuestion) {

@@ -1,6 +1,6 @@
 {
   "name": "jq-quiz",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Jquery plugin to create quizzes",
   "main": "dist/jquery.quiz.js",
   "jsnext:main": "esm2015/jquery.quiz.js",
@@ -27,25 +27,25 @@
     "typings": "src"
   },
   "devDependencies": {
-    "@types/jquery": "^3.3.0",
-    "@types/jqueryui": "^1.12.1",
-    "@types/node": "^9.3.0",
-    "chalk": "^2.3.1",
+    "@types/jquery": "^3.3.2",
+    "@types/jqueryui": "^1.12.2",
+    "@types/node": "^10.1.0",
+    "chalk": "^2.4.1",
     "gulp": "^3.9.1",
-    "gulp-clean-css": "^3.9.2",
+    "gulp-clean-css": "^3.9.4",
     "gulp-cli": "^2.0.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^3.1.0",
+    "gulp-rename": "^1.2.3",
+    "gulp-sass": "^4.0.1",
     "lodash.camelcase": "^4.3.0",
     "rimraf": "^2.6.2",
-    "rollup": "^0.55.5",
-    "rollup-plugin-license": "^0.5.0",
+    "rollup": "^0.59.1",
+    "rollup-plugin-license": "^0.6.0",
     "rollup-plugin-typescript": "^0.8.1",
     "rollup-plugin-uglify": "^3.0.0",
     "rollup-plugin-uglify-es": "0.0.1",
-    "typedoc": "^0.10.0",
-    "typedoc-plugin-external-module-name": "^1.0.10",
-    "typescript": "^2.6.2",
-    "uglify-js": "^3.3.8"
+    "typedoc": "^0.11.1",
+    "typedoc-plugin-external-module-name": "^1.1.1",
+    "typescript": "^2.8.3",
+    "uglify-js": "^3.3.25"
   }
 }
