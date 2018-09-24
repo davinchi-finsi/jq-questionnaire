@@ -79,21 +79,31 @@ $.widget(
                 button: "jq-quiz__action",
                 properties: "jq-quiz__properties",
                 questions: "jq-quiz__questions",
-                disabled:"jq-quiz--disabled"
+                title:"jq-quiz__title",
+                disabled:"jq-quiz--disabled",
+                property:"jq-quiz__property",
+                actions:"jq-quiz__actions",
+                action:"jq-quiz__action",
+                statement:"jq-quiz__statement",
+                options:"jq-quiz__options",
+                field:"jq-quiz__option-field",
+                feedback:"jq-quiz__feedback",
+                resultItem:"jq-quiz__result-item",
+                label:"jq-quiz__option-label",
+                propertyName:"jq-quiz__property"
             },
             delayOnAutoNext: 500,//delay before auto go next question. Only applies if autoGoNext == true
             pointsForSuccess: 1,//amount of points to increase when a question is answered correctly
             pointsForFail: 0,//amount of points to substract when a question is answered incorrectly
             cutOffMark: 50,//minimum % of points to pass the quiz
             immediateFeedback: false,//show if the question has been answered correctly or incorrectly immediatly after choose an option
-            disableOptionAfterSelect: true,//DEPRECATED. use allowChangeOption. Disables the options of the question answered before choose one option. Only applies if immediateFeedback == true
             allowChangeOption:false,//Disables the options of the question answered before choose one option.
             autoGoNext: true,//Go to the next question after choose an option. Only applies if multichoice == false
             showCorrection: true,//Show the question corrections at the end of the quiz
             showResult: true,//show the result dialog
             multichoice: false,
-            disableNextUntilSuccess: false,//disable the next action until select the correct answer. Only available when immediateFeedback is true and disableOptionAfterSelect is false
-            disableEndActionUntil:0,//disable the end action until a condition. Use DISABLE_END conditions. Only available when immediateFeedback is true and disableOptionAfterSelect is false.
+            disableNextUntilSuccess: false,//disable the next action until select the correct answer. Only available when immediateFeedback is true and allowChangeOption is true
+            disableEndActionUntil:0,//disable the end action until a condition. Use DISABLE_END conditions. Only available when immediateFeedback is true and allowChangeOption is true.
             dialog: {//dialog options. All options of jquery ui dialog could be used  https://api.jqueryui.com/dialog/
                 draggable: false,
                 autoOpen: true,
@@ -108,6 +118,9 @@ $.widget(
          * @private
          */
         _create: function () {
+            if(this.options.quiz && this.element.children().length == 0){
+                this.element.html(this._renderTemplate());
+            }
             this._getElements();
             this.element.uniqueId();
             this._mapQuestions();
@@ -174,6 +187,310 @@ $.widget(
                     $element.html(optionValue);
                 }
             }
+        },
+        _renderTemplate:function(){
+            debugger;
+            let result;
+            const quiz = this.options.quiz;
+            if(quiz){
+                result=`
+                    <form class="${this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? +" "+quiz.wrapper.cssClass : "") }" data-jq-quiz-wrapper>
+                        ${this._renderTemplateHeader(quiz.header)}
+                        ${this._renderTemplateBody(quiz.body)}
+                        ${this._renderTemplateResult(quiz.result)}
+                    </form>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeader:function(header){
+            let result = "";
+            if(header){
+                result = `
+                    <div class="${this.options.classes.header + (header.cssClass ? +" "+header.cssClass : "") }" data-jq-quiz-header>
+                        ${this._renderTemplateHeaderTitle(header.title)}
+                        ${this._renderTemplateHeaderDescription(header.description)}
+                        ${this._renderTemplateHeaderProperties(header.properties)}
+                        ${this._renderTemplateHeaderActions(header.actions)}
+                    </div>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderTitle:function(title){
+            let result = "";
+            if(title){
+                if((typeof title).toLowerCase() == "string"){
+                    title = {
+                        tag:"h",
+                        level:1,
+                        content:title
+                    };
+                }
+                if(title.tag == "h" && !title.level){
+                    title.level = 1;
+                }
+                result = `
+                    <${title.tag}${title.level} class="${this.options.classes.title + (title.cssClass ? +" "+title.cssClass : "") }" data-jq-quiz-title>
+                        ${title.content}
+                    </${title.tag}${title.level}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderDescription:function(description){
+            let result = "";
+            if(description){
+                if((typeof description).toLowerCase() == "string"){
+                    description = {
+                        tag:"p",
+                        content:description
+                    };
+                }
+                result = `
+                    <${description.tag || "p"} class="${this.options.classes.description + (description.cssClass ? +" "+description.cssClass : "") }" data-jq-quiz-description>
+                        ${description.content}
+                    </${description.tag || "p"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderProperties:function(properties){
+            let result = "";
+            if(properties){
+                if(Array.isArray(properties)){
+                    properties = {
+                        tag:"dl",
+                        properties:properties
+                    };
+                }
+                let propertiesStr = "";
+                for (let propertyIndex = 0, propertiesLength = properties.properties.length; propertyIndex < propertiesLength; propertyIndex++) {
+                    let property = properties.properties[propertyIndex];
+                    propertiesStr+=this._renderTemplateHeaderProperty(property);
+                }
+                result = `
+                    <${properties.tag || "dl"} class="${this.options.classes.properties + (properties.cssClass ? +" "+properties.cssClass : "") }" data-jq-quiz-properties>
+                        ${propertiesStr}
+                    </${properties.tag || "dl"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderProperty:function(property){
+            let result = "";
+            if(property){
+                result = `
+                    <${property.tagName || "dt"} class="${this.options.classes.propertyName + (property.cssClass ? +" "+property.cssClass : "") }">
+                        ${property.content}
+                    </${property.tagName || "dt"}>
+                    <${property.tagName || "dd"} class="${this.options.classes.propertyName + (property.cssClass ? +" "+property.cssClass : "") }" data-jq-quiz-property="${property.type}">
+                        
+                    </${property.tagName || "dd"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderActions:function(actions){
+            let result = "";
+            if(actions){
+                if(Array.isArray(actions)){
+                    actions = {
+                        tag:"div",
+                        actions:actions
+                    };
+                }
+                let actionsStr = "";
+                for (let actionIndex = 0, actionsLength = actions.actions.length; actionIndex < actionsLength; actionIndex++) {
+                    let action = actions.actions[actionIndex];
+                    actionsStr+=this._renderTemplateHeaderAction(action);
+                }
+                result = `
+                    <${actions.tag || "div"} class="${this.options.classes.actions + (actions.cssClass ? +" "+actions.cssClass : "") }" data-jq-quiz-actions>
+                        ${actionsStr}
+                    </${actions.tag || "div"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateHeaderAction:function(action){
+            let result = "";
+            if(action){
+                result = `
+                    <${action.tagName || "button"} class="${this.options.classes.action + (action.cssClass ? +" "+action.cssClass : "") }" data-jq-quiz-${action.type}>
+                        ${action.content}
+                    </${action.tagName || "button"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBody:function(body){
+            let result = "";
+            if(body){
+                result = `
+                    <${body.tag || "div"} class="${this.options.classes.body + (body.cssClass ? +" "+body.cssClass : "") }" data-jq-quiz-body>
+                        ${this._renderTemplateBodyQuestions(body.questions)}
+                    </${body.tag || "div"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestions:function(questions){
+            let result = "";
+            if(questions && Array.isArray(questions)){
+                if(Array.isArray(questions)){
+                    questions = {
+                        questions:questions
+                    }
+                }
+                let questionsStr = "";
+                for(let question of questions.questions){
+                    questionsStr+=this._renderTemplateBodyQuestion(question);
+                }
+                result = `
+                    <${questions.tag || "div"} class="${this.options.classes.questions + (questions.cssClass
+                                                                                             ? +" " + questions.cssClass
+                                                                                             : "")}" data-jq-quiz-questions>
+                        ${questionsStr}
+                    </${questions.tag || "div"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestion:function(question){
+            let result = "";
+            if(question) {
+                result = `
+                    <${question.tag || "fieldset"} class="${this.options.classes.question + (question.cssClass
+                                                                                             ? +" " + question.cssClass
+                                                                                             : "")}" data-jq-quiz-question>
+                        ${this._renderTemplateBodyQuestionStatement(question.content)}
+                        ${this._renderTemplateBodyQuestionOptions(question.options)}
+                    </${question.tag || "fieldset"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionStatement:function(statement){
+            let result = "";
+            if(statement) {
+                if((typeof statement).toLowerCase() == "string"){
+                    statement = {
+                        content:statement
+                    }
+                }
+                result = `
+                    <${statement.tag || "legend"} class="${this.options.classes.statement + (statement.cssClass
+                                                                                             ? +" " + statement.cssClass
+                                                                                             : "")}" data-jq-quiz-statement>
+                        ${statement.content}
+                    </${statement.tag || "legend"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOptions:function(options){
+            let result = "";
+            if(options){
+                let optionsStr = "";
+                if(Array.isArray(options)){
+                    options={
+                        options:options
+                    }
+                }
+                for(let option of options.options){
+                    optionsStr+=this._renderTemplateBodyQuestionOption(option);
+                }
+                result = `
+                    <${options.tag || "ul"}  class="${this.options.classes.options + (options.cssClass
+                                                                                        ? +" " + options.cssClass
+                                                                                        : "")}" data-jq-quiz-options>
+                        ${optionsStr}
+                    </${options.tag || "ul"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOption:function(option){
+            let result = "";
+            if(option){
+                option.label = option.label ||{};
+                option.field = option.field || {};
+                result = `
+                    <${option.tag || "li"} class="${this.options.classes.option + (option.cssClass
+                                                                                   ? +" " + option.cssClass
+                                                                                   : "")}" data-jq-quiz-option data-is-correct="${!!option.isCorrect}">
+                        <label class="${this.options.classes.label + (option.label.cssClass
+                                                                        ? +" " + option.label.cssClass
+                                                                        : "")}"
+                                for="${option.field.id}">
+                                <span>${option.content}</span>
+                                <input class="${this.options.classes.field + (option.field.cssClass
+                                                                               ? +" " + option.field.cssClass
+                                                                               : "")}" 
+                                       type="${this.options.multichoice ? "checkbox" : "radio"}"
+                                       ${option.field.required ? "required" : ""}
+                                       ${option.name ? "name="+option.name : ""}
+                                       ${option.value ? "value="+option.value : ""}
+                                />
+                                
+                        </label>
+                        ${this._renderTemplateBodyQuestionOptionFeedback(option.feedback)}  
+                    </${option.tag || "li"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOptionFeedback:function(feedback){
+            let result = "";
+            if(feedback && Array.isArray(feedback)){
+                for(let item of feedback){
+                    result+=`
+                        <${item.tag || "div"}  class="${this.options.classes.feedback + (item.cssClass
+                                                                                        ? +" " + item.cssClass
+                                                                                        : "")}" data-jq-quiz-feedback>
+                            ${item.content}
+                        </${item.tag || "div"}>
+                    `;
+                }
+            }
+            return result;
+        },
+        _renderTemplateResult:function(resultOptions){
+            let result = "";
+            if(resultOptions){
+                if(Array.isArray(resultOptions)){
+                    resultOptions = {
+                        items:resultOptions
+                    }
+                }
+                let resultStr = "";
+                for(let resultItem of resultOptions.items){
+                    resultStr+=this._renderTemplateResultItem(resultItem);
+                }
+                result = `
+                    <${resultOptions.tag || "div"} class="${this.options.classes.result + (resultOptions.cssClass
+                                                                                             ? +" " + resultOptions.cssClass
+                                                                                             : "")}" data-jq-quiz-result>
+                        ${resultStr}
+                    </${resultOptions.tag || "div"}>
+                `;
+            }
+            return result;
+        },
+        _renderTemplateResultItem:function(item){
+            let result ="";
+            if(item){
+                result = `
+                    <${item.tagName || "dt"} class="${this.options.classes.resultItem + (item.cssClass ? +" "+item.cssClass : "") }" data-jq-quiz-result-item-label="${item.type}">
+                        ${item.content}
+                    </${item.tagName || "dt"}>
+                    <${item.tagName || "dd"} class="${this.options.classes.resultItem + (item.cssClass ? +" "+item.cssClass : "") }" data-jq-quiz-result-item="${item.type}">
+                        
+                    </${item.tagName || "dd"}>
+                `;
+            }
+            return result;
         },
         /**
          * Obtiene todos los elementos internos
@@ -708,6 +1025,10 @@ $.widget(
                 questionRuntime.options = options;
                 questionRuntime.optionsValues = optionsValues;
                 instance._runtime[questionId] = questionRuntime;
+                const index = instance._runtime.pendingQuestions.indexOf(questionId);
+                if(index != -1){
+                    instance._runtime.pendingQuestions.splice(index,1);
+                }
                 //if multichoice
                 if (instance.options.multichoice) {
                     //if item is selected
@@ -747,9 +1068,8 @@ $.widget(
                 }
                 //go next if isn't immediateFeedback and isnt multichoice
                 if (instance.options.immediateFeedback == true) {
-                    //if disableOptionAfterSelect, the options will be disabled
-                    //@deprecated
-                    if ((instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true ) || instance.options.disableOptionAfterSelect == true) {
+                    //if allowChangeOption is not true, the options will be disabled
+                    if (instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true ) {
                         instance._disableQuestionOptionsField(questionId);
                     } else if (instance.options.disableNextUntilSuccess == true) {
                         instance._updateNavigationActionsStates();
@@ -759,14 +1079,16 @@ $.widget(
                     instance._showOptionFeedback(questionId, optionId);
                     instance._showQuestionFeedback(questionId, optionId);
                 }
-                if (instance.options.autoGoNext != false) {
-                    if (instance.options.multichoice != true) {
-                        setTimeout(
-                            () => {
+                if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
+                    setTimeout(
+                        () => {
+                            if(instance._runtime.pendingQuestions.length > 0) {
                                 instance.next();
-                            }, instance.options.delayOnAutoNext
-                        );
-                    }
+                            }else{
+                                instance.end();
+                            }
+                        }, instance.options.delayOnAutoNext
+                    );
                 }
                 instance.element.triggerHandler(instance.ON_OPTION_CHANGE, [instance, questionId, optionId,optionValue,questionRuntime]);
             }
@@ -1187,7 +1509,8 @@ $.widget(
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
         goTo: function (questionIdOrIndex) {
-            let promise;
+            let defer = $.Deferred();
+            let promise = defer.promise();
             if (this._state === this.STATES.running || this._state == this.STATES.review) {
                 let nextQuestion,
                     questionIndex = questionIdOrIndex;
@@ -1200,8 +1523,6 @@ $.widget(
                 //ensure that next question exists and it's different of the current question
                 if (nextQuestion != undefined) {
                     if(currentQuestion == undefined || currentQuestion != nextQuestion) {
-                        let defer = $.Deferred();
-                        promise = defer.promise();
                         //prevent navigation during transition
                         this._disableNext();
                         this._disablePrev();
@@ -1247,8 +1568,12 @@ $.widget(
                                     )
                                 );
                         }
+                    }else{
+                        defer.reject();
                     }
                 }else{
+                    defer.reject();
+                }/*else{
                     //hide current question
                     if(currentQuestion) {
                         let defer = $.Deferred();
@@ -1260,7 +1585,7 @@ $.widget(
                             defer
                         ));
                     }
-                }
+                }*/
             }
             return promise;
         },
@@ -1364,7 +1689,9 @@ $.widget(
             if (this.options.disabled != true && this._state === this.STATES.off) {
                 this._changeState(this.STATES.running);
                 this.element.trigger(this.ON_START, [this]);
-                this._runtime = {};
+                this._runtime = {
+                    pendingQuestions:this._questions.map(q=>q.id)
+                };
                 this._animationStart()
                     .then(this._onAnimationStartEnd);
             }
