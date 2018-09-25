@@ -110,6 +110,7 @@ $.widget(
                 resizable: false,
                 modal: true
             },
+            randomize:false,//randomize the questions
             initialQuestion:0,//initial question to show. Null to use goTo manually
             autoStart:false//auto start the quiz
         },
@@ -211,7 +212,7 @@ $.widget(
                         ${this._renderTemplateHeaderTitle(header.title)}
                         ${this._renderTemplateHeaderDescription(header.description)}
                         ${this._renderTemplateHeaderProperties(header.properties)}
-                        ${this._renderTemplateHeaderActions(header.actions)}
+                        ${this._renderTemplateActions(header.actions)}
                     </div>
                 `;
             }
@@ -291,7 +292,7 @@ $.widget(
             }
             return result;
         },
-        _renderTemplateHeaderActions:function(actions){
+        _renderTemplateActions:function(actions){
             let result = "";
             if(actions){
                 if(Array.isArray(actions)){
@@ -303,7 +304,7 @@ $.widget(
                 let actionsStr = "";
                 for (let actionIndex = 0, actionsLength = actions.actions.length; actionIndex < actionsLength; actionIndex++) {
                     let action = actions.actions[actionIndex];
-                    actionsStr+=this._renderTemplateHeaderAction(action);
+                    actionsStr+=this._renderTemplateAction(action);
                 }
                 result = `
                     <${actions.tag || "div"} class="${this.options.classes.actions + (actions.cssClass ? +" "+actions.cssClass : "") }" data-jq-quiz-actions>
@@ -313,7 +314,7 @@ $.widget(
             }
             return result;
         },
-        _renderTemplateHeaderAction:function(action){
+        _renderTemplateAction:function(action){
             let result = "";
             if(action){
                 result = `
@@ -330,6 +331,7 @@ $.widget(
                 result = `
                     <${body.tag || "div"} class="${this.options.classes.body + (body.cssClass ? +" "+body.cssClass : "") }" data-jq-quiz-body>
                         ${this._renderTemplateBodyQuestions(body.questions)}
+                        ${this._renderTemplateActions(body.actions)}
                     </${body.tag || "div"}>
                 `;
             }
@@ -1025,9 +1027,9 @@ $.widget(
                 questionRuntime.options = options;
                 questionRuntime.optionsValues = optionsValues;
                 instance._runtime[questionId] = questionRuntime;
-                const index = instance._runtime.pendingQuestions.indexOf(questionId);
+                const index = instance.pendingQuestions.indexOf(questionId);
                 if(index != -1){
-                    instance._runtime.pendingQuestions.splice(index,1);
+                    instance.completedQuestions.push(instance.pendingQuestions.splice(index,1)[0]);
                 }
                 //if multichoice
                 if (instance.options.multichoice) {
@@ -1082,7 +1084,7 @@ $.widget(
                 if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
                     setTimeout(
                         () => {
-                            if(instance._runtime.pendingQuestions.length > 0) {
+                            if(instance.pendingQuestions.length > 0) {
                                 instance.next();
                             }else{
                                 instance.end();
@@ -1391,7 +1393,11 @@ $.widget(
          */
         _onAnimationStartEnd: function () {
             if(this.options.initialQuestion != undefined) {
-                this.goTo(this.options.initialQuestion);
+                if(this.options.randomize) {
+                    this.goTo(this._getRandomNextQuestionIndex());
+                }else{
+                    this.goTo(this.options.initialQuestion);
+                }
             }
             this.element.trigger(this.ON_STARTED, [this]);
         },
@@ -1487,22 +1493,47 @@ $.widget(
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
         next: function () {
+            let goTo;
+            /*if(this.pendingQuestions.length == 0 && this.options.neverEnds){
+                this.pendingQuestions = this.completedQuestions;
+                this.completedQuestions = [this.pendingQuestions.pop()];
+                this._resetUI();
+            }*/
             if (this._currentQuestionIndex != undefined) {
-                return this.goTo(this._currentQuestionIndex + 1);
+                if(this.options.randomize && this._state == this.STATES.running){
+                    goTo = this._getRandomNextQuestionIndex();
+                }else{
+                    goTo = this._currentQuestionIndex + 1;
+                }
             } else {
-                return this.goTo(0);
+                if(this.options.randomize){
+                    goTo = this._getRandomNextQuestionIndex();
+                }else{
+                    goTo = 0;
+                }
             }
+            return this.goTo(goTo);
         },
         /**
          * Retrocede a la pregunta anterior
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
         prev: function () {
-            if (this._currentQuestionIndex != undefined) {
-                return this.goTo(this._currentQuestionIndex - 1);
-            } else {
-                return this.goTo(0);
+            let goTo;
+            if(this.options.randomize && this._currentQuestionIndex != undefined && this._state == this.STATES.running){
+                let lastQuestionId = this.completedQuestions.slice(-1)[0];
+                if(lastQuestionId == this.getQuestionByIndex(this._currentQuestionIndex).id){
+                    lastQuestionId = this.completedQuestions.slice(-2,-1)[0];
+                }
+                goTo = this._questions.findIndex(q=>q.id == lastQuestionId);
+            }else{
+                if (this._currentQuestionIndex != undefined) {
+                    goTo = this._currentQuestionIndex - 1;
+                } else {
+                    goTo =0;
+                }
             }
+            return this.goTo(goTo);
         },
         /**
          * Navega a una pregunta en concreto
@@ -1662,25 +1693,13 @@ $.widget(
          */
         reset: function () {
             this._runtime = {};
+            this.pendingQuestions=null;
+            this.completedQuestions=null;
             this.element.removeAttr(this.ATTR_CURRENT_QUESTION);
             this.element.removeClass(this.options.classes.firstQuestion);
             this.element.removeClass(this.options.classes.lastQuestion);
             this._currentQuestionIndex = null;
-            this._$questions.hide();
-            this._$questions.first()
-                .show();
-            this._$questions.find("input")
-                .prop("checked", false)
-                .removeAttr("disabled");
-            this._$questions.find("."+this.options.classes.disabled).removeClass(this.options.classes.disabled);
-            this.element.find(this.QUERY_FEEDBACK)
-                .hide();
-            this.element.find("." + this.options.classes.questionCorrect)
-                .removeClass(this.options.classes.questionCorrect);
-            this.element.find("." + this.options.classes.questionIncorrect)
-                .removeClass(this.options.classes.questionIncorrect);
-            this.element.find("." + this.options.classes.selected)
-                .removeClass(this.options.classes.selected);
+            this._resetUI();
         },
         /**
          * Comienza el cuestionario
@@ -1690,8 +1709,9 @@ $.widget(
                 this._changeState(this.STATES.running);
                 this.element.trigger(this.ON_START, [this]);
                 this._runtime = {
-                    pendingQuestions:this._questions.map(q=>q.id)
                 };
+                this.pendingQuestions=this._questions.map(q=>q.id);
+                this.completedQuestions=[];
                 this._animationStart()
                     .then(this._onAnimationStartEnd);
             }
@@ -1777,6 +1797,29 @@ $.widget(
                     .then(this._onAnimationEndEnd);
                 return this.lastCalification;
             }
+        },
+        _resetUI:function(){
+            this._$questions.hide();
+            this._$questions.first()
+                .show();
+            this._$questions.find("input")
+                .prop("checked", false)
+                .removeAttr("disabled");
+            this._$questions.find("."+this.options.classes.disabled).removeClass(this.options.classes.disabled);
+            this.element.find(this.QUERY_FEEDBACK)
+                .hide();
+            this.element.find("." + this.options.classes.questionCorrect)
+                .removeClass(this.options.classes.questionCorrect);
+            this.element.find("." + this.options.classes.questionIncorrect)
+                .removeClass(this.options.classes.questionIncorrect);
+            this.element.find("." + this.options.classes.selected)
+                .removeClass(this.options.classes.selected);
+        },
+        _getRandomNextQuestionIndex:function(){
+            let result;
+            const questionId = this.pendingQuestions[Math.floor(Math.random() * this.pendingQuestions.length)];
+            result = this._questions.findIndex(q=>q.id == questionId);
+            return result;
         },
         _changeState: function (state) {
             switch (state) {
