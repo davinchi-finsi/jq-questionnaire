@@ -89,14 +89,24 @@
                 button: "jq-quiz__action",
                 properties: "jq-quiz__properties",
                 questions: "jq-quiz__questions",
-                disabled: "jq-quiz--disabled"
+                title: "jq-quiz__title",
+                disabled: "jq-quiz--disabled",
+                property: "jq-quiz__property",
+                actions: "jq-quiz__actions",
+                action: "jq-quiz__action",
+                statement: "jq-quiz__statement",
+                options: "jq-quiz__options",
+                field: "jq-quiz__option-field",
+                feedback: "jq-quiz__feedback",
+                resultItem: "jq-quiz__result-item",
+                label: "jq-quiz__option-label",
+                propertyName: "jq-quiz__property"
             },
             delayOnAutoNext: 500,
             pointsForSuccess: 1,
             pointsForFail: 0,
             cutOffMark: 50,
             immediateFeedback: false,
-            disableOptionAfterSelect: true,
             allowChangeOption: false,
             autoGoNext: true,
             showCorrection: true,
@@ -110,6 +120,7 @@
                 resizable: false,
                 modal: true
             },
+            randomize: false,
             initialQuestion: 0,
             autoStart: false //auto start the quiz
         },
@@ -118,6 +129,9 @@
          * @private
          */
         _create: function () {
+            if (this.options.quiz && this.element.children().length == 0) {
+                this.element.html(this._renderTemplate());
+            }
             this._getElements();
             this.element.uniqueId();
             this._mapQuestions();
@@ -185,6 +199,223 @@
                 }
             }
             var _a, _b;
+        },
+        _renderTemplate: function () {
+            debugger;
+            var result;
+            var quiz = this.options.quiz;
+            if (quiz) {
+                result = "\n                    <form class=\"" + (this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? +" " + quiz.wrapper.cssClass : "")) + "\" data-jq-quiz-wrapper>\n                        " + this._renderTemplateHeader(quiz.header) + "\n                        " + this._renderTemplateBody(quiz.body) + "\n                        " + this._renderTemplateResult(quiz.result) + "\n                    </form>\n                ";
+            }
+            return result;
+        },
+        _renderTemplateHeader: function (header) {
+            var result = "";
+            if (header) {
+                result = "\n                    <div class=\"" + (this.options.classes.header + (header.cssClass ? +" " + header.cssClass : "")) + "\" data-jq-quiz-header>\n                        " + this._renderTemplateHeaderTitle(header.title) + "\n                        " + this._renderTemplateHeaderDescription(header.description) + "\n                        " + this._renderTemplateHeaderProperties(header.properties) + "\n                        " + this._renderTemplateActions(header.actions) + "\n                    </div>\n                ";
+            }
+            return result;
+        },
+        _renderTemplateHeaderTitle: function (title) {
+            var result = "";
+            if (title) {
+                if ((typeof title).toLowerCase() == "string") {
+                    title = {
+                        tag: "h",
+                        level: 1,
+                        content: title
+                    };
+                }
+                if (title.tag == "h" && !title.level) {
+                    title.level = 1;
+                }
+                result = "\n                    <" + title.tag + title.level + " class=\"" + (this.options.classes.title + (title.cssClass ? +" " + title.cssClass : "")) + "\" data-jq-quiz-title>\n                        " + title.content + "\n                    </" + title.tag + title.level + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateHeaderDescription: function (description) {
+            var result = "";
+            if (description) {
+                if ((typeof description).toLowerCase() == "string") {
+                    description = {
+                        tag: "p",
+                        content: description
+                    };
+                }
+                result = "\n                    <" + (description.tag || "p") + " class=\"" + (this.options.classes.description + (description.cssClass ? +" " + description.cssClass : "")) + "\" data-jq-quiz-description>\n                        " + description.content + "\n                    </" + (description.tag || "p") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateHeaderProperties: function (properties) {
+            var result = "";
+            if (properties) {
+                if (Array.isArray(properties)) {
+                    properties = {
+                        tag: "dl",
+                        properties: properties
+                    };
+                }
+                var propertiesStr = "";
+                for (var propertyIndex = 0, propertiesLength = properties.properties.length; propertyIndex < propertiesLength; propertyIndex++) {
+                    var property = properties.properties[propertyIndex];
+                    propertiesStr += this._renderTemplateHeaderProperty(property);
+                }
+                result = "\n                    <" + (properties.tag || "dl") + " class=\"" + (this.options.classes.properties + (properties.cssClass ? +" " + properties.cssClass : "")) + "\" data-jq-quiz-properties>\n                        " + propertiesStr + "\n                    </" + (properties.tag || "dl") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateHeaderProperty: function (property) {
+            var result = "";
+            if (property) {
+                result = "\n                    <" + (property.tagName || "dt") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")) + "\">\n                        " + property.content + "\n                    </" + (property.tagName || "dt") + ">\n                    <" + (property.tagName || "dd") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")) + "\" data-jq-quiz-property=\"" + property.type + "\">\n                        \n                    </" + (property.tagName || "dd") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateActions: function (actions) {
+            var result = "";
+            if (actions) {
+                if (Array.isArray(actions)) {
+                    actions = {
+                        tag: "div",
+                        actions: actions
+                    };
+                }
+                var actionsStr = "";
+                for (var actionIndex = 0, actionsLength = actions.actions.length; actionIndex < actionsLength; actionIndex++) {
+                    var action = actions.actions[actionIndex];
+                    actionsStr += this._renderTemplateAction(action);
+                }
+                result = "\n                    <" + (actions.tag || "div") + " class=\"" + (this.options.classes.actions + (actions.cssClass ? +" " + actions.cssClass : "")) + "\" data-jq-quiz-actions>\n                        " + actionsStr + "\n                    </" + (actions.tag || "div") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateAction: function (action) {
+            var result = "";
+            if (action) {
+                result = "\n                    <" + (action.tagName || "button") + " class=\"" + (this.options.classes.action + (action.cssClass ? +" " + action.cssClass : "")) + "\" data-jq-quiz-" + action.type + ">\n                        " + action.content + "\n                    </" + (action.tagName || "button") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBody: function (body) {
+            var result = "";
+            if (body) {
+                result = "\n                    <" + (body.tag || "div") + " class=\"" + (this.options.classes.body + (body.cssClass ? +" " + body.cssClass : "")) + "\" data-jq-quiz-body>\n                        " + this._renderTemplateBodyQuestions(body.questions) + "\n                        " + this._renderTemplateActions(body.actions) + "\n                    </" + (body.tag || "div") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestions: function (questions) {
+            var result = "";
+            if (questions && Array.isArray(questions)) {
+                if (Array.isArray(questions)) {
+                    questions = {
+                        questions: questions
+                    };
+                }
+                var questionsStr = "";
+                for (var _i = 0, _a = questions.questions; _i < _a.length; _i++) {
+                    var question = _a[_i];
+                    questionsStr += this._renderTemplateBodyQuestion(question);
+                }
+                result = "\n                    <" + (questions.tag || "div") + " class=\"" + (this.options.classes.questions + (questions.cssClass
+                    ? +" " + questions.cssClass
+                    : "")) + "\" data-jq-quiz-questions>\n                        " + questionsStr + "\n                    </" + (questions.tag || "div") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestion: function (question) {
+            var result = "";
+            if (question) {
+                result = "\n                    <" + (question.tag || "fieldset") + " class=\"" + (this.options.classes.question + (question.cssClass
+                    ? +" " + question.cssClass
+                    : "")) + "\" data-jq-quiz-question>\n                        " + this._renderTemplateBodyQuestionStatement(question.content) + "\n                        " + this._renderTemplateBodyQuestionOptions(question.options) + "\n                    </" + (question.tag || "fieldset") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionStatement: function (statement) {
+            var result = "";
+            if (statement) {
+                if ((typeof statement).toLowerCase() == "string") {
+                    statement = {
+                        content: statement
+                    };
+                }
+                result = "\n                    <" + (statement.tag || "legend") + " class=\"" + (this.options.classes.statement + (statement.cssClass
+                    ? +" " + statement.cssClass
+                    : "")) + "\" data-jq-quiz-statement>\n                        " + statement.content + "\n                    </" + (statement.tag || "legend") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOptions: function (options) {
+            var result = "";
+            if (options) {
+                var optionsStr = "";
+                if (Array.isArray(options)) {
+                    options = {
+                        options: options
+                    };
+                }
+                for (var _i = 0, _a = options.options; _i < _a.length; _i++) {
+                    var option = _a[_i];
+                    optionsStr += this._renderTemplateBodyQuestionOption(option);
+                }
+                result = "\n                    <" + (options.tag || "ul") + "  class=\"" + (this.options.classes.options + (options.cssClass
+                    ? +" " + options.cssClass
+                    : "")) + "\" data-jq-quiz-options>\n                        " + optionsStr + "\n                    </" + (options.tag || "ul") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOption: function (option) {
+            var result = "";
+            if (option) {
+                option.label = option.label || {};
+                option.field = option.field || {};
+                result = "\n                    <" + (option.tag || "li") + " class=\"" + (this.options.classes.option + (option.cssClass
+                    ? +" " + option.cssClass
+                    : "")) + "\" data-jq-quiz-option data-is-correct=\"" + !!option.isCorrect + "\">\n                        <label class=\"" + (this.options.classes.label + (option.label.cssClass
+                    ? +" " + option.label.cssClass
+                    : "")) + "\"\n                                for=\"" + option.field.id + "\">\n                                <span>" + option.content + "</span>\n                                <input class=\"" + (this.options.classes.field + (option.field.cssClass
+                    ? +" " + option.field.cssClass
+                    : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionOptionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateBodyQuestionOptionFeedback: function (feedback) {
+            var result = "";
+            if (feedback && Array.isArray(feedback)) {
+                for (var _i = 0, feedback_1 = feedback; _i < feedback_1.length; _i++) {
+                    var item = feedback_1[_i];
+                    result += "\n                        <" + (item.tag || "div") + "  class=\"" + (this.options.classes.feedback + (item.cssClass
+                        ? +" " + item.cssClass
+                        : "")) + "\" data-jq-quiz-feedback>\n                            " + item.content + "\n                        </" + (item.tag || "div") + ">\n                    ";
+                }
+            }
+            return result;
+        },
+        _renderTemplateResult: function (resultOptions) {
+            var result = "";
+            if (resultOptions) {
+                if (Array.isArray(resultOptions)) {
+                    resultOptions = {
+                        items: resultOptions
+                    };
+                }
+                var resultStr = "";
+                for (var _i = 0, _a = resultOptions.items; _i < _a.length; _i++) {
+                    var resultItem = _a[_i];
+                    resultStr += this._renderTemplateResultItem(resultItem);
+                }
+                result = "\n                    <" + (resultOptions.tag || "div") + " class=\"" + (this.options.classes.result + (resultOptions.cssClass
+                    ? +" " + resultOptions.cssClass
+                    : "")) + "\" data-jq-quiz-result>\n                        " + resultStr + "\n                    </" + (resultOptions.tag || "div") + ">\n                ";
+            }
+            return result;
+        },
+        _renderTemplateResultItem: function (item) {
+            var result = "";
+            if (item) {
+                result = "\n                    <" + (item.tagName || "dt") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")) + "\" data-jq-quiz-result-item-label=\"" + item.type + "\">\n                        " + item.content + "\n                    </" + (item.tagName || "dt") + ">\n                    <" + (item.tagName || "dd") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")) + "\" data-jq-quiz-result-item=\"" + item.type + "\">\n                        \n                    </" + (item.tagName || "dd") + ">\n                ";
+            }
+            return result;
         },
         /**
          * Obtiene todos los elementos internos
@@ -686,6 +917,10 @@
                 questionRuntime.options = options;
                 questionRuntime.optionsValues = optionsValues;
                 instance._runtime[questionId] = questionRuntime;
+                var index = instance.pendingQuestions.indexOf(questionId);
+                if (index != -1) {
+                    instance.completedQuestions.push(instance.pendingQuestions.splice(index, 1)[0]);
+                }
                 //if multichoice
                 if (instance.options.multichoice) {
                     //if item is selected
@@ -727,9 +962,8 @@
                 }
                 //go next if isn't immediateFeedback and isnt multichoice
                 if (instance.options.immediateFeedback == true) {
-                    //if disableOptionAfterSelect, the options will be disabled
-                    //@deprecated
-                    if ((instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true) || instance.options.disableOptionAfterSelect == true) {
+                    //if allowChangeOption is not true, the options will be disabled
+                    if (instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true) {
                         instance._disableQuestionOptionsField(questionId);
                     }
                     else if (instance.options.disableNextUntilSuccess == true) {
@@ -740,12 +974,15 @@
                     instance._showOptionFeedback(questionId, optionId);
                     instance._showQuestionFeedback(questionId, optionId);
                 }
-                if (instance.options.autoGoNext != false) {
-                    if (instance.options.multichoice != true) {
-                        setTimeout(function () {
+                if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
+                    setTimeout(function () {
+                        if (instance.pendingQuestions.length > 0) {
                             instance.next();
-                        }, instance.options.delayOnAutoNext);
-                    }
+                        }
+                        else {
+                            instance.end();
+                        }
+                    }, instance.options.delayOnAutoNext);
                 }
                 instance.element.triggerHandler(instance.ON_OPTION_CHANGE, [instance, questionId, optionId, optionValue, questionRuntime]);
             }
@@ -1037,7 +1274,12 @@
          */
         _onAnimationStartEnd: function () {
             if (this.options.initialQuestion != undefined) {
-                this.goTo(this.options.initialQuestion);
+                if (this.options.randomize) {
+                    this.goTo(this._getRandomNextQuestionIndex());
+                }
+                else {
+                    this.goTo(this.options.initialQuestion);
+                }
             }
             this.element.trigger(this.ON_STARTED, [this]);
         },
@@ -1132,24 +1374,52 @@
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
         next: function () {
+            var goTo;
+            /*if(this.pendingQuestions.length == 0 && this.options.neverEnds){
+                this.pendingQuestions = this.completedQuestions;
+                this.completedQuestions = [this.pendingQuestions.pop()];
+                this._resetUI();
+            }*/
             if (this._currentQuestionIndex != undefined) {
-                return this.goTo(this._currentQuestionIndex + 1);
+                if (this.options.randomize && this._state == this.STATES.running) {
+                    goTo = this._getRandomNextQuestionIndex();
+                }
+                else {
+                    goTo = this._currentQuestionIndex + 1;
+                }
             }
             else {
-                return this.goTo(0);
+                if (this.options.randomize) {
+                    goTo = this._getRandomNextQuestionIndex();
+                }
+                else {
+                    goTo = 0;
+                }
             }
+            return this.goTo(goTo);
         },
         /**
          * Retrocede a la pregunta anterior
          * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
          */
         prev: function () {
-            if (this._currentQuestionIndex != undefined) {
-                return this.goTo(this._currentQuestionIndex - 1);
+            var goTo;
+            if (this.options.randomize && this._currentQuestionIndex != undefined && this._state == this.STATES.running) {
+                var lastQuestionId_1 = this.completedQuestions.slice(-1)[0];
+                if (lastQuestionId_1 == this.getQuestionByIndex(this._currentQuestionIndex).id) {
+                    lastQuestionId_1 = this.completedQuestions.slice(-2, -1)[0];
+                }
+                goTo = this._questions.findIndex(function (q) { return q.id == lastQuestionId_1; });
             }
             else {
-                return this.goTo(0);
+                if (this._currentQuestionIndex != undefined) {
+                    goTo = this._currentQuestionIndex - 1;
+                }
+                else {
+                    goTo = 0;
+                }
             }
+            return this.goTo(goTo);
         },
         /**
          * Navega a una pregunta en concreto
@@ -1157,7 +1427,8 @@
          */
         goTo: function (questionIdOrIndex) {
             var _this = this;
-            var promise;
+            var defer = $.Deferred();
+            var promise = defer.promise();
             if (this._state === this.STATES.running || this._state == this.STATES.review) {
                 var nextQuestion_1, questionIndex = questionIdOrIndex;
                 if ((typeof questionIndex).toLowerCase() == "string") {
@@ -1168,8 +1439,6 @@
                 //ensure that next question exists and it's different of the current question
                 if (nextQuestion_1 != undefined) {
                     if (currentQuestion_1 == undefined || currentQuestion_1 != nextQuestion_1) {
-                        var defer_1 = $.Deferred();
-                        promise = defer_1.promise();
                         //prevent navigation during transition
                         this._disableNext();
                         this._disablePrev();
@@ -1194,24 +1463,34 @@
                             this._hide(currentQuestion_1.$element)
                                 .then(function () {
                                 _this._show(nextQuestion_1.$element)
-                                    .then(_this._onQuestionTransitionEnd.bind(_this, currentQuestion_1, nextQuestion_1, defer_1));
+                                    .then(_this._onQuestionTransitionEnd.bind(_this, currentQuestion_1, nextQuestion_1, defer));
                             });
                         }
                         else {
                             //if current quesiton doesn't exists
                             this._show(nextQuestion_1.$element)
-                                .then(this._onQuestionTransitionEnd.bind(this, currentQuestion_1, nextQuestion_1, defer_1));
+                                .then(this._onQuestionTransitionEnd.bind(this, currentQuestion_1, nextQuestion_1, defer));
                         }
+                    }
+                    else {
+                        defer.reject();
                     }
                 }
                 else {
+                    defer.reject();
+                } /*else{
                     //hide current question
-                    if (currentQuestion_1) {
-                        var defer = $.Deferred();
+                    if(currentQuestion) {
+                        let defer = $.Deferred();
                         promise = defer.promise();
-                        this._hide(currentQuestion_1.$element).then(this._onQuestionTransitionEnd.bind(this, currentQuestion_1, null, defer));
+                        this._hide(currentQuestion.$element).then(this._onQuestionTransitionEnd.bind(
+                            this,
+                            currentQuestion,
+                            null,
+                            defer
+                        ));
                     }
-                }
+                }*/
             }
             return promise;
         },
@@ -1285,25 +1564,13 @@
          */
         reset: function () {
             this._runtime = {};
+            this.pendingQuestions = null;
+            this.completedQuestions = null;
             this.element.removeAttr(this.ATTR_CURRENT_QUESTION);
             this.element.removeClass(this.options.classes.firstQuestion);
             this.element.removeClass(this.options.classes.lastQuestion);
             this._currentQuestionIndex = null;
-            this._$questions.hide();
-            this._$questions.first()
-                .show();
-            this._$questions.find("input")
-                .prop("checked", false)
-                .removeAttr("disabled");
-            this._$questions.find("." + this.options.classes.disabled).removeClass(this.options.classes.disabled);
-            this.element.find(this.QUERY_FEEDBACK)
-                .hide();
-            this.element.find("." + this.options.classes.questionCorrect)
-                .removeClass(this.options.classes.questionCorrect);
-            this.element.find("." + this.options.classes.questionIncorrect)
-                .removeClass(this.options.classes.questionIncorrect);
-            this.element.find("." + this.options.classes.selected)
-                .removeClass(this.options.classes.selected);
+            this._resetUI();
         },
         /**
          * Comienza el cuestionario
@@ -1313,6 +1580,8 @@
                 this._changeState(this.STATES.running);
                 this.element.trigger(this.ON_START, [this]);
                 this._runtime = {};
+                this.pendingQuestions = this._questions.map(function (q) { return q.id; });
+                this.completedQuestions = [];
                 this._animationStart()
                     .then(this._onAnimationStartEnd);
             }
@@ -1401,6 +1670,29 @@
                 return this.lastCalification;
             }
         },
+        _resetUI: function () {
+            this._$questions.hide();
+            this._$questions.first()
+                .show();
+            this._$questions.find("input")
+                .prop("checked", false)
+                .removeAttr("disabled");
+            this._$questions.find("." + this.options.classes.disabled).removeClass(this.options.classes.disabled);
+            this.element.find(this.QUERY_FEEDBACK)
+                .hide();
+            this.element.find("." + this.options.classes.questionCorrect)
+                .removeClass(this.options.classes.questionCorrect);
+            this.element.find("." + this.options.classes.questionIncorrect)
+                .removeClass(this.options.classes.questionIncorrect);
+            this.element.find("." + this.options.classes.selected)
+                .removeClass(this.options.classes.selected);
+        },
+        _getRandomNextQuestionIndex: function () {
+            var result;
+            var questionId = this.pendingQuestions[Math.floor(Math.random() * this.pendingQuestions.length)];
+            result = this._questions.findIndex(function (q) { return q.id == questionId; });
+            return result;
+        },
         _changeState: function (state) {
             switch (state) {
                 case this.STATES.review:
@@ -1463,6 +1755,7 @@
             if (this._$result.data("uiDialog")) {
                 this._$result.dialog("destroy");
             }
+            this._super();
         }
     });
 
