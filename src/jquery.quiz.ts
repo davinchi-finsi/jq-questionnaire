@@ -1883,6 +1883,7 @@ $.widget(
             if (this._$result.data("uiDialog")) {
                 this._$result.dialog("destroy");
             }
+            this._super();
         }
     }
 );
