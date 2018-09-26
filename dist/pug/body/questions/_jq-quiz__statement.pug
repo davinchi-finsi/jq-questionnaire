@@ -1,0 +1,33 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../../common/_globalStructure/_globalStructure
+//- @pugdoc
+    @function jq-quiz__statement
+    @description Mixin to generate the statement of a questions.
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=legend]         Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {String}            [params.content]            Text for the element
+    @example
+    +jq-quiz__statement({
+        content:"Some question"
+    })
+    @example
+    +jq-quiz__statement
+        span Some question
+mixin jq-quiz__statement(params)
+    - params = params || {};
+    - params.tag = params.tag || "legend";
+    //Quiz statement
+    +_mod-baseContent__title({
+        internalParams: {
+            cssClass: "jq-quiz__statement",
+            attributes: {
+                "data-jq-quiz-statement": ""
+            },
+            ignoreContent: false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz statement

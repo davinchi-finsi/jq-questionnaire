@@ -1,0 +1,62 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../../common/_globalStructure/_globalStructure
+//- @pugdoc
+    @function jq-quiz__options
+    @description Mixin to generate the options container
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=div]            Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {Object[]}          [params.options]            If is provided, jq-quiz__option will be invoked for each item.
+    @see jq-quiz__option
+    @example
+    +jq-quiz__options
+        +jq-quiz__option({
+            name:"q1",
+            content:"Some option 1",
+            isCorrect:false
+        })
+        +jq-quiz__option({
+            name:"q1",
+            content:"Some option 2",
+            isCorrect:true
+        })
+    @example
+    +jq-quiz__options({
+        id: "someId",
+        cssClass: "someCssClass",
+        attributes: {
+            "data-some-attribute": "someValue"
+        },
+        options:[
+            {
+                name: "q1",
+                content: "Some option 1",
+                isCorrect: false
+            },
+            {
+                name: "q1",
+                content: "Some option 2",
+                isCorrect: true
+            }
+        ]
+    })
+mixin jq-quiz__options(params)
+    -
+        params = params || {};
+    //Quiz options
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__options",
+            attributes: {
+                "data-jq-quiz-options": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.options)
+            each option in params.options
+                - option.multichoice = params.multichoice || false;
+                +jq-quiz__option(option)
+        block
+    //End quiz options

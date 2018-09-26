@@ -1,0 +1,154 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+include questions/_jq-quiz__questions
+include questions/_jq-quiz__question
+include ../actions/_jq-quiz__actions
+//- @pugdoc
+    @function jq-quiz__body
+    @description Mixin to generate the body of the quiz.
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=div]            Tag to render
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {Object[] | Object} [params.questions]          If is provided, jq-quiz__questions will be invoked. Could use an array of questions or a full list of parameters from jq-quiz__questions
+    @param  {Object[] | Object} [params.actions]            If is provided, jq-quiz__actions will be invoked. Could use an array of actions or a full list of parameters from jq-quiz__actions
+    @see jq-quiz__questions
+    @see jq-quiz__actions
+    @example
+    +jq-quiz
+        +jq-quiz__header
+            //- Header content
+        +jq-quiz__body({
+            id: "someId",
+            cssClass: "someCssClass",
+            attributes: {
+                "data-some-attribute": "someValue"
+            }
+        })
+            +jq-quiz__questions
+                +jq-quiz__question
+                    +jq-quiz__statement
+                        span Some question
+                    +jq-quiz__options
+                        +jq-quiz__option({
+                            name:"q1",
+                            content:"Some option 1",
+                            isCorrect:false
+                        })
+                        +jq-quiz__option({
+                            name:"q1",
+                            content:"Some option 2",
+                            isCorrect:true
+                        })
+            +jq-quiz__actions
+                +jq-quiz__action({
+                    type:"end",
+                    content:"End quiz"
+                })
+    @example
+    +jq-quiz
+        +jq-quiz__header
+            //- Header content
+        +jq-quiz__body({
+            id: "someId",
+            cssClass: "someCssClass",
+            attributes: {
+                "data-some-attribute": "someValue"
+            },
+            questions: [
+                {
+                    statement: "Some question",
+                    options: [
+                        {
+                            name: "q1",
+                            content: "Some option 1",
+                            isCorrect: false
+                        },
+                        {
+                            name: "q1",
+                            content: "Some option 2",
+                            isCorrect: true
+                        }
+                    ]
+                }
+            ],
+            actions: [
+                {
+                    type: "end",
+                    content: "End quiz"
+                }
+            ]
+        })
+    @example
+    +jq-quiz
+        +jq-quiz__header
+            //- Header content
+        +jq-quiz__body({
+            id:"someId",
+            cssClass:"someCssClass",
+            attributes:{
+                "data-some-attribute":"someValue"
+            },
+            questions:{
+                id: "someQuestionsId",
+                cssClass: "someQuestionsCssClass",
+                attributes: {
+                    "data-some-attribute": "someValue"
+                },
+                questions: [
+                    {
+                        content: "Some question",
+                        options: [
+                            {
+                                name: "q1",
+                                content: "Some option 1",
+                                isCorrect: false
+                            },
+                            {
+                                name: "q1",
+                                content: "Some option 2",
+                                isCorrect: true
+                            }
+                        ]
+                    }
+                ],
+                actions: [
+                    {
+                        type: "end",
+                        content: "End quiz"
+                    }
+                ]
+            }
+        })
+mixin jq-quiz__body(params)
+    //Quiz body
+    - params = params || {};
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__body",
+            attributes: {
+                "data-jq-quiz-body": ""
+            }
+        },
+        externalParams: params
+    })&attributes(attributes)
+        if(params.questions)
+            -
+                var questionsParams = {};
+                if(Array.isArray(params.questions)){
+                    questionsParams.questions = params.questions;
+                }else{
+                    questionsParams = params.questions;
+                }
+            +jq-quiz__questions(questionsParams)
+        if(params.actions)
+            -
+                var actionsParams = {};
+                if(Array.isArray(params.actions)){
+                    actionsParams.actions = params.actions;
+                }else{
+                    actionParams = params.actions;
+                }
+            +jq-quiz__actions(actionsParams)
+        block
+    //End quiz body

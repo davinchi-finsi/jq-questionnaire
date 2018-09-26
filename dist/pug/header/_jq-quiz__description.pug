@@ -1,0 +1,55 @@
+//- ! jqQuiz | (c) Davinchi | https://github.com/davinchi-finsi/jq-quiz/blob/master/LICENSE
+include ../common/_globalStructure/_globalStructure
+//- @pugdoc
+    @function jq-quiz__description
+    @description Mixin to generate the description of the quiz
+    @param  {Object}            [params]                    Parameters
+    @param  {String}            [params.tag=p]              Tag to render.
+    @param  {String}            [params.cssClass]           Class to add to the element.
+    @param  {Object}            [params.attributes]         Key-value attributes to add to the element
+    @param  {String}            [params.content]            Text for the element
+    @example
+    +jq-quiz__title({
+        id:"someId",
+        cssClass:"someCssClass",
+        attributes:{
+            "data-some-attribute":"someValue"
+        },
+        content:"Some title"
+    })
+    @example
+    +jq-quiz__title({
+        id:"someId",
+        cssClass:"someCssClass",
+        attributes:{
+            "data-some-attribute":"someValue"
+        }
+    })
+        span Some title
+    @example
+    +jq-quiz__title({
+        level:2,
+        content:"Some title"
+    })
+    @example
+    +jq-quiz__title({
+        tag:"p",
+        content:"Some title"
+    })
+mixin jq-quiz__description(params)
+    -
+        params = params || {};
+        params.tag = params.tag || "p";
+    //Questionnaire description
+    +_mod-baseContent({
+        internalParams: {
+            cssClass: "jq-quiz__description",
+            attributes: {
+                "data-jq-quiz-description": ""
+            },
+            ignoreContent:false
+        },
+        externalParams: params
+    })&attributes(attributes)
+        block
+    //End quiz description
