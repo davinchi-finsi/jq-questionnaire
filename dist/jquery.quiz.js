@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v1.1.0
+ * @license jq-quiz v2.0.0
  * (c) 2018 Finsi, Inc.
  */
 
@@ -129,6 +129,7 @@
          * @private
          */
         _create: function () {
+            this.element.addClass(this.options.classes.widget);
             if (this.options.quiz && this.element.children().length == 0) {
                 this.element.html(this._renderTemplate());
             }
@@ -373,9 +374,9 @@
                     ? +" " + option.cssClass
                     : "")) + "\" data-jq-quiz-option data-is-correct=\"" + !!option.isCorrect + "\">\n                        <label class=\"" + (this.options.classes.label + (option.label.cssClass
                     ? +" " + option.label.cssClass
-                    : "")) + "\"\n                                for=\"" + option.field.id + "\">\n                                <span>" + option.content + "</span>\n                                <input class=\"" + (this.options.classes.field + (option.field.cssClass
+                    : "")) + "\"\n                                " + (option.field && option.field.id ? "for=" + option.field.id : "") + ">\n                                <span>" + option.content + "</span>\n                                <input " + (option.field && option.field.id ? "id=" + option.field.id : "") + "\n                                       class=\"" + (this.options.classes.field + (option.field.cssClass
                     ? +" " + option.field.cssClass
-                    : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionOptionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
+                    : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field && option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionOptionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
             }
             return result;
         },
