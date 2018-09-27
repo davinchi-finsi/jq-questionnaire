@@ -61,6 +61,7 @@ $.widget("ui.jqQuiz", {
         classes: {
             firstQuestion: "jq-quiz--first-question",
             lastQuestion: "jq-quiz--last-question",
+            lastQuestionToAsk: "jq-quiz--last-question-to-ask",
             widget: "jq-quiz",
             questionCorrect: "jq-quiz--correct",
             questionIncorrect: "jq-quiz--incorrect",
@@ -550,16 +551,14 @@ $.widget("ui.jqQuiz", {
         else {
             $options.attr("type", "radio");
         }
-        let $questions = this._$questions, questions = [], questionsMap = {}, maxScore = 0;
+        let $questions = this._$questions, questions = [], maxScore = 0;
         //map each question
         for (let questionIndex = 0, $questionsLength = $questions.length; questionIndex < $questionsLength; questionIndex++) {
             let $current = $($questions[questionIndex]), parsedQuestion = this._mapQuestion($current);
             questions.push(parsedQuestion);
-            questionsMap[parsedQuestion.id] = questionIndex;
             maxScore += parsedQuestion.pointsForSuccess; //increment the max score
         }
-        this._questions = questions;
-        this._questionsMap = questionsMap;
+        this._originalQuestions = questions;
         this._maxScore = maxScore;
         this._setOption("maxScore", maxScore);
     },
@@ -995,10 +994,6 @@ $.widget("ui.jqQuiz", {
             questionRuntime.options = options;
             questionRuntime.optionsValues = optionsValues;
             instance._runtime[questionId] = questionRuntime;
-            const index = instance.pendingQuestions.indexOf(questionId);
-            if (index != -1) {
-                instance.completedQuestions.push(instance.pendingQuestions.splice(index, 1)[0]);
-            }
             //if multichoice
             if (instance.options.multichoice) {
                 //if item is selected
@@ -1346,12 +1341,7 @@ $.widget("ui.jqQuiz", {
      */
     _onAnimationStartEnd: function () {
         if (this.options.initialQuestion != undefined) {
-            if (this.options.randomize) {
-                this.goTo(this._getRandomNextQuestionIndex());
-            }
-            else {
-                this.goTo(this.options.initialQuestion);
-            }
+            this.goTo(this.options.initialQuestion);
         }
         this.element.trigger(this.ON_STARTED, [this]);
     },
@@ -1446,52 +1436,24 @@ $.widget("ui.jqQuiz", {
      * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
      */
     next: function () {
-        let goTo;
-        /*if(this.pendingQuestions.length == 0 && this.options.neverEnds){
-            this.pendingQuestions = this.completedQuestions;
-            this.completedQuestions = [this.pendingQuestions.pop()];
-            this._resetUI();
-        }*/
         if (this._currentQuestionIndex != undefined) {
-            if (this.options.randomize && this._state == this.STATES.running) {
-                goTo = this._getRandomNextQuestionIndex();
-            }
-            else {
-                goTo = this._currentQuestionIndex + 1;
-            }
+            return this.goTo(this._currentQuestionIndex + 1);
         }
         else {
-            if (this.options.randomize) {
-                goTo = this._getRandomNextQuestionIndex();
-            }
-            else {
-                goTo = 0;
-            }
+            return this.goTo(0);
         }
-        return this.goTo(goTo);
     },
     /**
      * Retrocede a la pregunta anterior
      * @returns {JQueryPromise<T>|null} Si la navegación se realiza, devuelve una promesa que será resuelta al finalizar la transición
      */
     prev: function () {
-        let goTo;
-        if (this.options.randomize && this._currentQuestionIndex != undefined && this._state == this.STATES.running) {
-            let lastQuestionId = this.completedQuestions.slice(-1)[0];
-            if (lastQuestionId == this.getQuestionByIndex(this._currentQuestionIndex).id) {
-                lastQuestionId = this.completedQuestions.slice(-2, -1)[0];
-            }
-            goTo = this._questions.findIndex(q => q.id == lastQuestionId);
+        if (this._currentQuestionIndex != undefined) {
+            return this.goTo(this._currentQuestionIndex - 1);
         }
         else {
-            if (this._currentQuestionIndex != undefined) {
-                goTo = this._currentQuestionIndex - 1;
-            }
-            else {
-                goTo = 0;
-            }
+            return this.goTo(0);
         }
-        return this.goTo(goTo);
     },
     /**
      * Navega a una pregunta en concreto
@@ -1586,7 +1548,7 @@ $.widget("ui.jqQuiz", {
      * @returns {any}
      */
     getQuestionById: function (id) {
-        return this.getQuestionByIndex(this._questionsMap[id]);
+        return this.getQuestionByIndex(this._questions.findIndex(q => q.id == id));
     },
     /**
      * Obtiene las opciones de una pregunta
@@ -1651,8 +1613,10 @@ $.widget("ui.jqQuiz", {
             this._changeState(this.STATES.running);
             this.element.trigger(this.ON_START, [this]);
             this._runtime = {};
-            this.pendingQuestions = this._questions.map(q => q.id);
-            this.completedQuestions = [];
+            this._questions = this._originalQuestions.slice();
+            if (this.options.randomize) {
+                this._questions = this._shuffle(this._questions);
+            }
             this._animationStart()
                 .then(this._onAnimationStartEnd);
         }
@@ -1693,6 +1657,13 @@ $.widget("ui.jqQuiz", {
         else {
             return false;
         }
+    },
+    _shuffle: function (a) {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
     },
     _disableAllQuestions: function () {
         let questions = this._questions;
@@ -1743,8 +1714,6 @@ $.widget("ui.jqQuiz", {
     },
     _resetUI: function () {
         this._$questions.hide();
-        this._$questions.first()
-            .show();
         this._$questions.find("input")
             .prop("checked", false)
             .removeAttr("disabled");
