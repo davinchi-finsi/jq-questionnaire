@@ -119,6 +119,7 @@ $.widget(
          * @private
          */
         _create: function () {
+            this.element.addClass(this.options.classes.widget);
             if(this.options.quiz && this.element.children().length == 0){
                 this.element.html(this._renderTemplate());
             }
@@ -425,13 +426,14 @@ $.widget(
                         <label class="${this.options.classes.label + (option.label.cssClass
                                                                         ? +" " + option.label.cssClass
                                                                         : "")}"
-                                for="${option.field.id}">
+                                ${option.field && option.field.id ? "for="+option.field.id : ""}>
                                 <span>${option.content}</span>
-                                <input class="${this.options.classes.field + (option.field.cssClass
+                                <input ${option.field && option.field.id ? "id="+option.field.id : ""}
+                                       class="${this.options.classes.field + (option.field.cssClass
                                                                                ? +" " + option.field.cssClass
                                                                                : "")}" 
                                        type="${this.options.multichoice ? "checkbox" : "radio"}"
-                                       ${option.field.required ? "required" : ""}
+                                       ${option.field && option.field.required ? "required" : ""}
                                        ${option.name ? "name="+option.name : ""}
                                        ${option.value ? "value="+option.value : ""}
                                 />
