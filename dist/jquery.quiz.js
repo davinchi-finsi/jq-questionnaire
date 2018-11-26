@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v2.0.0
+ * @license jq-quiz v2.2.0-beta.1
  * (c) 2018 Finsi, Inc.
  */
 
@@ -122,7 +122,7 @@
                 modal: true
             },
             randomize: false,
-            initialQuestion: 0,
+            initialQuestion: null,
             autoStart: false //auto start the quiz
         },
         /**
@@ -203,7 +203,6 @@
             var _a, _b;
         },
         _renderTemplate: function () {
-            debugger;
             var result;
             var quiz = this.options.quiz;
             if (quiz) {
@@ -329,7 +328,7 @@
             if (question) {
                 result = "\n                    <" + (question.tag || "fieldset") + " class=\"" + (this.options.classes.question + (question.cssClass
                     ? +" " + question.cssClass
-                    : "")) + "\" data-jq-quiz-question>\n                        " + this._renderTemplateBodyQuestionStatement(question.content) + "\n                        " + this._renderTemplateBodyQuestionOptions(question.options) + "\n                    </" + (question.tag || "fieldset") + ">\n                ";
+                    : "")) + "\" data-jq-quiz-question>\n                        " + this._renderTemplateBodyQuestionStatement(question.content) + "\n                        " + this._renderTemplateBodyQuestionOptions(question.options) + "\n                        " + this._renderTemplateBodyQuestionFeedback(question.feedback) + "\n                    </" + (question.tag || "fieldset") + ">\n                ";
             }
             return result;
         },
@@ -377,18 +376,18 @@
                     ? +" " + option.label.cssClass
                     : "")) + "\"\n                                " + (option.field && option.field.id ? "for=" + option.field.id : "") + ">\n                                <span>" + option.content + "</span>\n                                <input " + (option.field && option.field.id ? "id=" + option.field.id : "") + "\n                                       class=\"" + (this.options.classes.field + (option.field.cssClass
                     ? +" " + option.field.cssClass
-                    : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field && option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionOptionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
+                    : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field && option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
             }
             return result;
         },
-        _renderTemplateBodyQuestionOptionFeedback: function (feedback) {
+        _renderTemplateBodyQuestionFeedback: function (feedback) {
             var result = "";
             if (feedback && Array.isArray(feedback)) {
                 for (var _i = 0, feedback_1 = feedback; _i < feedback_1.length; _i++) {
                     var item = feedback_1[_i];
                     result += "\n                        <" + (item.tag || "div") + "  class=\"" + (this.options.classes.feedback + (item.cssClass
                         ? +" " + item.cssClass
-                        : "")) + "\" data-jq-quiz-feedback>\n                            " + item.content + "\n                        </" + (item.tag || "div") + ">\n                    ";
+                        : "")) + "\" data-jq-quiz-feedback=\"" + item.type + "\">\n                            " + item.content + "\n                        </" + (item.tag || "div") + ">\n                    ";
                 }
             }
             return result;
@@ -900,6 +899,77 @@
                 e.preventDefault();
             }
         },
+        _updateRuntime: function (questionId, optionId, optionValue, selected) {
+            var questionRuntime = this._runtime[questionId] || {}, options = questionRuntime.options || [], optionsValues = questionRuntime.optionsValues || [];
+            questionRuntime.options = options;
+            questionRuntime.optionsValues = optionsValues;
+            if (this.options.multichoice) {
+                if (selected) {
+                    //store the option in the runtime
+                    options.push(optionId);
+                    if (optionValue) {
+                        optionsValues.push(optionValue);
+                    }
+                }
+                else {
+                    options.splice(options.indexOf(optionId), 1);
+                    if (optionValue) {
+                        optionsValues.splice(optionsValues.indexOf(optionValue), 1);
+                    }
+                }
+            }
+            else {
+                //if single choice
+                //store the option in the runtime
+                options[0] = optionId;
+                if (optionValue) {
+                    optionsValues[0] = optionValue;
+                }
+            }
+            return questionRuntime;
+        },
+        _updateQuestionAndOptionUI: function (questionId, optionId, $option) {
+            var questionRuntime = this._runtime[questionId];
+            //if multichoice
+            if (this.options.multichoice) {
+                //if item is selected
+                if (e.target.checked) {
+                    $option.addClass(this.options.classes.selected);
+                }
+                else {
+                    //remove the option and reset the dom
+                    this._resetOption(questionId, optionId);
+                }
+            }
+            else {
+                //if single choice
+                //check if exists an option in the runtime
+                if (questionRuntime && questionRuntime.options.length > 0) {
+                    //reset the option
+                    this._resetOption(questionId, questionRuntime.options[0]);
+                }
+                $option.addClass(this.options.classes.selected);
+            }
+        },
+        _updateQuestionsProperties: function (questionId, optionId) {
+            if (this.options.allowChangeOption != true) {
+                this._disableQuestionOptionsField(questionId);
+            }
+            //go next if isn't immediateFeedback and isnt multichoice
+            if (this.options.immediateFeedback == true) {
+                //if allowChangeOption is not true, the options will be disabled
+                if (this.options.allowChangeOption != undefined && this.options.allowChangeOption != true) {
+                    this._disableQuestionOptionsField(questionId);
+                }
+                else if (this.options.disableNextUntilSuccess == true) {
+                    this._updateNavigationActionsStates();
+                }
+                this._showQuestionStatus(questionId);
+                this._showOptionStatus(questionId, optionId);
+                this._showOptionFeedback(questionId, optionId);
+                this._showQuestionFeedback(questionId, optionId);
+            }
+        },
         /**
          * Invocado al cambiar el valor de una opción.
          * Registra en el runtime de la pregunta la opción seleccionada.
@@ -913,66 +983,31 @@
             if (instance.options.disabled != true && instance._state == instance.STATES.running) {
                 var $option = $(e.target)
                     .parents(instance.QUERY_OPTION), $question = $(this), //the event handler it's attached to the question
-                questionId = $question.attr("id"), questionRuntime = instance._runtime[questionId] || {}, options = questionRuntime.options || [], optionsValues = questionRuntime.optionsValues || [], optionId = $option.attr("id"), optionValue = $option.find("input").attr("value");
-                questionRuntime.options = options;
-                questionRuntime.optionsValues = optionsValues;
+                questionId = $question.attr("id"), optionId = $option.attr("id"), optionValue = $option.find("input").attr("value"), pendingQuestionIndex = void 0;
+                for (var questionIndex = 0, questionsLength = instance.pendingQuestions.length; questionIndex < questionsLength; questionIndex++) {
+                    var question = instance.pendingQuestions[questionIndex];
+                    if (question.id === questionId) {
+                        pendingQuestionIndex = questionIndex;
+                        questionIndex = instance.pendingQuestions.length;
+                    }
+                }
+                if (pendingQuestionIndex != -1) {
+                    instance.pendingQuestions.splice(pendingQuestionIndex, 1);
+                }
+                instance._updateQuestionAndOptionUI(questionId, optionId, $option);
+                var questionRuntime = instance._updateRuntime(questionId, optionId, optionValue, e.target.checked);
                 instance._runtime[questionId] = questionRuntime;
                 //if multichoice
                 if (instance.options.multichoice) {
-                    //if item is selected
-                    if (e.target.checked) {
-                        //store the option in the runtime
-                        options.push(optionId);
-                        if (optionValue) {
-                            optionsValues.push(optionValue);
-                        }
-                        $option.addClass(instance.options.classes.selected);
-                    }
-                    else {
-                        //remove the option and reset the dom
-                        instance._resetOption(questionId, optionId);
-                        options.splice(options.indexOf(optionId), 1);
-                        if (optionValue) {
-                            optionsValues.splice(optionsValues.indexOf(optionValue), 1);
-                        }
-                    }
                     instance._calificateMultiChoiceQuestion(questionId);
                 }
                 else {
-                    //if single choice
-                    //check if exists an option in the runtime
-                    if (questionRuntime.options.length > 0) {
-                        //reset the option
-                        instance._resetOption(questionId, questionRuntime.options[0]);
-                    }
-                    //store the option in the runtime
-                    options[0] = optionId;
-                    if (optionValue) {
-                        optionsValues[0] = optionValue;
-                    }
-                    $option.addClass(instance.options.classes.selected);
                     instance._calificateSingleChoiceQuestion(questionId);
                 }
-                if (instance.options.allowChangeOption != true) {
-                    instance._disableQuestionOptionsField(questionId);
-                }
-                //go next if isn't immediateFeedback and isnt multichoice
-                if (instance.options.immediateFeedback == true) {
-                    //if allowChangeOption is not true, the options will be disabled
-                    if (instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true) {
-                        instance._disableQuestionOptionsField(questionId);
-                    }
-                    else if (instance.options.disableNextUntilSuccess == true) {
-                        instance._updateNavigationActionsStates();
-                    }
-                    instance._showQuestionStatus(questionId);
-                    instance._showOptionStatus(questionId, optionId);
-                    instance._showOptionFeedback(questionId, optionId);
-                    instance._showQuestionFeedback(questionId, optionId);
-                }
+                instance._updateQuestionsProperties(questionId, optionId);
                 if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
                     setTimeout(function () {
-                        if (instance.pendingQuestions.length > 0) {
+                        if (instance.pendingQuestions && instance.pendingQuestions.length > 0) {
                             instance.next();
                         }
                         else {
@@ -1269,8 +1304,21 @@
          * @private
          */
         _onAnimationStartEnd: function () {
-            if (this.options.initialQuestion != undefined) {
-                this.goTo(this.options.initialQuestion);
+            var goTo;
+            if (this._state === this.STATES.running) {
+                if (this.pendingQuestions.length === this._questions.length) {
+                    goTo = this.options.initialQuestion || 0;
+                }
+                else {
+                    goTo = "" + this.pendingQuestions[0].id;
+                }
+            }
+            else {
+                goTo = 0;
+            }
+            this.goTo(goTo);
+            if (this._state == this.STATES.review) {
+                this.showCorrection();
             }
             this.element.trigger(this.ON_STARTED, [this]);
         },
@@ -1538,15 +1586,28 @@
         /**
          * Comienza el cuestionario
          */
-        start: function () {
+        start: function (params) {
             if (this.options.disabled != true && this._state === this.STATES.off) {
-                this._changeState(this.STATES.running);
-                this.element.trigger(this.ON_START, [this]);
-                this._runtime = {};
+                this._changeState((params && params.review && this.STATES.review) || this.STATES.running);
+                this._runtime = (params && params.runtime) || {};
                 this._questions = this._originalQuestions.slice();
+                this.pendingQuestions = this._questions.slice();
+                if (params && params.runtime) {
+                    this._setRuntimeState(params.runtime, this._questions);
+                    for (var questionId in this._runtime) {
+                        for (var questionIndex = 0, questionsLength = this.pendingQuestions.length; questionIndex < questionsLength; questionIndex++) {
+                            var question = this.pendingQuestions[questionIndex];
+                            if (question.id === questionId) {
+                                this.pendingQuestions.splice(questionIndex, 1);
+                                questionIndex = this.pendingQuestions.length + 1;
+                            }
+                        }
+                    }
+                }
                 if (this.options.randomize) {
                     this._questions = this._shuffle(this._questions);
                 }
+                this.element.trigger(this.ON_START, [this]);
                 this._animationStart()
                     .then(this._onAnimationStartEnd);
             }
@@ -1613,7 +1674,7 @@
                 var calification = this._calificate();
                 this.lastCalification = calification;
                 this._disableAllQuestions();
-                this.element.trigger(this.ON_END, [this, calification]);
+                this.element.trigger(this.ON_END, [this, calification, this._runtime]);
                 //if show result is disabled
                 if (!this.showResult(calification)) {
                     //if show correction
@@ -1663,6 +1724,29 @@
             var questionId = this.pendingQuestions[Math.floor(Math.random() * this.pendingQuestions.length)];
             result = this._questions.findIndex(function (q) { return q.id == questionId; });
             return result;
+        },
+        _setRuntimeState: function (states, questions) {
+            var _loop_1 = function (questionId) {
+                var state = states[questionId], 
+                //find it
+                question = questions.find(function (q) { return q.id === questionId; });
+                if (question) {
+                    //find selected option
+                    for (var optionStateIndex = 0, optionsLength = state.options.length; optionStateIndex < optionsLength; optionStateIndex++) {
+                        var optionId = state.options[optionStateIndex], optionIndex = question.optionsMap[optionId];
+                        if (optionIndex != null) {
+                            //mark as checked
+                            question.options[optionIndex].$element.find("input").prop("checked", true);
+                            this_1._updateQuestionAndOptionUI(questionId, optionId, question.options[optionIndex].$element);
+                            this_1._updateQuestionsProperties(questionId, optionId);
+                        }
+                    }
+                }
+            };
+            var this_1 = this;
+            for (var questionId in states) {
+                _loop_1(questionId);
+            }
         },
         _changeState: function (state) {
             switch (state) {
@@ -1727,6 +1811,9 @@
                 this._$result.dialog("destroy");
             }
             this._super();
+        },
+        getRuntime: function () {
+            return this._runtime;
         }
     });
 
