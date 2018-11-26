@@ -370,6 +370,7 @@ $.widget(
                                                                                              : "")}" data-jq-quiz-question>
                         ${this._renderTemplateBodyQuestionStatement(question.content)}
                         ${this._renderTemplateBodyQuestionOptions(question.options)}
+                        ${this._renderTemplateBodyQuestionFeedback(question.feedback)}
                     </${question.tag || "fieldset"}>
                 `;
             }
@@ -440,20 +441,20 @@ $.widget(
                                 />
                                 
                         </label>
-                        ${this._renderTemplateBodyQuestionOptionFeedback(option.feedback)}  
+                        ${this._renderTemplateBodyQuestionFeedback(option.feedback)}  
                     </${option.tag || "li"}>
                 `;
             }
             return result;
         },
-        _renderTemplateBodyQuestionOptionFeedback:function(feedback){
+        _renderTemplateBodyQuestionFeedback:function(feedback){
             let result = "";
             if(feedback && Array.isArray(feedback)){
                 for(let item of feedback){
                     result+=`
                         <${item.tag || "div"}  class="${this.options.classes.feedback + (item.cssClass
                                                                                         ? +" " + item.cssClass
-                                                                                        : "")}" data-jq-quiz-feedback>
+                                                                                        : "")}" data-jq-quiz-feedback="${item.type}">
                             ${item.content}
                         </${item.tag || "div"}>
                     `;
