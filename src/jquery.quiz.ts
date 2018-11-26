@@ -112,7 +112,7 @@ $.widget(
                 modal: true
             },
             randomize:false,//randomize the questions
-            initialQuestion:0,//initial question to show. Null to use goTo manually
+            initialQuestion:null,//initial question to show. Null to use goTo manually
             autoStart:false//auto start the quiz
         },
         /**
@@ -192,7 +192,6 @@ $.widget(
             }
         },
         _renderTemplate:function(){
-            debugger;
             let result;
             const quiz = this.options.quiz;
             if(quiz){
@@ -1005,6 +1004,74 @@ $.widget(
                 e.preventDefault();
             }
         },
+        _updateRuntime:function(questionId,optionId,optionValue,selected){
+            let questionRuntime = this._runtime[questionId] || {},
+                options = questionRuntime.options || [],
+                optionsValues = questionRuntime.optionsValues || [];
+            questionRuntime.options = options;
+            questionRuntime.optionsValues = optionsValues;
+            if(this.options.multichoice){
+                if (selected) {
+                    //store the option in the runtime
+                    options.push(optionId);
+                    if(optionValue) {
+                        optionsValues.push(optionValue);
+                    }
+                } else {
+                    options.splice(options.indexOf(optionId), 1);
+                    if(optionValue) {
+                        optionsValues.splice(optionsValues.indexOf(optionValue), 1);
+                    }
+                }
+            }else{
+                //if single choice
+                //store the option in the runtime
+                options[0] = optionId;
+                if(optionValue) {
+                    optionsValues[0] = optionValue;
+                }
+            }
+            return questionRuntime;
+        },
+        _updateQuestionAndOptionUI:function(questionId,optionId,$option){
+            let questionRuntime = this._runtime[questionId];
+            //if multichoice
+            if (this.options.multichoice) {
+                //if item is selected
+                if (e.target.checked) {
+                    $option.addClass(this.options.classes.selected);
+                } else {
+                    //remove the option and reset the dom
+                    this._resetOption(questionId, optionId);
+                }
+            } else {
+                //if single choice
+                //check if exists an option in the runtime
+                if (questionRuntime && questionRuntime.options.length > 0) {
+                    //reset the option
+                    this._resetOption(questionId, questionRuntime.options[0]);
+                }
+                $option.addClass(this.options.classes.selected);
+            }
+        },
+        _updateQuestionsProperties:function(questionId,optionId){
+            if(this.options.allowChangeOption != true){
+                this._disableQuestionOptionsField(questionId);
+            }
+            //go next if isn't immediateFeedback and isnt multichoice
+            if (this.options.immediateFeedback == true) {
+                //if allowChangeOption is not true, the options will be disabled
+                if (this.options.allowChangeOption != undefined && this.options.allowChangeOption != true ) {
+                    this._disableQuestionOptionsField(questionId);
+                } else if (this.options.disableNextUntilSuccess == true) {
+                    this._updateNavigationActionsStates();
+                }
+                this._showQuestionStatus(questionId);
+                this._showOptionStatus(questionId, optionId);
+                this._showOptionFeedback(questionId, optionId);
+                this._showQuestionFeedback(questionId, optionId);
+            }
+        },
         /**
          * Invocado al cambiar el valor de una opción.
          * Registra en el runtime de la pregunta la opción seleccionada.
@@ -1020,68 +1087,33 @@ $.widget(
                         .parents(instance.QUERY_OPTION),
                     $question = $(this),//the event handler it's attached to the question
                     questionId = $question.attr("id"),
-                    questionRuntime = instance._runtime[questionId] || {},
-                    options = questionRuntime.options || [],
-                    optionsValues = questionRuntime.optionsValues || [],
                     optionId = $option.attr("id"),
-                    optionValue = $option.find("input").attr("value");
-                questionRuntime.options = options;
-                questionRuntime.optionsValues = optionsValues;
+                    optionValue = $option.find("input").attr("value"),
+                    pendingQuestionIndex;
+                for (let questionIndex = 0, questionsLength = instance.pendingQuestions.length; questionIndex < questionsLength; questionIndex++) {
+                    let question = instance.pendingQuestions[questionIndex];
+                    if(question.id === questionId){
+                        pendingQuestionIndex = questionIndex;
+                        questionIndex = instance.pendingQuestions.length;
+                    }
+                }
+                if(pendingQuestionIndex != -1) {
+                    instance.pendingQuestions.splice(pendingQuestionIndex,1);
+                }
+                instance._updateQuestionAndOptionUI(questionId,optionId,$option);
+                let questionRuntime = instance._updateRuntime(questionId,optionId,optionValue,e.target.checked);
                 instance._runtime[questionId] = questionRuntime;
                 //if multichoice
                 if (instance.options.multichoice) {
-                    //if item is selected
-                    if (e.target.checked) {
-                        //store the option in the runtime
-                        options.push(optionId);
-                        if(optionValue) {
-                            optionsValues.push(optionValue);
-                        }
-                        $option.addClass(instance.options.classes.selected);
-                    } else {
-                        //remove the option and reset the dom
-                        instance._resetOption(questionId, optionId);
-                        options.splice(options.indexOf(optionId), 1);
-                        if(optionValue) {
-                            optionsValues.splice(optionsValues.indexOf(optionValue), 1);
-                        }
-                    }
                     instance._calificateMultiChoiceQuestion(questionId);
                 } else {
-                    //if single choice
-                    //check if exists an option in the runtime
-                    if (questionRuntime.options.length > 0) {
-                        //reset the option
-                        instance._resetOption(questionId, questionRuntime.options[0]);
-                    }
-                    //store the option in the runtime
-                    options[0] = optionId;
-                    if(optionValue) {
-                        optionsValues[0] = optionValue;
-                    }
-                    $option.addClass(instance.options.classes.selected);
                     instance._calificateSingleChoiceQuestion(questionId);
                 }
-                if(instance.options.allowChangeOption != true){
-                    instance._disableQuestionOptionsField(questionId);
-                }
-                //go next if isn't immediateFeedback and isnt multichoice
-                if (instance.options.immediateFeedback == true) {
-                    //if allowChangeOption is not true, the options will be disabled
-                    if (instance.options.allowChangeOption != undefined && instance.options.allowChangeOption != true ) {
-                        instance._disableQuestionOptionsField(questionId);
-                    } else if (instance.options.disableNextUntilSuccess == true) {
-                        instance._updateNavigationActionsStates();
-                    }
-                    instance._showQuestionStatus(questionId);
-                    instance._showOptionStatus(questionId, optionId);
-                    instance._showOptionFeedback(questionId, optionId);
-                    instance._showQuestionFeedback(questionId, optionId);
-                }
+                instance._updateQuestionsProperties(questionId,optionId);
                 if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
                     setTimeout(
                         () => {
-                            if(instance.pendingQuestions.length > 0) {
+                            if(instance.pendingQuestions && instance.pendingQuestions.length > 0) {
                                 instance.next();
                             }else{
                                 instance.end();
@@ -1389,8 +1421,19 @@ $.widget(
          * @private
          */
         _onAnimationStartEnd: function () {
-            if(this.options.initialQuestion != undefined) {
-                this.goTo(this.options.initialQuestion);
+            let goTo;
+            if(this._state === this.STATES.running){
+                if(this.pendingQuestions.length === this._questions.length) {
+                    goTo = this.options.initialQuestion || 0;
+                }else{
+                    goTo = ""+this.pendingQuestions[0].id;
+                }
+            }else{
+                goTo = 0;
+            }
+            this.goTo(goTo);
+            if(this._state == this.STATES.review){
+                this.showCorrection();
             }
             this.element.trigger(this.ON_STARTED, [this]);
         },
@@ -1672,16 +1715,29 @@ $.widget(
         /**
          * Comienza el cuestionario
          */
-        start: function () {
+        start: function (params?:{runtime?:any,review?:boolean}) {
             if (this.options.disabled != true && this._state === this.STATES.off) {
-                this._changeState(this.STATES.running);
-                this.element.trigger(this.ON_START, [this]);
-                this._runtime = {
+                this._changeState((params && params.review && this.STATES.review) || this.STATES.running);
+                this._runtime = (params && params.runtime) || {
                 };
                 this._questions = this._originalQuestions.slice();
+                this.pendingQuestions = this._questions.slice();
+                if(params && params.runtime){
+                    this._setRuntimeState(params.runtime,this._questions);
+                    for(let questionId in this._runtime){
+                        for (let questionIndex = 0, questionsLength = this.pendingQuestions.length; questionIndex < questionsLength; questionIndex++) {
+                            let question = this.pendingQuestions[questionIndex];
+                            if(question.id === questionId){
+                                this.pendingQuestions.splice(questionIndex,1);
+                                questionIndex = this.pendingQuestions.length+1;
+                            }
+                        }
+                    }
+                }
                 if(this.options.randomize){
                     this._questions= this._shuffle(this._questions);
                 }
+                this.element.trigger(this.ON_START, [this]);
                 this._animationStart()
                     .then(this._onAnimationStartEnd);
             }
@@ -1747,7 +1803,7 @@ $.widget(
                 let calification = this._calificate();
                 this.lastCalification = calification;
                 this._disableAllQuestions();
-                this.element.trigger(this.ON_END, [this, calification]);
+                this.element.trigger(this.ON_END, [this, calification,this._runtime]);
                 //if show result is disabled
                 if (!this.showResult(calification)) {
                     //if show correction
@@ -1795,6 +1851,28 @@ $.widget(
             const questionId = this.pendingQuestions[Math.floor(Math.random() * this.pendingQuestions.length)];
             result = this._questions.findIndex(q=>q.id == questionId);
             return result;
+        },
+        _setRuntimeState:function(states,questions){
+            //for each question
+            let lastQuestion
+            for(let questionId in states) {
+                let state = states[questionId],
+                    //find it
+                    question = questions.find(q=>q.id === questionId);
+                if(question) {
+                    //find selected option
+                    for (let optionStateIndex = 0, optionsLength = state.options.length; optionStateIndex < optionsLength; optionStateIndex++) {
+                        let optionId = state.options[optionStateIndex],
+                            optionIndex = question.optionsMap[optionId];
+                        if(optionIndex != null){
+                            //mark as checked
+                            question.options[optionIndex].$element.find("input").prop("checked",true);
+                            this._updateQuestionAndOptionUI(questionId,optionId,question.options[optionIndex].$element);
+                            this._updateQuestionsProperties(questionId,optionId);
+                        }
+                    }
+                }
+            }
         },
         _changeState: function (state) {
             switch (state) {
@@ -1859,6 +1937,9 @@ $.widget(
                 this._$result.dialog("destroy");
             }
             this._super();
+        },
+        getRuntime(){
+            return this._runtime;
         }
     }
 );
