@@ -137,6 +137,7 @@
             this._getElements();
             this.element.uniqueId();
             this._mapQuestions();
+            this._questions = this._originalQuestions.slice("");
             this._changeState(this.STATES.off);
             this._assignEvents();
             this._renderOptions();
@@ -647,37 +648,42 @@
              * }
          * @private
          */
-        _calificate: function () {
-            var currentScore = 0, maxScore = this._maxScore, runtime = this._runtime, questions = this._questions, calification, nSuccess = 0, nFails = 0;
-            if (this.options.multichoice != true) {
-                var result = this._calificateSingleChoice();
-                nSuccess = result.nSuccess;
-                nFails = result.nFails;
-                currentScore = result.score;
+        calificate: function (runtime) {
+            var currentScore = 0, maxScore = this._maxScore, runtimeToCalificate = runtime || this._runtime, questions = this._questions, calification, nSuccess = 0, nFails = 0;
+            if (this._runtime != undefined || runtime != undefined) {
+                if (this.options.multichoice != true) {
+                    var result = this._calificateSingleChoice(runtimeToCalificate);
+                    nSuccess = result.nSuccess;
+                    nFails = result.nFails;
+                    currentScore = result.score;
+                }
+                else {
+                    var result = this._calificateMultiChoice(runtimeToCalificate);
+                    nSuccess = result.nSuccess;
+                    nFails = result.nFails;
+                    currentScore = result.score;
+                }
+                calification = {
+                    maxScore: maxScore,
+                    score: currentScore,
+                    percentage: (currentScore * 100) / maxScore,
+                    questionsSuccess: nSuccess,
+                    questionsFail: nFails,
+                    questionsNotAttempted: questions.length - (nSuccess + nFails)
+                };
+                calification.success = calification.percentage >= this.options.cutOffMark;
             }
             else {
-                var result = this._calificateMultiChoice();
-                nSuccess = result.nSuccess;
-                nFails = result.nFails;
-                currentScore = result.score;
+                console.log("[jqQuiz] WARN: calificate must be used when the quiz is in running or review state or with a specific runtime");
             }
-            calification = {
-                maxScore: maxScore,
-                score: currentScore,
-                percentage: (currentScore * 100) / maxScore,
-                questionsSuccess: nSuccess,
-                questionsFail: nFails,
-                questionsNotAttempted: questions.length - (nSuccess + nFails)
-            };
-            calification.success = calification.percentage >= this.options.cutOffMark;
             return calification;
         },
-        _calificateSingleChoice: function () {
-            var currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
+        _calificateSingleChoice: function (runtime) {
+            var currentScore = 0, runtimeToCalificate = runtime || this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
             //for each question
             for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-                var currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
-                result = this._calificateSingleChoiceQuestion(currentQuestion.id);
+                var currentQuestion = questions[questionIndex], questionRuntime = runtimeToCalificate[currentQuestion.id], //get runtime for question
+                result = this._calificateSingleChoiceQuestion(runtime, currentQuestion.id);
                 //if runtime exists, the question has been answered
                 if (result != undefined) {
                     //if correct
@@ -700,10 +706,10 @@
                 score: currentScore
             };
         },
-        _calificateSingleChoiceQuestion: function (questionId) {
-            var question = this.getQuestionById(questionId), result;
+        _calificateSingleChoiceQuestion: function (questionId, runtime) {
+            var runtimeToCalificate = runtime || this._runtime, question = this.getQuestionById(questionId), result;
             if (question) {
-                var questionRuntime = this._runtime[question.id]; //get runtime for question
+                var questionRuntime = runtimeToCalificate[question.id]; //get runtime for question
                 //if runtime exists, the question has been answered
                 if (questionRuntime && questionRuntime.options.length > 0) {
                     var questionOptions = question.options, //get the options of the question
@@ -717,10 +723,10 @@
             }
             return result;
         },
-        _calificateMultiChoiceQuestion: function (questionId) {
-            var question = this.getQuestionById(questionId), result;
+        _calificateMultiChoiceQuestion: function (questionId, runtime) {
+            var runtimeToCalificate = runtime || this._runtime, question = this.getQuestionById(questionId), result;
             if (question) {
-                var questionRuntime = this._runtime[question.id]; //get runtime for question
+                var questionRuntime = runtimeToCalificate[question.id]; //get runtime for question
                 if (questionRuntime) {
                     var questionOptions = question.options, //get the options of the question
                     selectedOptions = questionRuntime.options, //get selected options
@@ -747,12 +753,12 @@
             }
             return result;
         },
-        _calificateMultiChoice: function () {
-            var currentScore = 0, runtime = this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
+        _calificateMultiChoice: function (runtime) {
+            var currentScore = 0, runtimeToCalificate = runtime || this._runtime, questions = this._questions, nSuccess = 0, nFails = 0;
             //for each question
             for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
-                var currentQuestion = questions[questionIndex], questionRuntime = runtime[currentQuestion.id], //get runtime for question
-                result = this._calificateMultiChoiceQuestion(currentQuestion.id);
+                var currentQuestion = questions[questionIndex], questionRuntime = runtimeToCalificate[currentQuestion.id], //get runtime for question
+                result = this._calificateMultiChoiceQuestion(currentQuestion.id, runtime);
                 //if runtime exists, the question has been answered
                 if (result != undefined) {
                     //check if the correct options are all checked
