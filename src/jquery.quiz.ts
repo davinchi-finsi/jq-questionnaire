@@ -786,7 +786,7 @@ $.widget(
             for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
                 let currentQuestion = questions[questionIndex],
                     questionRuntime = runtimeToCalificate[currentQuestion.id],//get runtime for question
-                    result = this._calificateSingleChoiceQuestion(runtime,currentQuestion.id);
+                    result = this._calificateSingleChoiceQuestion(currentQuestion.id,runtime);
                 //if runtime exists, the question has been answered
                 if (result != undefined) {
                     //if correct
