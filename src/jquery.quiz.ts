@@ -1807,7 +1807,7 @@ $.widget(
             //if its running
             if (this._state === this.STATES.running) {
                 //calificate
-                let calification = this._calificate();
+                let calification = this.calificate();
                 this.lastCalification = calification;
                 this._disableAllQuestions();
                 this.element.trigger(this.ON_END, [this, calification,this._runtime]);

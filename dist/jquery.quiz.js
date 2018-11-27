@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v2.2.0-beta.1
+ * @license jq-quiz v2.2.0-beta.2
  * (c) 2018 Finsi, Inc.
  */
 
@@ -1677,7 +1677,7 @@
             //if its running
             if (this._state === this.STATES.running) {
                 //calificate
-                var calification = this._calificate();
+                var calification = this.calificate();
                 this.lastCalification = calification;
                 this._disableAllQuestions();
                 this.element.trigger(this.ON_END, [this, calification, this._runtime]);
