@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v2.2.0-beta.3
+ * @license jq-quiz v2.2.0-beta.5
  * (c) 2018 Finsi, Inc.
  */
 
@@ -48,6 +48,7 @@
         ON_START: "jqQuiz:start",
         ON_STARTED: "jqQuiz:started",
         ON_END: "jqQuiz:end",
+        ON_REVIEW_END: "jqQuiz:reviewEnd",
         FEEDBACK_TYPES: {
             "ok": "ok",
             "ko": "ko"
@@ -113,7 +114,7 @@
             showCorrection: true,
             showResult: true,
             multichoice: false,
-            disableNextUntilSuccess: false,
+            disableNextUntil: -1,
             disableEndActionUntil: 0,
             dialog: {
                 draggable: false,
@@ -859,9 +860,36 @@
             if (question) {
                 var runtime = this._runtime[question.id];
                 if (runtime && runtime != undefined) {
+                    var correct = true;
                     //todo add control of multi choice
-                    var option = this.getOptionById(questionId, runtime.options[0]);
-                    if (option.isCorrect) {
+                    if (this.options.multichoice) {
+                        var correctOptions = question.options.filter(function (o) { return o.isCorrect; });
+                        if (correctOptions.length == runtime.options.length) {
+                            for (var correctOptionIndex = 0, correctOptionsLength = correctOptions.length; correctOptionIndex < correctOptionsLength; correctOptionIndex++) {
+                                var currentOption = correctOptions[correctOptionIndex];
+                                if (runtime.options.indexOf(currentOption.id) == -1) {
+                                    correct = false;
+                                    correctOptionIndex = correctOptionsLength;
+                                }
+                            }
+                        }
+                        else {
+                            correct = false;
+                        }
+                        if (correct) {
+                            question.$feedbackKo.hide();
+                            question.$feedbackOk.show();
+                        }
+                        else {
+                            question.$feedbackOk.hide();
+                            question.$feedbackKo.show();
+                        }
+                    }
+                    else {
+                        var option = this.getOptionById(questionId, runtime.options[0]);
+                        correct = option.isCorrect;
+                    }
+                    if (correct) {
                         question.$feedbackKo.hide();
                         question.$feedbackOk.show();
                     }
@@ -869,6 +897,10 @@
                         question.$feedbackOk.hide();
                         question.$feedbackKo.show();
                     }
+                }
+                else {
+                    question.$feedbackOk.hide();
+                    question.$feedbackKo.show();
                 }
             }
         },
@@ -934,12 +966,12 @@
             }
             return questionRuntime;
         },
-        _updateQuestionAndOptionUI: function (questionId, optionId, $option) {
+        _updateQuestionAndOptionUI: function (questionId, optionId, $option, checked) {
             var questionRuntime = this._runtime[questionId];
             //if multichoice
             if (this.options.multichoice) {
                 //if item is selected
-                if (e.target.checked) {
+                if (checked) {
                     $option.addClass(this.options.classes.selected);
                 }
                 else {
@@ -958,17 +990,14 @@
             }
         },
         _updateQuestionsProperties: function (questionId, optionId) {
-            if (this.options.allowChangeOption != true) {
+            if (this._state != this.STATES.running || this.options.allowChangeOption != true) {
                 this._disableQuestionOptionsField(questionId);
             }
             //go next if isn't immediateFeedback and isnt multichoice
-            if (this.options.immediateFeedback == true) {
+            if (this._state != this.STATES.running || this.options.immediateFeedback == true) {
                 //if allowChangeOption is not true, the options will be disabled
                 if (this.options.allowChangeOption != undefined && this.options.allowChangeOption != true) {
                     this._disableQuestionOptionsField(questionId);
-                }
-                else if (this.options.disableNextUntilSuccess == true) {
-                    this._updateNavigationActionsStates();
                 }
                 this._showQuestionStatus(questionId);
                 this._showOptionStatus(questionId, optionId);
@@ -1000,7 +1029,7 @@
                 if (pendingQuestionIndex != -1) {
                     instance.pendingQuestions.splice(pendingQuestionIndex, 1);
                 }
-                instance._updateQuestionAndOptionUI(questionId, optionId, $option);
+                instance._updateQuestionAndOptionUI(questionId, optionId, $option, e.target.checked);
                 var questionRuntime = instance._updateRuntime(questionId, optionId, optionValue, e.target.checked);
                 instance._runtime[questionId] = questionRuntime;
                 //if multichoice
@@ -1011,7 +1040,7 @@
                     instance._calificateSingleChoiceQuestion(questionId);
                 }
                 instance._updateQuestionsProperties(questionId, optionId);
-                if (instance.options.autoGoNext != false && instance.options.multichoice != true) {
+                if (instance.options.autoGoNext != false && instance.options.multichoice != true && instance.options.allowChangeOption != true) {
                     setTimeout(function () {
                         if (instance.pendingQuestions && instance.pendingQuestions.length > 0) {
                             instance.next();
@@ -1020,6 +1049,9 @@
                             instance.end();
                         }
                     }, instance.options.delayOnAutoNext);
+                }
+                else {
+                    instance._updateNavigationActionsStates();
                 }
                 instance.element.triggerHandler(instance.ON_OPTION_CHANGE, [instance, questionId, optionId, optionValue, questionRuntime]);
             }
@@ -1365,10 +1397,19 @@
                 this._enablePrev();
                 this._enableNext();
             }
-            if (this.options.immediateFeedback == true && this.options.disableOptionAfterSelect != true) {
-                if (this.options.disableNextUntilSuccess == true && (questionRuntime == undefined || questionRuntime.isCorrect != true)) {
-                    this._disableNext();
+            if (this._state == this.STATES.running && this.options.disableNextUntil != -1) {
+                if (this.options.allowChangeOption == false) {
+                    if (this.options.disableNextUntil >= 0 && questionRuntime == undefined) {
+                        this._disableNext();
+                    }
                 }
+                else {
+                    if ((questionRuntime == undefined && this.options.disableNextUntil == 0) || (this.options.disableNextUntil == 1 && (questionRuntime == undefined || !questionRuntime.isCorrect))) {
+                        this._disableNext();
+                    }
+                }
+            }
+            if (this._state == this.STATES.running && this.options.immediateFeedback == true && this.options.allowChangeOption == true) {
                 switch (this.options.disableEndActionUntil) {
                     case this.DISABLE_END.beforeAnswerAll:
                         Object.keys(this._runtime) == this._questions.length;
@@ -1707,6 +1748,7 @@
                 this._changeState(this.STATES.off);
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
+                this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(), this._runtime]);
                 return this.lastCalification;
             }
         },
@@ -1743,13 +1785,14 @@
                         if (optionIndex != null) {
                             //mark as checked
                             question.options[optionIndex].$element.find("input").prop("checked", true);
-                            this_1._updateQuestionAndOptionUI(questionId, optionId, question.options[optionIndex].$element);
+                            this_1._updateQuestionAndOptionUI(questionId, optionId, question.options[optionIndex].$element, true);
                             this_1._updateQuestionsProperties(questionId, optionId);
                         }
                     }
                 }
             };
             var this_1 = this;
+            //for each question
             for (var questionId in states) {
                 _loop_1(questionId);
             }
