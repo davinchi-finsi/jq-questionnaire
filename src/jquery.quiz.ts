@@ -110,7 +110,10 @@ $.widget(
                 draggable: false,
                 autoOpen: true,
                 resizable: false,
-                modal: true
+                modal: true,
+                classes: {
+                    "ui-dialog": "jq-quiz-results-dialog"
+                }
             },
             randomize:false,//randomize the questions
             initialQuestion:null,//initial question to show. Null to use goTo manually
