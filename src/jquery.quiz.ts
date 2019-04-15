@@ -82,6 +82,7 @@ $.widget(
                 properties: "jq-quiz__properties",
                 questions: "jq-quiz__questions",
                 title:"jq-quiz__title",
+                description:"jq-quiz__description",
                 disabled:"jq-quiz--disabled",
                 property:"jq-quiz__property",
                 actions:"jq-quiz__actions",
