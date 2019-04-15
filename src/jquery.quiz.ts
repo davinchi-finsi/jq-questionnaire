@@ -1813,6 +1813,8 @@ $.widget(
          */
         showCorrection: function () {
             if (this.options.showCorrection) {
+                this._changeState(this.STATES.review);
+                this.goTo(0);
                 let questions = this._questions;
                 for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
                     let currentQuestion = questions[questionIndex],
@@ -1821,10 +1823,15 @@ $.widget(
                         let currentOption = options[optionIndex];
                         this._showOptionStatus(currentQuestion.id, currentOption.id);
                     }
+                    if (this._runtime[currentQuestion.id]){
+                        const runtime = this._runtime[currentQuestion.id],
+                            options = runtime.options;
+                        for (const option of options) {
+                            this._updateQuestionsProperties(currentQuestion.id, option);
+                        }
+                    }
                     this._disableQuestionOptionsField(currentQuestion.id);
                 }
-                this._changeState(this.STATES.review);
-                this.goTo(0);
                 return true
             } else {
                 return false;
