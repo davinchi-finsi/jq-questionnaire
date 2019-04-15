@@ -370,7 +370,7 @@ $.widget(
             let result = "";
             if(question) {
                 result = `
-                    <${question.tag || "fieldset"} class="${this.options.classes.question + (question.cssClass
+                    <${question.tag || "fieldset"} ${question.id ? "id='"+question.id+"'": ""} class="${this.options.classes.question + (question.cssClass
                                                                                              ? " " + question.cssClass
                                                                                              : "")}" data-jq-quiz-question>
                         ${this._renderTemplateBodyQuestionStatement(question.content)}
