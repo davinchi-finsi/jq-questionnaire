@@ -1182,6 +1182,10 @@ $.widget(
                     this._enable();
                 }
             }
+            if(key === "pointsForSuccess" || key=== "pointsForFail"){
+                this._mapQuestions();
+                this._questions = this._originalQuestions.slice("");
+            }
         },
         /**
          * Ejecuta la animación para ocultar una pregunta.
