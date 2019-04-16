@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v3.0.0-beta.1
+ * @license jq-quiz v3.0.0-beta.3
  * (c) 2019 Finsi, Inc.
  */
 
@@ -1448,6 +1448,7 @@
          */
         _onEndShowResult: function (e) {
             var instance = e.data.instance;
+            instance._enableEnd();
             instance.end();
         },
         /**
@@ -1733,6 +1734,7 @@
         end: function () {
             //if its running
             if (this._state === this.STATES.running) {
+                this._disableEnd();
                 //calificate
                 var calification = this.calificate();
                 this.lastCalification = calification;
@@ -1741,6 +1743,7 @@
                 //if show result is disabled
                 if (!this.showResult(calification)) {
                     //if show correction
+                    this._enableEnd();
                     if (!this.showCorrection()) {
                         this._changeState(this.STATES.off);
                         this._animationStop()
@@ -1751,7 +1754,9 @@
                 //if its with result
             }
             else if (this._state == this.STATES.result) {
+                this._disableEnd();
                 //if show correction is distabled
+                this._enableEnd();
                 if (!this.showCorrection()) {
                     this._changeState(this.STATES.off);
                     this._animationStop()
@@ -1763,6 +1768,7 @@
             }
             else if (this._state == this.STATES.review) {
                 this._changeState(this.STATES.off);
+                this._enableEnd();
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
                 this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(), this._runtime]);

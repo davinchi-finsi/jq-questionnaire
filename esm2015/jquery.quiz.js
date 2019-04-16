@@ -1,5 +1,5 @@
 /**
- * @license jq-quiz v3.0.0-beta.1
+ * @license jq-quiz v3.0.0-beta.3
  * (c) 2019 Finsi, Inc.
  */
 
@@ -1520,6 +1520,7 @@ $.widget("ui.jqQuiz", {
      */
     _onEndShowResult: function (e) {
         let instance = e.data.instance;
+        instance._enableEnd();
         instance.end();
     },
     /**
@@ -1802,6 +1803,7 @@ $.widget("ui.jqQuiz", {
     end: function () {
         //if its running
         if (this._state === this.STATES.running) {
+            this._disableEnd();
             //calificate
             let calification = this.calificate();
             this.lastCalification = calification;
@@ -1810,6 +1812,7 @@ $.widget("ui.jqQuiz", {
             //if show result is disabled
             if (!this.showResult(calification)) {
                 //if show correction
+                this._enableEnd();
                 if (!this.showCorrection()) {
                     this._changeState(this.STATES.off);
                     this._animationStop()
@@ -1820,7 +1823,9 @@ $.widget("ui.jqQuiz", {
             //if its with result
         }
         else if (this._state == this.STATES.result) {
+            this._disableEnd();
             //if show correction is distabled
+            this._enableEnd();
             if (!this.showCorrection()) {
                 this._changeState(this.STATES.off);
                 this._animationStop()
@@ -1832,6 +1837,7 @@ $.widget("ui.jqQuiz", {
         }
         else if (this._state == this.STATES.review) {
             this._changeState(this.STATES.off);
+            this._enableEnd();
             this._animationStop()
                 .then(this._onAnimationEndEnd);
             this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(), this._runtime]);

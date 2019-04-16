@@ -1560,6 +1560,7 @@ $.widget(
          */
         _onEndShowResult: function (e) {
             let instance = e.data.instance;
+            instance._enableEnd();
             instance.end();
         },
         /**
@@ -1858,6 +1859,7 @@ $.widget(
         end: function () {
             //if its running
             if (this._state === this.STATES.running) {
+                this._disableEnd();
                 //calificate
                 let calification = this.calificate();
                 this.lastCalification = calification;
@@ -1866,6 +1868,7 @@ $.widget(
                 //if show result is disabled
                 if (!this.showResult(calification)) {
                     //if show correction
+                    this._enableEnd();
                     if (!this.showCorrection()) {
                         this._changeState(this.STATES.off);
                         this._animationStop()
@@ -1875,7 +1878,9 @@ $.widget(
                 return calification;
                 //if its with result
             } else if (this._state == this.STATES.result) {
+                this._disableEnd();
                 //if show correction is distabled
+                this._enableEnd();
                 if (!this.showCorrection()) {
                     this._changeState(this.STATES.off);
                     this._animationStop()
@@ -1886,6 +1891,7 @@ $.widget(
                 //if its reviewing
             } else if (this._state == this.STATES.review) {
                 this._changeState(this.STATES.off);
+                this._enableEnd();
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
                 this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(),this._runtime]);

@@ -1,6 +1,6 @@
 {
   "name": "jq-quiz",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "description": "Jquery plugin to create quizzes",
   "main": "dist/jquery.quiz.js",
   "jsnext:main": "esm2015/jquery.quiz.js",
