@@ -1,6 +1,6 @@
 /**
- * @license jq-quiz v2.2.0-beta.5
- * (c) 2018 Finsi, Inc.
+ * @license jq-quiz v3.0.0-beta.1
+ * (c) 2019 Finsi, Inc.
  */
 
 (function (global, factory) {
@@ -48,6 +48,7 @@
         ON_START: "jqQuiz:start",
         ON_STARTED: "jqQuiz:started",
         ON_END: "jqQuiz:end",
+        ON_FINISHED: "jqQuiz:finished",
         ON_REVIEW_END: "jqQuiz:reviewEnd",
         FEEDBACK_TYPES: {
             "ok": "ok",
@@ -92,6 +93,7 @@
                 properties: "jq-quiz__properties",
                 questions: "jq-quiz__questions",
                 title: "jq-quiz__title",
+                description: "jq-quiz__description",
                 disabled: "jq-quiz--disabled",
                 property: "jq-quiz__property",
                 actions: "jq-quiz__actions",
@@ -120,7 +122,10 @@
                 draggable: false,
                 autoOpen: true,
                 resizable: false,
-                modal: true
+                modal: true,
+                classes: {
+                    "ui-dialog": "jq-quiz-results-dialog"
+                }
             },
             randomize: false,
             initialQuestion: null,
@@ -208,14 +213,14 @@
             var result;
             var quiz = this.options.quiz;
             if (quiz) {
-                result = "\n                    <form class=\"" + (this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? +" " + quiz.wrapper.cssClass : "")) + "\" data-jq-quiz-wrapper>\n                        " + this._renderTemplateHeader(quiz.header) + "\n                        " + this._renderTemplateBody(quiz.body) + "\n                        " + this._renderTemplateResult(quiz.result) + "\n                    </form>\n                ";
+                result = "\n                    <form class=\"" + (this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? " " + quiz.wrapper.cssClass : "")) + "\" data-jq-quiz-wrapper>\n                        " + this._renderTemplateHeader(quiz.header) + "\n                        " + this._renderTemplateBody(quiz.body) + "\n                        " + this._renderTemplateResult(quiz.result) + "\n                    </form>\n                ";
             }
             return result;
         },
         _renderTemplateHeader: function (header) {
             var result = "";
             if (header) {
-                result = "\n                    <div class=\"" + (this.options.classes.header + (header.cssClass ? +" " + header.cssClass : "")) + "\" data-jq-quiz-header>\n                        " + this._renderTemplateHeaderTitle(header.title) + "\n                        " + this._renderTemplateHeaderDescription(header.description) + "\n                        " + this._renderTemplateHeaderProperties(header.properties) + "\n                        " + this._renderTemplateActions(header.actions) + "\n                    </div>\n                ";
+                result = "\n                    <div class=\"" + (this.options.classes.header + (header.cssClass ? " " + header.cssClass : "")) + "\" data-jq-quiz-header>\n                        " + this._renderTemplateHeaderTitle(header.title) + "\n                        " + this._renderTemplateHeaderDescription(header.description) + "\n                        " + this._renderTemplateHeaderProperties(header.properties) + "\n                        " + this._renderTemplateActions(header.actions) + "\n                    </div>\n                ";
             }
             return result;
         },
@@ -232,7 +237,7 @@
                 if (title.tag == "h" && !title.level) {
                     title.level = 1;
                 }
-                result = "\n                    <" + title.tag + title.level + " class=\"" + (this.options.classes.title + (title.cssClass ? +" " + title.cssClass : "")) + "\" data-jq-quiz-title>\n                        " + title.content + "\n                    </" + title.tag + title.level + ">\n                ";
+                result = "\n                    <" + title.tag + title.level + " class=\"" + (this.options.classes.title + (title.cssClass ? " " + title.cssClass : "")) + "\" data-jq-quiz-title>\n                        " + title.content + "\n                    </" + title.tag + title.level + ">\n                ";
             }
             return result;
         },
@@ -245,7 +250,7 @@
                         content: description
                     };
                 }
-                result = "\n                    <" + (description.tag || "p") + " class=\"" + (this.options.classes.description + (description.cssClass ? +" " + description.cssClass : "")) + "\" data-jq-quiz-description>\n                        " + description.content + "\n                    </" + (description.tag || "p") + ">\n                ";
+                result = "\n                    <" + (description.tag || "p") + " class=\"" + (this.options.classes.description + (description.cssClass ? " " + description.cssClass : "")) + "\" data-jq-quiz-description>\n                        " + description.content + "\n                    </" + (description.tag || "p") + ">\n                ";
             }
             return result;
         },
@@ -263,14 +268,14 @@
                     var property = properties.properties[propertyIndex];
                     propertiesStr += this._renderTemplateHeaderProperty(property);
                 }
-                result = "\n                    <" + (properties.tag || "dl") + " class=\"" + (this.options.classes.properties + (properties.cssClass ? +" " + properties.cssClass : "")) + "\" data-jq-quiz-properties>\n                        " + propertiesStr + "\n                    </" + (properties.tag || "dl") + ">\n                ";
+                result = "\n                    <" + (properties.tag || "dl") + " class=\"" + (this.options.classes.properties + (properties.cssClass ? " " + properties.cssClass : "")) + "\" data-jq-quiz-properties>\n                        " + propertiesStr + "\n                    </" + (properties.tag || "dl") + ">\n                ";
             }
             return result;
         },
         _renderTemplateHeaderProperty: function (property) {
             var result = "";
             if (property) {
-                result = "\n                    <" + (property.tagName || "dt") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")) + "\">\n                        " + property.content + "\n                    </" + (property.tagName || "dt") + ">\n                    <" + (property.tagName || "dd") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")) + "\" data-jq-quiz-property=\"" + property.type + "\">\n                        \n                    </" + (property.tagName || "dd") + ">\n                ";
+                result = "\n                    <" + (property.tagName || "dt") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? " " + property.cssClass : "")) + "\">\n                        " + property.content + "\n                    </" + (property.tagName || "dt") + ">\n                    <" + (property.tagName || "dd") + " class=\"" + (this.options.classes.propertyName + (property.cssClass ? " " + property.cssClass : "")) + "\" data-jq-quiz-property=\"" + property.type + "\">\n                        \n                    </" + (property.tagName || "dd") + ">\n                ";
             }
             return result;
         },
@@ -288,21 +293,21 @@
                     var action = actions.actions[actionIndex];
                     actionsStr += this._renderTemplateAction(action);
                 }
-                result = "\n                    <" + (actions.tag || "div") + " class=\"" + (this.options.classes.actions + (actions.cssClass ? +" " + actions.cssClass : "")) + "\" data-jq-quiz-actions>\n                        " + actionsStr + "\n                    </" + (actions.tag || "div") + ">\n                ";
+                result = "\n                    <" + (actions.tag || "div") + " class=\"" + (this.options.classes.actions + (actions.cssClass ? " " + actions.cssClass : "")) + "\" data-jq-quiz-actions>\n                        " + actionsStr + "\n                    </" + (actions.tag || "div") + ">\n                ";
             }
             return result;
         },
         _renderTemplateAction: function (action) {
             var result = "";
             if (action) {
-                result = "\n                    <" + (action.tagName || "button") + " class=\"" + (this.options.classes.action + (action.cssClass ? +" " + action.cssClass : "")) + "\" data-jq-quiz-" + action.type + ">\n                        " + action.content + "\n                    </" + (action.tagName || "button") + ">\n                ";
+                result = "\n                    <" + (action.tagName || "button") + " class=\"" + (this.options.classes.action + (action.cssClass ? " " + action.cssClass : "")) + "\" data-jq-quiz-" + action.type + ">\n                        " + action.content + "\n                    </" + (action.tagName || "button") + ">\n                ";
             }
             return result;
         },
         _renderTemplateBody: function (body) {
             var result = "";
             if (body) {
-                result = "\n                    <" + (body.tag || "div") + " class=\"" + (this.options.classes.body + (body.cssClass ? +" " + body.cssClass : "")) + "\" data-jq-quiz-body>\n                        " + this._renderTemplateBodyQuestions(body.questions) + "\n                        " + this._renderTemplateActions(body.actions) + "\n                    </" + (body.tag || "div") + ">\n                ";
+                result = "\n                    <" + (body.tag || "div") + " class=\"" + (this.options.classes.body + (body.cssClass ? " " + body.cssClass : "")) + "\" data-jq-quiz-body>\n                        " + this._renderTemplateBodyQuestions(body.questions) + "\n                        " + this._renderTemplateActions(body.actions) + "\n                    </" + (body.tag || "div") + ">\n                ";
             }
             return result;
         },
@@ -320,7 +325,7 @@
                     questionsStr += this._renderTemplateBodyQuestion(question);
                 }
                 result = "\n                    <" + (questions.tag || "div") + " class=\"" + (this.options.classes.questions + (questions.cssClass
-                    ? +" " + questions.cssClass
+                    ? " " + questions.cssClass
                     : "")) + "\" data-jq-quiz-questions>\n                        " + questionsStr + "\n                    </" + (questions.tag || "div") + ">\n                ";
             }
             return result;
@@ -328,8 +333,8 @@
         _renderTemplateBodyQuestion: function (question) {
             var result = "";
             if (question) {
-                result = "\n                    <" + (question.tag || "fieldset") + " class=\"" + (this.options.classes.question + (question.cssClass
-                    ? +" " + question.cssClass
+                result = "\n                    <" + (question.tag || "fieldset") + " " + (question.id ? "id='" + question.id + "'" : "") + " class=\"" + (this.options.classes.question + (question.cssClass
+                    ? " " + question.cssClass
                     : "")) + "\" data-jq-quiz-question>\n                        " + this._renderTemplateBodyQuestionStatement(question.content) + "\n                        " + this._renderTemplateBodyQuestionOptions(question.options) + "\n                        " + this._renderTemplateBodyQuestionFeedback(question.feedback) + "\n                    </" + (question.tag || "fieldset") + ">\n                ";
             }
             return result;
@@ -343,7 +348,7 @@
                     };
                 }
                 result = "\n                    <" + (statement.tag || "legend") + " class=\"" + (this.options.classes.statement + (statement.cssClass
-                    ? +" " + statement.cssClass
+                    ? " " + statement.cssClass
                     : "")) + "\" data-jq-quiz-statement>\n                        " + statement.content + "\n                    </" + (statement.tag || "legend") + ">\n                ";
             }
             return result;
@@ -362,7 +367,7 @@
                     optionsStr += this._renderTemplateBodyQuestionOption(option);
                 }
                 result = "\n                    <" + (options.tag || "ul") + "  class=\"" + (this.options.classes.options + (options.cssClass
-                    ? +" " + options.cssClass
+                    ? " " + options.cssClass
                     : "")) + "\" data-jq-quiz-options>\n                        " + optionsStr + "\n                    </" + (options.tag || "ul") + ">\n                ";
             }
             return result;
@@ -373,11 +378,11 @@
                 option.label = option.label || {};
                 option.field = option.field || {};
                 result = "\n                    <" + (option.tag || "li") + " class=\"" + (this.options.classes.option + (option.cssClass
-                    ? +" " + option.cssClass
+                    ? " " + option.cssClass
                     : "")) + "\" data-jq-quiz-option data-is-correct=\"" + !!option.isCorrect + "\">\n                        <label class=\"" + (this.options.classes.label + (option.label.cssClass
-                    ? +" " + option.label.cssClass
+                    ? " " + option.label.cssClass
                     : "")) + "\"\n                                " + (option.field && option.field.id ? "for=" + option.field.id : "") + ">\n                                <span>" + option.content + "</span>\n                                <input " + (option.field && option.field.id ? "id=" + option.field.id : "") + "\n                                       class=\"" + (this.options.classes.field + (option.field.cssClass
-                    ? +" " + option.field.cssClass
+                    ? " " + option.field.cssClass
                     : "")) + "\" \n                                       type=\"" + (this.options.multichoice ? "checkbox" : "radio") + "\"\n                                       " + (option.field && option.field.required ? "required" : "") + "\n                                       " + (option.name ? "name=" + option.name : "") + "\n                                       " + (option.value ? "value=" + option.value : "") + "\n                                />\n                                \n                        </label>\n                        " + this._renderTemplateBodyQuestionFeedback(option.feedback) + "  \n                    </" + (option.tag || "li") + ">\n                ";
             }
             return result;
@@ -388,7 +393,7 @@
                 for (var _i = 0, feedback_1 = feedback; _i < feedback_1.length; _i++) {
                     var item = feedback_1[_i];
                     result += "\n                        <" + (item.tag || "div") + "  class=\"" + (this.options.classes.feedback + (item.cssClass
-                        ? +" " + item.cssClass
+                        ? " " + item.cssClass
                         : "")) + "\" data-jq-quiz-feedback=\"" + item.type + "\">\n                            " + item.content + "\n                        </" + (item.tag || "div") + ">\n                    ";
                 }
             }
@@ -408,7 +413,7 @@
                     resultStr += this._renderTemplateResultItem(resultItem);
                 }
                 result = "\n                    <" + (resultOptions.tag || "div") + " class=\"" + (this.options.classes.result + (resultOptions.cssClass
-                    ? +" " + resultOptions.cssClass
+                    ? " " + resultOptions.cssClass
                     : "")) + "\" data-jq-quiz-result>\n                        " + resultStr + "\n                    </" + (resultOptions.tag || "div") + ">\n                ";
             }
             return result;
@@ -416,7 +421,7 @@
         _renderTemplateResultItem: function (item) {
             var result = "";
             if (item) {
-                result = "\n                    <" + (item.tagName || "dt") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")) + "\" data-jq-quiz-result-item-label=\"" + item.type + "\">\n                        " + item.content + "\n                    </" + (item.tagName || "dt") + ">\n                    <" + (item.tagName || "dd") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")) + "\" data-jq-quiz-result-item=\"" + item.type + "\">\n                        \n                    </" + (item.tagName || "dd") + ">\n                ";
+                result = "\n                    <" + (item.tagName || "dt") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? " " + item.cssClass : "")) + "\" data-jq-quiz-result-item-label=\"" + item.type + "\">\n                        " + item.content + "\n                    </" + (item.tagName || "dt") + ">\n                    <" + (item.tagName || "dd") + " class=\"" + (this.options.classes.resultItem + (item.cssClass ? " " + item.cssClass : "")) + "\" data-jq-quiz-result-item=\"" + item.type + "\">\n                        \n                    </" + (item.tagName || "dd") + ">\n                ";
             }
             return result;
         },
@@ -1077,6 +1082,10 @@
                     this._enable();
                 }
             }
+            if (key === "pointsForSuccess" || key === "pointsForFail") {
+                this._mapQuestions();
+                this._questions = this._originalQuestions.slice("");
+            }
         },
         /**
          * Ejecuta la animación para ocultar una pregunta.
@@ -1679,6 +1688,8 @@
          */
         showCorrection: function () {
             if (this.options.showCorrection) {
+                this._changeState(this.STATES.review);
+                this.goTo(0);
                 var questions = this._questions;
                 for (var questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
                     var currentQuestion = questions[questionIndex], options = currentQuestion.options;
@@ -1686,10 +1697,15 @@
                         var currentOption = options[optionIndex];
                         this._showOptionStatus(currentQuestion.id, currentOption.id);
                     }
+                    if (this._runtime[currentQuestion.id]) {
+                        var runtime = this._runtime[currentQuestion.id], options_2 = runtime.options;
+                        for (var _i = 0, options_3 = options_2; _i < options_3.length; _i++) {
+                            var option = options_3[_i];
+                            this._updateQuestionsProperties(currentQuestion.id, option);
+                        }
+                    }
                     this._disableQuestionOptionsField(currentQuestion.id);
                 }
-                this._changeState(this.STATES.review);
-                this.goTo(0);
                 return true;
             }
             else {
@@ -1740,6 +1756,7 @@
                     this._changeState(this.STATES.off);
                     this._animationStop()
                         .then(this._onAnimationEndEnd);
+                    this.element.trigger(this.ON_FINISHED, [this, this.latestCalification || this.calificate(), this._runtime]);
                 }
                 return this.lastCalification;
                 //if its reviewing
@@ -1749,6 +1766,7 @@
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
                 this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(), this._runtime]);
+                this.element.trigger(this.ON_FINISHED, [this, this.latestCalification || this.calificate(), this._runtime]);
                 return this.lastCalification;
             }
         },

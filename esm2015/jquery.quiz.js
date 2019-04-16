@@ -1,6 +1,6 @@
 /**
- * @license jq-quiz v2.2.0-beta.5
- * (c) 2018 Finsi, Inc.
+ * @license jq-quiz v3.0.0-beta.1
+ * (c) 2019 Finsi, Inc.
  */
 
 $.widget("ui.jqQuiz", {
@@ -42,6 +42,7 @@ $.widget("ui.jqQuiz", {
     ON_START: "jqQuiz:start",
     ON_STARTED: "jqQuiz:started",
     ON_END: "jqQuiz:end",
+    ON_FINISHED: "jqQuiz:finished",
     ON_REVIEW_END: "jqQuiz:reviewEnd",
     FEEDBACK_TYPES: {
         "ok": "ok",
@@ -86,6 +87,7 @@ $.widget("ui.jqQuiz", {
             properties: "jq-quiz__properties",
             questions: "jq-quiz__questions",
             title: "jq-quiz__title",
+            description: "jq-quiz__description",
             disabled: "jq-quiz--disabled",
             property: "jq-quiz__property",
             actions: "jq-quiz__actions",
@@ -114,7 +116,10 @@ $.widget("ui.jqQuiz", {
             draggable: false,
             autoOpen: true,
             resizable: false,
-            modal: true
+            modal: true,
+            classes: {
+                "ui-dialog": "jq-quiz-results-dialog"
+            }
         },
         randomize: false,
         initialQuestion: null,
@@ -201,7 +206,7 @@ $.widget("ui.jqQuiz", {
         const quiz = this.options.quiz;
         if (quiz) {
             result = `
-                    <form class="${this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? +" " + quiz.wrapper.cssClass : "")}" data-jq-quiz-wrapper>
+                    <form class="${this.options.classes.wrapper + (quiz.wrapper && quiz.wrapper.cssClass ? " " + quiz.wrapper.cssClass : "")}" data-jq-quiz-wrapper>
                         ${this._renderTemplateHeader(quiz.header)}
                         ${this._renderTemplateBody(quiz.body)}
                         ${this._renderTemplateResult(quiz.result)}
@@ -214,7 +219,7 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (header) {
             result = `
-                    <div class="${this.options.classes.header + (header.cssClass ? +" " + header.cssClass : "")}" data-jq-quiz-header>
+                    <div class="${this.options.classes.header + (header.cssClass ? " " + header.cssClass : "")}" data-jq-quiz-header>
                         ${this._renderTemplateHeaderTitle(header.title)}
                         ${this._renderTemplateHeaderDescription(header.description)}
                         ${this._renderTemplateHeaderProperties(header.properties)}
@@ -238,7 +243,7 @@ $.widget("ui.jqQuiz", {
                 title.level = 1;
             }
             result = `
-                    <${title.tag}${title.level} class="${this.options.classes.title + (title.cssClass ? +" " + title.cssClass : "")}" data-jq-quiz-title>
+                    <${title.tag}${title.level} class="${this.options.classes.title + (title.cssClass ? " " + title.cssClass : "")}" data-jq-quiz-title>
                         ${title.content}
                     </${title.tag}${title.level}>
                 `;
@@ -255,7 +260,7 @@ $.widget("ui.jqQuiz", {
                 };
             }
             result = `
-                    <${description.tag || "p"} class="${this.options.classes.description + (description.cssClass ? +" " + description.cssClass : "")}" data-jq-quiz-description>
+                    <${description.tag || "p"} class="${this.options.classes.description + (description.cssClass ? " " + description.cssClass : "")}" data-jq-quiz-description>
                         ${description.content}
                     </${description.tag || "p"}>
                 `;
@@ -277,7 +282,7 @@ $.widget("ui.jqQuiz", {
                 propertiesStr += this._renderTemplateHeaderProperty(property);
             }
             result = `
-                    <${properties.tag || "dl"} class="${this.options.classes.properties + (properties.cssClass ? +" " + properties.cssClass : "")}" data-jq-quiz-properties>
+                    <${properties.tag || "dl"} class="${this.options.classes.properties + (properties.cssClass ? " " + properties.cssClass : "")}" data-jq-quiz-properties>
                         ${propertiesStr}
                     </${properties.tag || "dl"}>
                 `;
@@ -288,10 +293,10 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (property) {
             result = `
-                    <${property.tagName || "dt"} class="${this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")}">
+                    <${property.tagName || "dt"} class="${this.options.classes.propertyName + (property.cssClass ? " " + property.cssClass : "")}">
                         ${property.content}
                     </${property.tagName || "dt"}>
-                    <${property.tagName || "dd"} class="${this.options.classes.propertyName + (property.cssClass ? +" " + property.cssClass : "")}" data-jq-quiz-property="${property.type}">
+                    <${property.tagName || "dd"} class="${this.options.classes.propertyName + (property.cssClass ? " " + property.cssClass : "")}" data-jq-quiz-property="${property.type}">
                         
                     </${property.tagName || "dd"}>
                 `;
@@ -313,7 +318,7 @@ $.widget("ui.jqQuiz", {
                 actionsStr += this._renderTemplateAction(action);
             }
             result = `
-                    <${actions.tag || "div"} class="${this.options.classes.actions + (actions.cssClass ? +" " + actions.cssClass : "")}" data-jq-quiz-actions>
+                    <${actions.tag || "div"} class="${this.options.classes.actions + (actions.cssClass ? " " + actions.cssClass : "")}" data-jq-quiz-actions>
                         ${actionsStr}
                     </${actions.tag || "div"}>
                 `;
@@ -324,7 +329,7 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (action) {
             result = `
-                    <${action.tagName || "button"} class="${this.options.classes.action + (action.cssClass ? +" " + action.cssClass : "")}" data-jq-quiz-${action.type}>
+                    <${action.tagName || "button"} class="${this.options.classes.action + (action.cssClass ? " " + action.cssClass : "")}" data-jq-quiz-${action.type}>
                         ${action.content}
                     </${action.tagName || "button"}>
                 `;
@@ -335,7 +340,7 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (body) {
             result = `
-                    <${body.tag || "div"} class="${this.options.classes.body + (body.cssClass ? +" " + body.cssClass : "")}" data-jq-quiz-body>
+                    <${body.tag || "div"} class="${this.options.classes.body + (body.cssClass ? " " + body.cssClass : "")}" data-jq-quiz-body>
                         ${this._renderTemplateBodyQuestions(body.questions)}
                         ${this._renderTemplateActions(body.actions)}
                     </${body.tag || "div"}>
@@ -357,7 +362,7 @@ $.widget("ui.jqQuiz", {
             }
             result = `
                     <${questions.tag || "div"} class="${this.options.classes.questions + (questions.cssClass
-                ? +" " + questions.cssClass
+                ? " " + questions.cssClass
                 : "")}" data-jq-quiz-questions>
                         ${questionsStr}
                     </${questions.tag || "div"}>
@@ -369,8 +374,8 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (question) {
             result = `
-                    <${question.tag || "fieldset"} class="${this.options.classes.question + (question.cssClass
-                ? +" " + question.cssClass
+                    <${question.tag || "fieldset"} ${question.id ? "id='" + question.id + "'" : ""} class="${this.options.classes.question + (question.cssClass
+                ? " " + question.cssClass
                 : "")}" data-jq-quiz-question>
                         ${this._renderTemplateBodyQuestionStatement(question.content)}
                         ${this._renderTemplateBodyQuestionOptions(question.options)}
@@ -390,7 +395,7 @@ $.widget("ui.jqQuiz", {
             }
             result = `
                     <${statement.tag || "legend"} class="${this.options.classes.statement + (statement.cssClass
-                ? +" " + statement.cssClass
+                ? " " + statement.cssClass
                 : "")}" data-jq-quiz-statement>
                         ${statement.content}
                     </${statement.tag || "legend"}>
@@ -412,7 +417,7 @@ $.widget("ui.jqQuiz", {
             }
             result = `
                     <${options.tag || "ul"}  class="${this.options.classes.options + (options.cssClass
-                ? +" " + options.cssClass
+                ? " " + options.cssClass
                 : "")}" data-jq-quiz-options>
                         ${optionsStr}
                     </${options.tag || "ul"}>
@@ -427,16 +432,16 @@ $.widget("ui.jqQuiz", {
             option.field = option.field || {};
             result = `
                     <${option.tag || "li"} class="${this.options.classes.option + (option.cssClass
-                ? +" " + option.cssClass
+                ? " " + option.cssClass
                 : "")}" data-jq-quiz-option data-is-correct="${!!option.isCorrect}">
                         <label class="${this.options.classes.label + (option.label.cssClass
-                ? +" " + option.label.cssClass
+                ? " " + option.label.cssClass
                 : "")}"
                                 ${option.field && option.field.id ? "for=" + option.field.id : ""}>
                                 <span>${option.content}</span>
                                 <input ${option.field && option.field.id ? "id=" + option.field.id : ""}
                                        class="${this.options.classes.field + (option.field.cssClass
-                ? +" " + option.field.cssClass
+                ? " " + option.field.cssClass
                 : "")}" 
                                        type="${this.options.multichoice ? "checkbox" : "radio"}"
                                        ${option.field && option.field.required ? "required" : ""}
@@ -457,7 +462,7 @@ $.widget("ui.jqQuiz", {
             for (let item of feedback) {
                 result += `
                         <${item.tag || "div"}  class="${this.options.classes.feedback + (item.cssClass
-                    ? +" " + item.cssClass
+                    ? " " + item.cssClass
                     : "")}" data-jq-quiz-feedback="${item.type}">
                             ${item.content}
                         </${item.tag || "div"}>
@@ -480,7 +485,7 @@ $.widget("ui.jqQuiz", {
             }
             result = `
                     <${resultOptions.tag || "div"} class="${this.options.classes.result + (resultOptions.cssClass
-                ? +" " + resultOptions.cssClass
+                ? " " + resultOptions.cssClass
                 : "")}" data-jq-quiz-result>
                         ${resultStr}
                     </${resultOptions.tag || "div"}>
@@ -492,10 +497,10 @@ $.widget("ui.jqQuiz", {
         let result = "";
         if (item) {
             result = `
-                    <${item.tagName || "dt"} class="${this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")}" data-jq-quiz-result-item-label="${item.type}">
+                    <${item.tagName || "dt"} class="${this.options.classes.resultItem + (item.cssClass ? " " + item.cssClass : "")}" data-jq-quiz-result-item-label="${item.type}">
                         ${item.content}
                     </${item.tagName || "dt"}>
-                    <${item.tagName || "dd"} class="${this.options.classes.resultItem + (item.cssClass ? +" " + item.cssClass : "")}" data-jq-quiz-result-item="${item.type}">
+                    <${item.tagName || "dd"} class="${this.options.classes.resultItem + (item.cssClass ? " " + item.cssClass : "")}" data-jq-quiz-result-item="${item.type}">
                         
                     </${item.tagName || "dd"}>
                 `;
@@ -1155,6 +1160,10 @@ $.widget("ui.jqQuiz", {
                 this._enable();
             }
         }
+        if (key === "pointsForSuccess" || key === "pointsForFail") {
+            this._mapQuestions();
+            this._questions = this._originalQuestions.slice("");
+        }
     },
     /**
      * Ejecuta la animación para ocultar una pregunta.
@@ -1750,6 +1759,8 @@ $.widget("ui.jqQuiz", {
      */
     showCorrection: function () {
         if (this.options.showCorrection) {
+            this._changeState(this.STATES.review);
+            this.goTo(0);
             let questions = this._questions;
             for (let questionIndex = 0, questionsLength = questions.length; questionIndex < questionsLength; questionIndex++) {
                 let currentQuestion = questions[questionIndex], options = currentQuestion.options;
@@ -1757,10 +1768,14 @@ $.widget("ui.jqQuiz", {
                     let currentOption = options[optionIndex];
                     this._showOptionStatus(currentQuestion.id, currentOption.id);
                 }
+                if (this._runtime[currentQuestion.id]) {
+                    const runtime = this._runtime[currentQuestion.id], options = runtime.options;
+                    for (const option of options) {
+                        this._updateQuestionsProperties(currentQuestion.id, option);
+                    }
+                }
                 this._disableQuestionOptionsField(currentQuestion.id);
             }
-            this._changeState(this.STATES.review);
-            this.goTo(0);
             return true;
         }
         else {
@@ -1810,6 +1825,7 @@ $.widget("ui.jqQuiz", {
                 this._changeState(this.STATES.off);
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
+                this.element.trigger(this.ON_FINISHED, [this, this.latestCalification || this.calificate(), this._runtime]);
             }
             return this.lastCalification;
             //if its reviewing
@@ -1819,6 +1835,7 @@ $.widget("ui.jqQuiz", {
             this._animationStop()
                 .then(this._onAnimationEndEnd);
             this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(), this._runtime]);
+            this.element.trigger(this.ON_FINISHED, [this, this.latestCalification || this.calificate(), this._runtime]);
             return this.lastCalification;
         }
     },

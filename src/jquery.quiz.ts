@@ -38,6 +38,7 @@ $.widget(
         ON_START: "jqQuiz:start",
         ON_STARTED: "jqQuiz:started",
         ON_END: "jqQuiz:end",
+        ON_FINISHED: "jqQuiz:finished",
         ON_REVIEW_END:"jqQuiz:reviewEnd",
         FEEDBACK_TYPES: {
             "ok": "ok",
@@ -1879,6 +1880,7 @@ $.widget(
                     this._changeState(this.STATES.off);
                     this._animationStop()
                         .then(this._onAnimationEndEnd);
+                    this.element.trigger(this.ON_FINISHED, [this,this.latestCalification || this.calificate(),this._runtime]);
                 }
                 return this.lastCalification;
                 //if its reviewing
@@ -1887,6 +1889,7 @@ $.widget(
                 this._animationStop()
                     .then(this._onAnimationEndEnd);
                 this.element.trigger(this.ON_REVIEW_END, [this, this.latestCalification || this.calificate(),this._runtime]);
+                this.element.trigger(this.ON_FINISHED, [this,this.latestCalification || this.calificate(), this._runtime]);
                 return this.lastCalification;
             }
         },
